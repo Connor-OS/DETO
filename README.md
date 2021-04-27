@@ -9,7 +9,7 @@ $ cd <path>
 $ git clone https://github.com/Connor-OS/DETO
 $ cd DETO
 ```
-<path> should be the location you wish to store DETO 
+path should be the location you wish to store DETO 
 
 ## Folder Layout
 After downloading the DETO folder will contain the following folders:
@@ -40,7 +40,7 @@ Where the input parameters are:
 
 a simple benchmark simulation to run could be:
 
-$ top(45,15,0.6,1,1.2,100)
+$ top(45,15,0.6,1,1.1,100)
 
 ### Tests
 A number of example simulations are included in the tests folder to showcase the capabilities of the code and some adapted boundry conditions without the user having to input material parameters. These can be run from the tests folder with the matlab commands:
@@ -56,6 +56,7 @@ a cantillever beam example.
 sim time: approx 10 mins
 
 $ topCentA
+
 $ topCentB
 
 two centrally supported beam examples designed to be compared.

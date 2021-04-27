@@ -42,20 +42,22 @@ a simple benchmark simulation to run could be:
 
 $ top(45,15,0.6,1,1.2,100)
 
-respectively
 ### Tests
 A number of example simulations are included in the tests folder to showcase the capabilities of the code and some adapted boundry conditions without the user having to input material parameters. These can be run from the tests folder with the matlab commands:
 
 $ top
+
 a simply supported beam exaple.
 sim time: approx 15 mins
 
 $ topCant
-A cantillever beam example.
+
+a cantillever beam example.
 sim time: approx 10 mins
 
 $ topCentA
 $ topCentB
+
 two centrally supported beam examples designed to be compared.
 In each case all input and boundry conditions are identical except sim A applies roller supports while sim B applies pinned. Entended to demonstrate the geometric non-linearity in the code as described in the related research paper.
 sim time: approx 10 mins each
@@ -65,7 +67,7 @@ The code can also be run on the Newcastle University Rocket cluster or a simmila
 ```
 $ sbatch topR.sh
 ```
-To alter the dimensions and and properties of this simulation you will need to eddit the values defiened at the top of the script topR.m
+To alter the dimensions and and properties of this simulation you will need to edit the values defiened at the top of the script topR.m
 
 ## Output files
 

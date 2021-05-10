@@ -42,18 +42,8 @@ while tol > tol_min
     % CONSTRAINTS
     %Left support
     Fy(1) = 0;
-    Fy(1+1) = 0;
-    Fx(1) = 0;
-    Fx(1+1) = 0;
-    %Mid support
-    Fy(ceil(nelx/2)-1) = 0;
-    Fy(ceil(nelx/2)) = 0;
-    Fy(ceil(nelx/2)+1) = 0;
     %Right support
     Fy(nelx) = 0;
-    Fy(nelx-1) = 0;
-    Fx(nelx) = 0;
-    Fx(nelx-1) = 0;
     % Compute scale factor
     vdotf = dot(vx,Fx) + dot(vy,Fy);
     % Overshoot check

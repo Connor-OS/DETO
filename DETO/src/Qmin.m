@@ -39,9 +39,21 @@ while tol > tol_min
             end
         end
     end
-    % Constraints
+    % CONSTRAINTS
+    %Left support
     Fy(1) = 0;
+    Fy(1+1) = 0;
+    Fx(1) = 0;
+    Fx(1+1) = 0;
+    %Mid support
+    Fy(ceil(nelx/2)-1) = 0;
+    Fy(ceil(nelx/2)) = 0;
+    Fy(ceil(nelx/2)+1) = 0;
+    %Right support
     Fy(nelx) = 0;
+    Fy(nelx-1) = 0;
+    Fx(nelx) = 0;
+    Fx(nelx-1) = 0;
     % Compute scale factor
     vdotf = dot(vx,Fx) + dot(vy,Fy);
     % Overshoot check
@@ -65,7 +77,7 @@ while tol > tol_min
     x = x + dt .* vx;
     y = y + dt .* vy;
     for i = 1:length(x)
-        if m(i) > 0
+        if m(i) > 1e-10
             vx(i)= vx(i)+dt/m(i)*Fx(i);
             vy(i)= vy(i)+dt/m(i)*Fy(i);
         else
@@ -87,8 +99,7 @@ while tol > tol_min
                 elseif (ptype == 4) potfac = 1./2. * kspr/apot/apot * log(cosh(apot*rij));
                 elseif (ptype == 5) potfac = 1./2. * ( kspr/apot/apot * cosh(apot*rij) - kspr/apot/apot );
             end
-            Eer = Eer + potfac * m(i)^2 *m(j)^2;   
-          
+            Eer = Eer + potfac * m(i)^2 *m(j)^2;
             %Eer = Eer+1/4*m(i)^2*m(j)^2*kspr*(L(i,s)-Li(i,s))^2;
         end
     end

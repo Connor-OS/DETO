@@ -11,7 +11,7 @@ function top(nelx,nely,mass,Diam,rmin,pot,kspr,apot,Mdam)
 disp('DETO STARTED');
 tic
 
-dump1 = false;   % if dump=true, the deformation history during iteration 1 is dumped
+dump1 = true;   % if dump=true, the deformation history during iteration 1 is dumped
 
 ptype = 0;  % potential type, lin_spr=1, e-x=2, e+x=3, tanh(x)=4, sinh(x)=5
 if (strcmp(pot,'lin_spr')==1)   ptype = 1; end
@@ -20,14 +20,14 @@ if (strcmp(pot,'e+x')==1)   ptype = 3; end
 if (strcmp(pot,'tanh(x)')==1)   ptype = 4; end
 if (strcmp(pot,'sinh(x)')==1)   ptype = 5; end
 if (ptype == 0)   
-    msg = sprintf('\nERROR: unknown type of interaction: %s',pot);
+    msg = sprintf('ERROR: unknown type of interaction: %s',pot);
     disp(msg);
     return
 end
 
 % Printing input damage matrix, just to check it is alright
 if size(Mdam,1)==0
-    disp('\nEmpty damage matrix provided. Optimising structure without damage.')
+    disp('Empty damage matrix provided. Optimising structure without damage.')
 else
     msg = sprintf('\nNumber of damage scenarios: %d',size(Mdam,1));
     disp(msg);
@@ -45,7 +45,9 @@ m = mass*ones((nely*nelx)-floor(nely/2),1);
 cut = 1.01*Diam;
 xi = zeros(length(m),1);  yi = xi;
 Fxe = zeros(length(m),1);   Fye = Fxe;
-Fye(length(m)-floor(nelx/2)) = -1;
+Fye(length(m)-floor(nelx/2)) = -0.5;
+Fye(length(m)-floor(nelx/2)-1) = -0.5;
+Fye(length(m)-floor(nelx/2)+1) = -0.5;
 % Initial geometry
 for j = 1:nely
     for i = 1:nelx-mod(j+1,2)
@@ -63,12 +65,17 @@ xy = sprintf('../dump/xy_%i_%i_%1.2f_%1.2f_%1.2f_%i.txt',nelx,nely,mass,Diam,rmi
 it = sprintf('../dump/it_%i_%i_%1.2f_%1.2f_%1.2f_%i.txt',nelx,nely,mass,Diam,rmin,kspr);
 XY = fopen(xy,'w');
 Itt = fopen(it,'w');
+m_old = rand(length(m),10);
 % START ITERATION
 while change > 0.004
+%     x = xi; y = yi;
     loop = loop+1;
     msg = sprintf('\nITERATION %d',loop);
     disp(msg);
-    mold = m;
+    for i = 1:9
+        m_old(:,i) = m_old(:,i+1); % Records prev 10 itteration history
+    end
+    m_old(:,10) = m;
     % updtaing interaction stiffnesses based on latest m-variables
     for i = 1:length(m)
         for s = 1:nn(i)
@@ -134,8 +141,13 @@ while change > 0.004
     OC
     % PER PARTICLE STRESS
     stress_perpart
+    change = 0.2;
+    for i = 1:10
+        if change > max(abs(m-m_old(:,i)))
+            change = max(abs(m-m_old(:,i))); % Computes lowest change - Past 10 turns
+        end
+    end
     % PRINT RESULTS
-    change = max(abs(m-mold));
     disp([' It.: ' sprintf('%4i',loop) ' Obj.: ' sprintf('%6.4f',Eer) ...
        ' Mass.: ' sprintf('%6.3f ',sum(m)/(length(xi))) ...
        ' ch.:' sprintf('%6.3f',change) ' Time.: ' sprintf('%4.2f',toc)])

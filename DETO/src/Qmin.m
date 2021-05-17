@@ -68,8 +68,8 @@ while tol > tol_min
     y = y + dt .* vy;
     for i = 1:length(x)
         if m(i) > 1e-10
-            vx(i)= vx(i)+dt/m(i)*Fx(i);
-            vy(i)= vy(i)+dt/m(i)*Fy(i);
+            vx(i)= vx(i)+dt/1*Fx(i);
+            vy(i)= vy(i)+dt/1*Fy(i);
         else
             vx(i) = 0;
             vy(i) = 0;

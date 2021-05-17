@@ -10,7 +10,7 @@ for i = 1:length(m)
         W(i,2) = W(i,2)+0.5*(Fy1*y(i)+Fy2*y(j));
         W(i,3) = W(i,3)+0.5*(Fy1*x(i)+Fy2*x(j));
         W(i,4) = W(i,4)+0.5*(Fx1*y(i)+Fx2*y(j));
-        W(i,5) = (W(i,1)+W(i,2))/2; % Hydrostatic stress
+        W(i,5) = (W(i,1)+W(i,2))/3; % Hydrostatic stress
         W(i,6) = sqrt(W(i,1)^2+W(i,2)^2+3*W(i,3)^2-W(i,1)*W(i,2)); % Deviatoric stress
     end
 end

@@ -26,8 +26,8 @@ target_f 0.6
 interaction lin 100
 #interaction tanh 100 40
 
-# quickmin parameters: Utol Ftol dmax dt out_Every   Utol is a fraction, Ftol is absolute max force
-quickmin 5e-9 1e-1 0.01 0.01 10000
+# quickmin parameters: Utol stepAve dmax dt out_Every dumpAll   Utol is a fraction dampAll is an optional boolian to dump every miniisation step
+quickmin 5e-9 10 0.01 0.01 10000
 
 # setdisp x/y partID value rate (Increase value to explore geomtric non-linearity)
 setdisp y 355 -.2 1e-4

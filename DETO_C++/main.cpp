@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <iomanip.h>
 #include <math.h>
 #include <string.h>
 #include <vector>
@@ -8,14 +7,13 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <chrono>
 
 // DEFINING OUTPUT FILES
 FILE *screen;   // screen output
-FILE *flog;   // output log file
+FILE *flog;   // output log file -- where the code tells you what it has been doing
 //FILE *fwarn;   // output warnings file
-FILE *fth;   // output thermo file
-FILE *fdump;   // output dump file in LAMMPS format. Also, another file recording deformation at each DETO step
+FILE *fth;   // output thermo file  -- your "it" file
+FILE *fdump;   // output dump file  -- your XY file, but in LAMMPS format here. Also, another file recording deformation movies at each DETO step
 
 // DEFINING GLOBAL VARIABLES - all functions can read and edit this
 // suggestion is to use local variable whenever possible and move them to here to make them global when you realise that some functions need to modify them
@@ -48,7 +46,8 @@ double ppow;                // penalisation power
 double kpot;                // k parameter in the interaction potential
 double apot;                // a parameter in the interaction potential
 std::string pottype;        // potential type
-double tol_min, dmax, dtinp, Ftol;   // quickmin parameters
+double tol_min, dmax, dtinp; //, Ftol;   // quickmin parameters
+int stepAve;          // number of steps over which Utot tolerance is averaged
 std::vector<int> FexID;     // ID of particles with applied external forces
 std::vector<int> FeyID;
 std::vector<double> Fex;    // values of applied external forces
@@ -75,6 +74,8 @@ std::vector<double> syx;
 std::vector<double> shyd;
 std::vector<double> sdev;
 int out_every;          // output dump and thermo every these quickmin steps
+double move;    // max chi move in DETO
+bool flag_Adump;    // flag to activate dumping of quickmin trajectories
 
 // DEFINING FUNCTIONS
 void read_input(std::string);   // reading input file and create initial system
@@ -88,18 +89,11 @@ void part_stress();     // computing per particle stresses
 void read_dump(std::string,int);    // reading initial chi ditribution from input file
 
 
-// fixed parameters, if any neded
-// #define nAvo 6.022e23
-
-//start timer
-auto start = std::chrono::high_resolution_clock::now();
-
-
 // MAIN PROGRAM
 int main(int argc, char **argv)
 {
     screen = stdout;    // setting screen output
-    fprintf(screen,"\n --------------------- \n PROGRAM STARTED \n ---------------------\n\n");
+    fprintf(screen,"\n --------------------- \n PROGRAM STARTED \n -----------------\n\n");
     
     //first argument will be the input file name. Error if not found
     std::string fname;
@@ -113,15 +107,17 @@ int main(int argc, char **argv)
     flog = fopen ("logfile.log","w");
     fprintf(flog,"LOG FILE CREATED SUCCESFULLY \n\n");
     
-    fprintf(screen,"READING INPUT FILE AND CREATING INITIAL STRUCTURE....\n");
+    fprintf(screen,"READING INPUT FILE AND CREATING INITIAL STRUCTURE.....\n");
     read_input(fname);
     fprintf(screen,"....DONE\n\n");
     
     // initiating dump files
     fdump = fopen ("DETO.dump","w");
     fclose(fdump);
-    fdump = fopen ("ALL.dump","w");
-    fclose(fdump);
+    if (flag_Adump) {
+        fdump = fopen ("ALL.dump","w");
+        fclose(fdump);
+    }
     
     
     
@@ -166,7 +162,7 @@ int main(int argc, char **argv)
     }
 
     write_dump("DETO.dump",loop);
-    write_dump("ALL.dump",astep);
+    if (flag_Adump) write_dump("ALL.dump",astep);
     write_thermo("thermo.txt",loop);
     write_thermo("thermoALL.txt",astep);
     
@@ -208,9 +204,12 @@ void read_input(std::string fname)
     dmax = 1e10;
     dtinp = 0.001;
     mass = -1.;
-    Ftol = 1e30;
+    //Ftol = 1e30;
     chi_min = 0.;
     out_every = 1000; //default
+    move = 0.2;
+    stepAve = 10;
+    flag_Adump = false;
     
     // reading input file.
     while (!inFile.eof()){
@@ -260,6 +259,7 @@ void read_input(std::string fname)
                     }
                 }
                 else if (strcmp(word.c_str(),"tol_chi")==0)  lss >> tol_chi;
+                else if (strcmp(word.c_str(),"move")==0)  lss >> move;
                 else if (strcmp(word.c_str(),"filtering")==0)  {
                     lss >> word;
                     if (strcmp(word.c_str(),"on")==0) lss >> rmin >> beta;
@@ -279,7 +279,10 @@ void read_input(std::string fname)
                     }
                 }
                 else if (strcmp(word.c_str(),"quickmin")==0)  {
-                    lss >> tol_min >> Ftol >> dmax >> dtinp >> out_every;
+                    //lss >> tol_min >> Ftol >> dmax >> dtinp >> out_every;
+                    std::string dump_yn;
+                    lss >> tol_min >> stepAve >> dmax >> dtinp >> out_every >> dump_yn;
+                    if  (strcmp(dump_yn.c_str(),"yes")==0) flag_Adump = true;
                 }
                 else if (strcmp(word.c_str(),"setforce")==0)  {
                     std::string x_y;
@@ -433,7 +436,7 @@ void neighbours()
         
         for (int j=0; j<Npart; j++) {
             rij = sqrt( (yi[i]-yi[j])*(yi[i]-yi[j]) + (xi[i]-xi[j])*(xi[i]-xi[j]) );
-            // filtering list
+            // filtering list (full neighbour list in this case, not half)
             if (i!=j && rij < rmin){
                 fvecN.push_back(j);
                 fvecL.push_back(rij);
@@ -452,34 +455,7 @@ void neighbours()
         kpen.push_back(kvec);
         F.push_back(vecF);
     }
-    
-    // I checked and the neighbour lists are recorded correctly. If you want to check, uncomment the block below and the lists will be printed to the log file
-    // plotting neighbour lists and initial lengths to log file just to check
-    
-    //  fprintf(flog,"INTERACTIONS NEIGHBOR LIST\n");
-    // for (int i=0; i<Npart; i++){
-    //     fprintf(flog,"part %d\t:",i);
-    //     for (int j=0; j<nn[i]; j++){
-    //         fprintf(flog,"  %d %f %e;",Nlist[i][j],Li[i][j],kpen[i][j]);
-    //     }
-    //     fprintf(flog,"\n");
-    // }
-    
-    // // plotting neighbour lists and initial lengths to log file just to check
-    // fprintf(flog,"FILTERING NEIGHBOR LIST\n");
-    // for (int i=0; i<Npart; i++){
-    //     fprintf(flog,"part %d\t:",i);
-    //     for (int j=0; j<nnf[i]; j++){
-    //         fprintf(flog,"  %d %f ;",Nflist[i][j],Lif[i][j]);
-    //     }
-    //     fprintf(flog,"\n");
-    // }
-    
     fflush(flog);
-    /*if rmin < Diam
-        Nf = 0;
-        Lif = 0;
-    end*/
 }
 
 void postprocess()
@@ -504,7 +480,7 @@ void write_dump(std::string dname, int dstep)
     for (int i=0; i<Npart;i++){
         fprintf(fdump,"%d %d %.6f %.6f %.6f %e %.5f %e %e %e %e %e %e %e\n",i,1,x[i],y[i],0.,D/2.,mass,chi[i],sx[i],sy[i],sxy[i],syx[i],shyd[i],sdev[i]);
     }
-    
+
     fclose(fdump);
 }
 
@@ -564,23 +540,19 @@ void DETOrun()
         dc.push_back(0.);
     }
     
-    
-    
     while (dchi > tol_chi){
         loop ++;
-        auto t = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = t - start;
-        fprintf(screen,"DETO step %d %f\n",loop,elapsed.count());
+        fprintf(screen,"DETO step %d\n",loop);
         
-         // always restarting step from underformed state
-         for (int i=0; i<Npart; i++){
-             x[i] = xi[i];
-             y[i] = yi[i];
-             for (int s=0; s<nn[i]; s++) F[i][s]=0.;
-             Fx[i]=0.;
-             Fy[i]=0.;
-             ochi[i] = chi[i];
-         }
+        // always restarting step from underformed state
+        for (int i=0; i<Npart; i++){
+            x[i] = xi[i];
+            y[i] = yi[i];
+            for (int s=0; s<nn[i]; s++) F[i][s]=0.;
+            Fx[i]=0.;
+            Fy[i]=0.;
+            ochi[i] = chi[i];
+        }
     
         // penalise kpot
         for (int i=0; i<Npart; i++){
@@ -594,7 +566,7 @@ void DETOrun()
         
         // write output files
         part_stress();
-        write_dump("ALL.dump",astep);
+        if (flag_Adump)  write_dump("ALL.dump",astep);
         write_thermo("thermoALL.txt",astep);
         
         quickmin();
@@ -604,9 +576,6 @@ void DETOrun()
         write_dump("DETO.dump",loop);
         write_thermo("thermo.txt",loop);
         
-        
-
-        
         // computing sensitivities (tp-to-date drij already from quickmin)
         for (int i=0; i<Npart; i++) dc[i]=0.;
         double potfac;
@@ -614,7 +583,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"lin")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = kpen[i][s] * drij[i][s] * drij[i][s];
+                    potfac = 1./4.*kpot * drij[i][s] * drij[i][s];
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -625,7 +594,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"e-x")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = kpen[i][s]/apot * (exp(-apot*drij[i][s])/apot+drij[i][s] ) - kpen[i][s]/apot/apot ;
+                    potfac = 1./2.* ( kpot/apot * (exp(-apot*drij[i][s])/apot+drij[i][s] ) - kpot/apot/apot) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -636,7 +605,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"e+x")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = kpen[i][s]/apot * (exp(apot*drij[i][s])/apot-drij[i][s] ) - kpen[i][s]/apot/apot ;
+                    potfac = 1./2. * ( kpot/apot * (exp(apot*drij[i][s])/apot-drij[i][s] ) - kpot/apot/apot ) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -647,7 +616,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"tanh")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = kpen[i][s]/apot/apot * log(cosh(apot*drij[i][s]));
+                    potfac = 1./2. * kpot/apot/apot * log(cosh(apot*drij[i][s]));
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -658,7 +627,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"sinh")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = kpen[i][s]/apot/apot * cosh(apot*drij[i][s]) - kpen[i][s]/apot/apot;
+                    potfac = 1./2. * ( kpot/apot/apot * cosh(apot*drij[i][s]) - kpot/apot/apot ) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -666,14 +635,14 @@ void DETOrun()
             }
         }
  
-        
+
         // Filtering of sensitivities (aka coarse graining)
         if (rmin > 0.){
             std::vector<double> dcn;
             double tot,fac;
             for (int i=0; i<Npart; i++) {
                 dcn.push_back(dc[i] * pow(chi[i],beta) * rmin);
-                tot = 0.;
+                tot = rmin;
                 for (int s=0; s<nnf[i]; s++){
                     int j = Nflist[i][s];
                     fac = rmin-Lif[i][s];
@@ -690,7 +659,7 @@ void DETOrun()
         double l1 = 0.;
         double l2 = 100000.;
         double lmid;
-        double move = 0.2;
+        //double move = 0.2;
         double chi_sum;
         while (l2-l1 > 1e-8){
             chi_sum = 0.;
@@ -729,6 +698,7 @@ void quickmin()
     double Uold;
     bool disp_reached = true;
     double dt;
+    double cumDU = 0.;   // cumulative of DUtot over stepAve steps
     
     for (int i=0; i<Npart; i++) {
         vx.push_back(0.);
@@ -739,13 +709,16 @@ void quickmin()
     
     if (Dix.size()>0) disp_reached=false;
     
-    double Fmax = 1.;
+    //double Fmax = 1.;
+    int count = 0;  // counts steps to meet stepAve
     
-    while ( (DUtot > tol_min || Fmax > Ftol) || disp_reached==false){
+    //while ( (DUtot > tol_min || Fmax > Ftol) || disp_reached==false){
+    while ( DUtot > tol_min || disp_reached==false ){
         nstep++;
         astep++;
         dt = dtinp;
-        Fmax = 0.;
+        //Fmax = 0.;
+        count++;
         
         // reset particle forces
         for (int i=0; i<Npart; i++) {
@@ -823,7 +796,7 @@ void quickmin()
         }
         
         
-        // constraints on forces, saving forces elsewhere for printing
+        // constraints on forces, computing forces elsewhere for printing
         for (int i=0; i<Xfix.size(); i++) Fx[Xfix[i]] = 0.;
         for (int i=0; i<Yfix.size(); i++) Fy[Yfix[i]] = 0.;
         for (int i=0; i<Dix.size(); i++) Fx[DixID[i]] = 0.;
@@ -856,12 +829,6 @@ void quickmin()
             }
 
         }
-        
-        // constraints via velocities on imposed displacements
-        //for (int i=0; i<Xfix.size(); i++) vx[Xfix[i]] = 0.;
-        //for (int i=0; i<Yfix.size(); i++) vy[Yfix[i]] = 0.;
-        //for (int i=0; i<Dix.size(); i++) vx[DixID[i]] = 0.;
-        //for (int i=0; i<Diy.size(); i++) vy[DiyID[i]] = 0.;
         
         
         // Limit dmax
@@ -932,15 +899,21 @@ void quickmin()
             }
         }
         
-        if  ( (nstep - freeze_step) < 100 ) DUtot = 2.*tol_min;
-        else DUtot = (fabs(Utot-Uold))/Uold;
-        
-        // max force
-        for (int i=0; i<Npart; i++){
-            if (Fx[i]>Fmax) Fmax = Fx[i];
-            if (Fy[i]>Fmax) Fmax = Fy[i];
+        if (count == stepAve){
+            if  ( (nstep - freeze_step) < 10 || nstep < 2*stepAve) DUtot = 2.*tol_min;
+            else { //sum last value and average
+                cumDU += (fabs(Utot-Uold))/Uold;
+                DUtot = cumDU / (double)stepAve;
+            }
+            count = 0; // reset counter and cumulative
+            cumDU = 0.;
+        }
+        else{
+            cumDU += (fabs(Utot-Uold))/Uold;
+            DUtot = 2.*tol_min;
         }
         
+
         // Imposing particle displacements
         disp_reached = true;
         for (int i=0; i<Dix.size(); i++){
@@ -962,9 +935,9 @@ void quickmin()
             }
         }
         
-        if (nstep%out_every==0) fprintf(screen,"%d %e %e %e %d %e %e\n",nstep,Utot,Uold,DUtot,freeze_step,dt,Fmax);
+        if (nstep%out_every==0) fprintf(screen,"%d %e %e %e %d %e %e\n",nstep,Utot,Uold,DUtot,freeze_step,dt,cumDU);
         part_stress();
-        if (nstep%out_every==0) write_dump("ALL.dump",astep);
+        if (nstep%out_every==0 && flag_Adump) write_dump("ALL.dump",astep);
         if (nstep%out_every==0) write_thermo("thermoALL.txt",astep);
     }
 }

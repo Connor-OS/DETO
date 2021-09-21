@@ -9,11 +9,11 @@ CFLAGS=-O3
 LINKER= $(CC) $(CFLAGS)
 LIBS=  
 
-INCLUDES=
+INCLUDES= #./read_input.cpp
 
 
 
-OBJ = $(DIR)main.o\
+OBJ = $(DIR)main.o #$(DIR)read_input.o
 
 
 MAKEFILE = makefile

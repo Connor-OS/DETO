@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+//#include <iomanip.h>
 #include <math.h>
 #include <string.h>
 #include <vector>
@@ -76,6 +77,11 @@ std::vector<double> sdev;
 int out_every;          // output dump and thermo every these quickmin steps
 double move;    // max chi move in DETO
 bool flag_Adump;    // flag to activate dumping of quickmin trajectories
+bool flag_sbrute;  // flag to activate calculation of sensitivity from total derivative by brute force
+double brDchi;  // chi increment to be used in brute force computation of energy total derivative
+std::vector<double> dc; // sensitivities
+std::vector<double> Partdc;  // sensitivities from partial derivatives
+bool in_brute;
 
 // DEFINING FUNCTIONS
 void read_input(std::string);   // reading input file and create initial system
@@ -87,6 +93,10 @@ void DETOrun();         // freeing arrays if any is created
 void quickmin();        // energy minimization
 void part_stress();     // computing per particle stresses
 void read_dump(std::string,int);    // reading initial chi ditribution from input file
+
+
+// fixed parameters, if any neded
+// #define nAvo 6.022e23
 
 
 // MAIN PROGRAM
@@ -161,6 +171,12 @@ int main(int argc, char **argv)
         sdev.push_back(0.);
     }
 
+    // initialising sensitivities so they can be plotted at time 0 already
+    for (int i=0; i<Npart; i++){
+        dc.push_back(0.);
+        Partdc.push_back(0.);
+    }
+    
     write_dump("DETO.dump",loop);
     if (flag_Adump) write_dump("ALL.dump",astep);
     write_thermo("thermo.txt",loop);
@@ -168,6 +184,8 @@ int main(int argc, char **argv)
     
     fprintf(screen,"RUNNING OPTIMIZATION.....\n");
     DETOrun();
+    //write_dump("DETO.dump",loop);
+    //write_thermo("thermo.txt",loop);
     fprintf(screen,".....OPTIMIZATION DONE\n\n");
     
     fprintf(screen,"POSTPROCESSING.....\n");
@@ -210,6 +228,7 @@ void read_input(std::string fname)
     move = 0.2;
     stepAve = 10;
     flag_Adump = false;
+    flag_sbrute = false;
     
     // reading input file.
     while (!inFile.eof()){
@@ -283,6 +302,15 @@ void read_input(std::string fname)
                     std::string dump_yn;
                     lss >> tol_min >> stepAve >> dmax >> dtinp >> out_every >> dump_yn;
                     if  (strcmp(dump_yn.c_str(),"yes")==0) flag_Adump = true;
+                }
+                else if (strcmp(word.c_str(),"sensitivity")==0)  {
+                    std::string senst;
+                    lss >> senst >> brDchi;
+                    if  (strcmp(senst.c_str(),"brute")==0) flag_sbrute = true;
+                    else if (strcmp(senst.c_str(),"partial")!=0) {
+                        fprintf(screen,"ERROR: unknown type of sensitivity. Accepted arguments are \"partial\" or \"brute\". Instead you gave: %s\n",senst.c_str());
+                        exit(0);
+                    }
                 }
                 else if (strcmp(word.c_str(),"setforce")==0)  {
                     std::string x_y;
@@ -455,7 +483,34 @@ void neighbours()
         kpen.push_back(kvec);
         F.push_back(vecF);
     }
+    
+    // I checked and the neighbour lists are recorded correctly. If you want to check, uncomment the block below and the lists will be printed to the log file
+    // plotting neighbour lists and initial lengths to log file just to check
+    
+     fprintf(flog,"INTERACTIONS NEIGHBOR LIST\n");
+    for (int i=0; i<Npart; i++){
+        fprintf(flog,"part %d\t:",i);
+        for (int j=0; j<nn[i]; j++){
+            fprintf(flog,"  %d %f %e;",Nlist[i][j],Li[i][j],kpen[i][j]);
+        }
+        fprintf(flog,"\n");
+    }
+    
+    // plotting neighbour lists and initial lengths to log file just to check
+    fprintf(flog,"FILTERING NEIGHBOR LIST\n");
+    for (int i=0; i<Npart; i++){
+        fprintf(flog,"part %d\t:",i);
+        for (int j=0; j<nnf[i]; j++){
+            fprintf(flog,"  %d %f ;",Nflist[i][j],Lif[i][j]);
+        }
+        fprintf(flog,"\n");
+    }
+    
     fflush(flog);
+    /*if rmin < Diam
+        Nf = 0;
+        Lif = 0;
+    end*/
 }
 
 void postprocess()
@@ -475,12 +530,12 @@ void write_dump(std::string dname, int dstep)
     fprintf(fdump,"%f %f\n",0.,nelx*D);
     fprintf(fdump,"%f %f\n",0.,nely*D);
     fprintf(fdump,"%f %f\n",-D,D);
-    fprintf(fdump,"ITEM: ATOMS id type x y z radius mass chi pxx pyy pxy pyx phyd pdev\n");
+    fprintf(fdump,"ITEM: ATOMS id type x y z radius mass chi pxx pyy pxy pyx phyd pdev dc Pdc\n");
     
     for (int i=0; i<Npart;i++){
-        fprintf(fdump,"%d %d %.6f %.6f %.6f %e %.5f %e %e %e %e %e %e %e\n",i,1,x[i],y[i],0.,D/2.,mass,chi[i],sx[i],sy[i],sxy[i],syx[i],shyd[i],sdev[i]);
+        fprintf(fdump,"%d %d %.6f %.6f %.6f %e %.5f %e %e %e %e %e %e %e %e %e\n",i,1,x[i],y[i],0.,D/2.,mass,chi[i],sx[i],sy[i],sxy[i],syx[i],shyd[i],sdev[i],dc[i],Partdc[i]);
     }
-
+    
     fclose(fdump);
 }
 
@@ -531,14 +586,20 @@ void write_thermo(std::string tname, int tstep)
 void DETOrun()
 {
     
-    std::vector<double> dc; // sensitivities
-    
     double dchi = 2.*tol_chi;       // same as "change" in MATLAB
     std::vector<double> ochi;   // vector of old chi values
     for (int i=0; i<Npart; i++){
         ochi.push_back(chi[i]);
-        dc.push_back(0.);
     }
+    
+    FILE *fbrute;   // file use only if flag_brute is on
+    
+    if (flag_sbrute){
+        fbrute = fopen ("brute_check.txt","w");
+        fprintf(fbrute,"step max_err Pmax mean_err f<0.01 f_0.01-0.1  f_0.1-0.2 f_0.2-0.4 f_0.4_0.8 f>0.8\n");
+        fclose(fbrute);
+    }
+    
     
     while (dchi > tol_chi){
         loop ++;
@@ -568,22 +629,24 @@ void DETOrun()
         part_stress();
         if (flag_Adump)  write_dump("ALL.dump",astep);
         write_thermo("thermoALL.txt",astep);
-        
+        in_brute = false;
         quickmin();
-        
         // write output files
         part_stress();
-        write_dump("DETO.dump",loop);
-        write_thermo("thermo.txt",loop);
+
         
-        // computing sensitivities (tp-to-date drij already from quickmin)
+        
+
+        
+        // computing sensitivities from partial derivative of U (drij is up-to-date already from quickmin)
         for (int i=0; i<Npart; i++) dc[i]=0.;
         double potfac;
         
         if (strcmp(pottype.c_str(),"lin")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = 1./4.*kpot * drij[i][s] * drij[i][s];
+                    // NB: in a previous version there was a 1/2 in front of all potfrac. I removed it because we moved to half neighbour lists. I think it was there just to avoid double counting
+                    potfac = 1./2.*kpot * drij[i][s] * drij[i][s];
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -594,7 +657,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"e-x")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = 1./2.* ( kpot/apot * (exp(-apot*drij[i][s])/apot+drij[i][s] ) - kpot/apot/apot) ;
+                    potfac = 1./1.* ( kpot/apot * (exp(-apot*drij[i][s])/apot+drij[i][s] ) - kpot/apot/apot) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -605,7 +668,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"e+x")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = 1./2. * ( kpot/apot * (exp(apot*drij[i][s])/apot-drij[i][s] ) - kpot/apot/apot ) ;
+                    potfac = 1./1. * ( kpot/apot * (exp(apot*drij[i][s])/apot-drij[i][s] ) - kpot/apot/apot ) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -616,7 +679,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"tanh")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = 1./2. * kpot/apot/apot * log(cosh(apot*drij[i][s]));
+                    potfac = 1./1. * kpot/apot/apot * log(cosh(apot*drij[i][s]));
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -627,7 +690,7 @@ void DETOrun()
         if (strcmp(pottype.c_str(),"sinh")==0) {
             for (int i=0; i<Npart; i++){
                 for (int s=0; s<nn[i]; s++){
-                    potfac = 1./2. * ( kpot/apot/apot * cosh(apot*drij[i][s]) - kpot/apot/apot ) ;
+                    potfac = 1./1. * ( kpot/apot/apot * cosh(apot*drij[i][s]) - kpot/apot/apot ) ;
                     int j = Nlist[i][s];
                     dc[i] -= ppow * pow(chi[i],ppow-1.)*pow(chi[j],ppow) * potfac;
                     dc[j] -= ppow * pow(chi[j],ppow-1.)*pow(chi[i],ppow) * potfac;
@@ -635,7 +698,131 @@ void DETOrun()
             }
         }
  
+        
+        // compute sensitivity from total derivatives using brute force
+        if (flag_sbrute){
+            // copy dc to a Part_dc vector for later comparison with partial derivatives
+            for (int i=0; i<Npart; i++) Partdc[i] = dc[i];
+            
+            // copy current configuration x,y to xsave,ysave
+            std::vector<double> xsave;
+            std::vector<double> ysave;
+            for (int i=0; i<Npart; i++) {
+                xsave.push_back(x[i]);
+                ysave.push_back(y[i]);
+            }
+            
+            double Ueq = Utot;  // record system energy at equilibrium
+            
+            // brute force total derivative calculation
+            for (int i=0; i< Npart; i++){
+                
+                double chi_eq = chi[i]; // save chi of equilibrated config
+                chi[i] += brDchi;   // increment chi
+                
+                // penalise kpot
+                // first all the links from partial neigh list of particle i
+                for (int s=0; s<nn[i]; s++){
+                    int j = Nlist[i][s];
+                    kpen[i][s] = pow(chi[i],ppow) * pow(chi[j],ppow)  * kpot;
+                }
+                // then look at all other particles and penalis k if their neighbour (in half list) is i
+                for (int k=0; k<Npart; k++){
+                    if (k!=i){
+                        for (int s=0; s<nn[k]; s++){
+                            int j = Nlist[k][s];
+                            if (j==i) kpen[k][s] = pow(chi[k],ppow) * pow(chi[i],ppow)  * kpot;
+                        }
+                    }
+                }
+                    
+                in_brute = true;
+                //  run quickmin to obtain incremented U
+                quickmin();
+                
 
+
+                // compute dc[i] = - DUi/dchi
+                dc[i] = -(Utot-Ueq)/brDchi;
+                if (dc[i]>0.) dc[i]=0;
+                
+                // restore chi to pre-increment
+                chi[i] = chi_eq;
+                
+                // restor kpot to prior to pre-increment
+                for (int i=0; i<Npart; i++){
+                    for (int s=0; s<nn[i]; s++){
+                        int j = Nlist[i][s];
+                        kpen[i][s] = pow(chi[i],ppow) * pow(chi[j],ppow)  * kpot;
+                    }
+                }
+                
+                // reload equilibrium configuration
+                for (int i=0; i<Npart; i++) {
+                    x[i] = xsave[i];
+                    y[i] = ysave[i];
+                }
+                Utot = Ueq;
+            }
+            
+            // compute and print measures of difference of sensitivity between partial and total derivative approaches
+            double errc = 0.;   // maximum difference between dc's across all particles
+            int Pmax = -1;      // id of particle with max dc difference
+            double Merrc = 0.;  // mean absolute difference of dc's
+            double f1 = 0.;   // fraction of particles with difference in dc's < 1%
+            double f10 = 0.;   // fraction of particles with difference in dc's < 10%
+            double f20 = 0.;
+            double f40 = 0.;
+            double f80 = 0.;
+            double fhi = 0.;
+            int Nnz = 0;    // number of particles with nonzero dc[i]
+            
+            for (int i=0; i< Npart; i++){
+                
+                if (dc[i]!=0 && Partdc[i]!=0)
+                {
+                    Nnz++;
+                    double erri = 0.;
+                    erri = fabs( (dc[i]-Partdc[i])/Partdc[i] );
+
+                    
+                    // computing max error
+                    if (erri > errc) {
+                        errc = erri;
+                        Pmax = i;
+                    }
+                    
+                    // adding to mean error
+                    Merrc += erri;
+                    
+                    // Counting particles with error in each range
+                    if (erri < 0.01) f1 += 1.;
+                    else if (erri < 0.1 ) f10 += 1.;
+                    else if (erri < 0.2 ) f20 += 1.;
+                    else if (erri < 0.4 ) f40 += 1.;
+                    else if (erri < 0.8 ) f80 += 1.;
+                    else fhi += 1.;
+                }
+            }
+            
+            Merrc /= (double)Nnz;  // mean error
+            f1 /= (double)Nnz;
+            f10 /= (double)Nnz;
+            f20 /= (double)Nnz;
+            f40 /= (double)Nnz;
+            f80 /= (double)Nnz;
+            fhi /= (double)Nnz;
+            
+            fbrute = fopen ("brute_check.txt","a");
+            fprintf(fbrute,"%d %e %d %e %e %e %e %e %e %e\n",loop,errc,Pmax,Merrc,f1,f10,f20,f40,f80,fhi);
+            fclose(fbrute);
+        }
+
+
+        write_dump("DETO.dump",loop);
+        write_thermo("thermo.txt",loop);
+        
+        
         // Filtering of sensitivities (aka coarse graining)
         if (rmin > 0.){
             std::vector<double> dcn;
@@ -729,7 +916,7 @@ void quickmin()
         // impose external forces
         for (int i=0; i<Fex.size(); i++) Fx[FexID[i]] = Fex[i];
         for (int i=0; i<Fey.size(); i++) Fy[FeyID[i]] = Fey[i];
-        
+
         // update interparticle distances in neighbour list
         for (int i=0; i<Npart; i++){
             for (int s=0; s<nn[i]; s++){
@@ -801,7 +988,10 @@ void quickmin()
         for (int i=0; i<Yfix.size(); i++) Fy[Yfix[i]] = 0.;
         for (int i=0; i<Dix.size(); i++) Fx[DixID[i]] = 0.;
         for (int i=0; i<Diy.size(); i++) Fy[DiyID[i]] = 0.;
-        
+        if(in_brute == true) {
+            for (int i=0; i<Fex.size(); i++) Fx[FexID[i]] = 0;
+            for (int i=0; i<Fey.size(); i++) Fy[FeyID[i]] = 0;
+        }
         
         //Compute scale factor
         vdotf = 0.;
@@ -829,6 +1019,12 @@ void quickmin()
             }
 
         }
+        
+        // constraints via velocities on imposed displacements
+        //for (int i=0; i<Xfix.size(); i++) vx[Xfix[i]] = 0.;
+        //for (int i=0; i<Yfix.size(); i++) vy[Yfix[i]] = 0.;
+        //for (int i=0; i<Dix.size(); i++) vx[DixID[i]] = 0.;
+        //for (int i=0; i<Diy.size(); i++) vy[DiyID[i]] = 0.;
         
         
         // Limit dmax
@@ -913,7 +1109,13 @@ void quickmin()
             DUtot = 2.*tol_min;
         }
         
-
+        
+        // max force
+        /*for (int i=0; i<Npart; i++){
+            if (Fx[i]>Fmax) Fmax = Fx[i];
+            if (Fy[i]>Fmax) Fmax = Fy[i];
+        }*/
+        
         // Imposing particle displacements
         disp_reached = true;
         for (int i=0; i<Dix.size(); i++){

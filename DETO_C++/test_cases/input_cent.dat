@@ -1,0 +1,65 @@
+# Comments start with #. You can place them wherever you want
+
+# keyword "geometry", arguments are nelx, nely, D, mass
+geometry 45 15 1 1
+
+# keyword "init_chi", arguments can be "file filename entry" or "uniform value"
+init_chi uniform 0.6
+
+# tolerance for DETO convergence
+tol_chi 0.004
+
+# max chi move in DETO
+move 0.1
+
+# filtering on/off. If on, specify rmin in absolute units and beta exponent
+filtering on 1.1
+
+# sensitivity type chi_increment     type can be "partial" derivative or "brute" force total derivative. Default is partial
+sensitivity brute 0.001
+
+# penalisation power
+ppow 2
+
+# chi_min
+chi_min 0.001
+
+# target solid volume fraction
+target_f 0.6
+
+# interaction potential: tpye (lin,e+x,e-x,sinh,tanh) kpot apot
+interaction lin 100
+# interaction e-x 100 40
+# interaction e+x 100 40
+#interaction tanh 100 400
+
+# quickmin parameters: Utol Ftol dmax dt out_Every   Utol is a fraction, Ftol is absolute max force
+quickmin 1e-8 10 0.02 0.02 10000 no
+
+# setforce x/y partID value
+setforce  y 333 -.1
+setforce  y 334 -.1
+#setforce  y 645 -.1
+
+#setdisp  y 333 -1 1.0e-4
+#setdisp  y 334 -1 1.0e-4
+
+
+# setdisp x/y partID value rate
+# you can set as many as you want here, also in combination with setforces above
+
+
+# fix particle motion via constraints  -  fix x/y partID
+
+fix x 333
+fix x 334
+
+#left support
+fix x 312
+fix y 312
+
+#right support
+fix x 355
+fix y 355
+
+#add_thermo Fx/Fy/x/y particle ID

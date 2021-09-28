@@ -1,0 +1,86 @@
+# Comments start with #. You can place them wherever you want
+
+sensitivity brute 0.01
+
+# keyword "geometry", arguments are nelx, nely, D, mass
+geometry 20 11 1 1
+
+# keyword "init_chi", arguments can be "file filename entry" or "uniform value"
+init_chi uniform 0.31
+
+# tolerance for DETO convergence
+tol_chi 0.004
+
+# max chi move in DETO
+move 0.1
+
+# filtering on/off. If on, specify rmin in absolute units and beta exponent
+filtering off
+
+# penalisation power
+ppow 2
+
+# chi_min
+chi_min 0.001
+
+# target solid volume fraction
+target_f 0.35
+
+# interaction potential: tpye (lin,e+x,e-x,sinh,tanh) kpot apot
+#interaction lin 100
+# interaction e-x 100 40
+# interaction e+x 100 40
+interaction tanh 100 400
+
+# quickmin parameters: Utol Ftol dmax dt out_Every   Utol is a fraction, Ftol is absolute max force
+quickmin 1e-8 10 0.02 0.02 10000 no
+
+# setforce x/y partID value
+# setforce  y 5985 -1	# top-mid force for 135x45 sys
+
+
+# setdisp x/y partID value rate
+# you can set as many as you want here, also in combination with setforces above
+setdisp y 203 -.06 1e-4
+setdisp y 204 -.06 1e-4
+
+setdisp y 205 -.06 1e-4
+setdisp y 206 -.06 1e-4
+
+
+# fix particle motion via constraints  -  fix x/y partID
+
+#left support
+fix x 0
+fix y 0
+fix x 1
+fix y 1
+
+
+#mid support
+fix x 9
+fix y 9
+
+fix x 10
+fix y 10
+
+#right support
+fix x 18
+fix y 18
+fix x 19
+fix y 19
+
+#anti-tilting top fix
+fix x 204
+fix x 205
+
+#add_thermo Fx/Fy/x/y particle ID
+add_thermo y 204 	# top-mid
+add_thermo Fy 204 	# top-mid
+
+
+add_thermo Fy 203
+
+add_thermo Fy 205
+add_thermo Fy 206
+                 

@@ -1,0 +1,50 @@
+# Simple test case for a beam structure with applied force at top middle
+
+# keyword "geometry", arguments are nelx, nely, D, mass
+geometry 75 25 1 1
+
+# keyword "init_chi", arguments can be "file filename entry" or "uniform value"
+init_chi uniform 0.6
+# init_chi file ./example_dump/beam.dump 50 #Activate this to continue from previouse dumpfile
+
+# tolerance for DETO convergence
+tol_chi 0.004
+
+# filtering on/off. If on, specify rmin in absolute units and beta exponent
+filtering on 1.1 2
+#filtering off
+
+# penalisation power
+ppow 2
+
+# chi_min
+chi_min 0.001
+
+# move limit
+#move = 0.3
+
+# target solid volume fraction
+target_f 0.6
+
+# interaction potential: tpye (lin,e+x,e-x,sinh,tanh) kpot apot
+interaction lin 100
+#interaction tanh 100 40
+
+# quickmin parameters: Utol stepAve dmax dt out_Every dumpAll   Utol is a fraction dampAll is an optional boolian to dump every miniisation step
+quickmin 5e-9 10 0.01 0.01 10000
+
+# setforce x/y partID value
+setforce y 1825 -1
+
+# fix particle motion via constraints  -  fix x/y partID
+#fix x 0
+fix y 0
+#fix x 74
+fix y 74
+
+
+#add_thermo Fx/Fy/x/y particle ID
+add_thermo y 1825  # Top middle
+add_thermo Fy 1825
+add_thermo y 37  # Bottom middle
+add_thermo Fy 37

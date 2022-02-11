@@ -1,0 +1,3 @@
+/Users/emasoero/GitHub/DETO/DETO/DETO_3D/build/CMakeFiles/rebuild_cache.dir
+/Users/emasoero/GitHub/DETO/DETO/DETO_3D/build/CMakeFiles/edit_cache.dir
+/Users/emasoero/GitHub/DETO/DETO/DETO_3D/build/CMakeFiles/deto.dir

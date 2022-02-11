@@ -1,0 +1,161 @@
+#include "universe.h"
+/*
+ #include "error.h"
+#include "randm.h"
+#include "output.h"
+ */
+#include <string.h>
+
+using namespace DETO_NS;
+
+
+
+Universe::Universe(DETO *deto) : Pointers(deto)
+{
+    // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
+    MPI_Comm_rank(MPI_COMM_WORLD, &me);
+    MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
+
+    
+    if (me == MASTER) fprintf(screen,"Generating universe class\n");
+
+    SCnames.clear();
+    SCnp.clear();
+    nsc = 0;
+    color = 0;
+    key = 0;
+    flampID = -1;
+    flampSC = -1;
+
+}
+
+
+
+// ---------------------------------------------------------------
+// Class destructor
+Universe::~Universe()
+{
+    /*
+     delete [] color_each;
+     */
+}
+
+
+
+
+
+
+// ---------------------------------------------------------------
+// Printing info about the inputcprs class (possibly useful for debugging)
+void Universe::addsubcomm(std::string name, int np, int lmpyn, int seme)
+{
+    /*
+     SCnames.push_back(name);
+    SCnp.push_back(np);
+    SClmp.push_back(lmpyn);
+    SCseme.push_back(seme);
+     */
+    
+}
+
+
+
+
+
+// ---------------------------------------------------------------
+// Creates the universe of sub-communicators
+void Universe::create()
+{
+    
+    /*
+    if (me == MASTER) fprintf(screen,"\nCreating the universe of sub-communicators as defined by the user in the inputcprs file (or in the restart file)...\n");
+    
+    // Create cumulative number of processors vector
+    std::vector<int> cumnp;
+    cumnp.push_back(SCnp[0]);
+    for (int i=1; i<nsc; i++) cumnp.push_back(cumnp[i-1]+SCnp[i]);
+    
+    // Find the subcomm to which the current processor pertains. Assign it a color (subcomm number) and key (rank in the subcomm)
+    for (int i=0; i<nsc; i++){
+        if (SClmp[i]==1 && flampID<0 && flampSC<0){
+            flampID = cumnp[i] - SCnp[i];
+            flampSC = color;
+        }
+        if (me >= cumnp[i]) color++;
+    }
+    if (me<cumnp[0]) key = me;
+    else key = me - cumnp[color-1];
+    
+    //just a check
+    //fprintf(screen,"CW_P%d is now in subcomm %d with rank %d\n",me,color,key);
+    
+    //splitting the communicator
+    MPI_Comm_split(MPI_COMM_WORLD, color, key, &subcomm);
+    
+    
+    // Create vector with IDs of all submasters
+    subMS.push_back(0);
+    for (int i=1; i<nsc; i++) {
+        subMS.push_back(subMS[i-1]+SCnp[i]);
+    }
+    
+    
+    
+    //create log file for each processor, with subcom and rank in subcom specified
+    if (msk->wplog) {
+        std::string fname;
+        std::ostringstream ss;
+        ss << me;
+        fname = "p"+ss.str()+"_S";
+        ss.str("");
+        ss.clear();
+        ss << color;
+        fname = fname + ss.str()+"_k";
+        ss.str("");
+        ss.clear();
+        ss << key;
+        fname = fname + ss.str()+".plog";
+        msk->plogfname=fname;
+        output->createplog(fname);
+    }
+
+    if (msk->nulog_flag) {
+      std::stringstream ss;
+      ss << "p" << me << ".nulog";
+      msk->nulog.open(ss.str());
+    }
+
+    if (msk->speclog_flag) {
+      std::stringstream ss;
+      ss << "p" << me << ".speclog";
+      msk->speclog.open(ss.str());
+    }
+    
+    // All processors tell every other processor their color (subcomm id) for later use (when sending subcomm-specific stuff, e.g. random number seed)
+    color_each = new int[nprocs];
+    color_each[me] = color;
+    MPI_Allgather(MPI_IN_PLACE,1,MPI_INT,color_each,1,MPI_INT,MPI_COMM_WORLD);
+    
+    // Seeding random generator for each processor
+    randm->seedit(SCseme[color]);
+    */
+    
+}
+
+
+
+
+
+
+
+    
+// ---------------------------------------------------------------
+// Printing info about the inputcprs class (possibly useful for debugging)
+void Universe::printall()
+{
+	fprintf(screen,"\n---------ALL ABOUT UNIVERSE----------\n");
+	//fprintf(screen,"inputcprs filename =  %s\n",fname.c_str());
+	fprintf(screen,"---------------------------------------\n\n");
+    //MPI_Comm_free(&subcomm);
+	
+}

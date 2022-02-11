@@ -1,0 +1,84 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXFileReference section */
+		50A364ED27B6C02F00FCF27C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../main.cpp; sourceTree = "<group>"; };
+		50A364EE27B6C02F00FCF27C /* deto.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = deto.cpp; path = ../deto.cpp; sourceTree = "<group>"; };
+		50A364EF27B6C02F00FCF27C /* deto.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = deto.h; path = ../deto.h; sourceTree = "<group>"; };
+		50A364F027B6C32F00FCF27C /* universe.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = universe.cpp; path = ../universe.cpp; sourceTree = "<group>"; };
+		50A364F127B6C32F00FCF27C /* universe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../universe.h; sourceTree = "<group>"; };
+		50A364F227B6C35F00FCF27C /* pointers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pointers.h; path = ../pointers.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		50A364E627B6BFF000FCF27C = {
+			isa = PBXGroup;
+			children = (
+				50A364EE27B6C02F00FCF27C /* deto.cpp */,
+				50A364EF27B6C02F00FCF27C /* deto.h */,
+				50A364ED27B6C02F00FCF27C /* main.cpp */,
+				50A364F227B6C35F00FCF27C /* pointers.h */,
+				50A364F027B6C32F00FCF27C /* universe.cpp */,
+				50A364F127B6C32F00FCF27C /* universe.h */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		50A364E727B6BFF000FCF27C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1320;
+			};
+			buildConfigurationList = 50A364EA27B6BFF000FCF27C /* Build configuration list for PBXProject "DETO" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 50A364E627B6BFF000FCF27C;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		50A364EB27B6BFF000FCF27C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		50A364EC27B6BFF000FCF27C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		50A364EA27B6BFF000FCF27C /* Build configuration list for PBXProject "DETO" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				50A364EB27B6BFF000FCF27C /* Debug */,
+				50A364EC27B6BFF000FCF27C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 50A364E727B6BFF000FCF27C /* Project object */;
+}

@@ -204,6 +204,8 @@ void Inputdeto::execline(std::string read_string)
             
             universe->create();
             
+            fprintf(screen,"\nProcessor \"%d\"asigned with colour\"%d\"and key \"%d\"\n",me,universe->color,universe->key);
+            
             /*
             lammpsIO->create();
             foundSubcomm = true;

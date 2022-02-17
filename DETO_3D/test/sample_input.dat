@@ -1,0 +1,10 @@
+#Sample input for DETO3D
+
+# To run the code on a MAC simply type
+#    /opt/local/bin/mpiexec-mpich-mp -np 1 ./deto input.dat
+
+
+# ===== SET UNIVERSE OF SUB-COMMUNICATORS ========
+
+# command structure: subcomm Nsubcomms
+subcomm 2

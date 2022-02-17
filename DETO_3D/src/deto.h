@@ -24,9 +24,9 @@ namespace DETO_NS {
 	public:
 		
 	/*class Memory *memory;          // memory allocation functions
-        class Error *error;
-        class Inputmsk *inputmsk;
      */
+        class Error *error;
+        class Inputdeto *inputdeto;
         class Universe *universe;
         /*
         class LammpsIO *lammpsIO;

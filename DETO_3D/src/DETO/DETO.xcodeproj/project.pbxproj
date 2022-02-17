@@ -13,6 +13,10 @@
 		50A364F027B6C32F00FCF27C /* universe.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = universe.cpp; path = ../universe.cpp; sourceTree = "<group>"; };
 		50A364F127B6C32F00FCF27C /* universe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../universe.h; sourceTree = "<group>"; };
 		50A364F227B6C35F00FCF27C /* pointers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pointers.h; path = ../pointers.h; sourceTree = "<group>"; };
+		50EA856027BBCEA400DB8303 /* inputdeto.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = inputdeto.cpp; path = ../inputdeto.cpp; sourceTree = "<group>"; };
+		50EA856127BBCEA400DB8303 /* inputdeto.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inputdeto.h; path = ../inputdeto.h; sourceTree = "<group>"; };
+		50EA856227BBD31800DB8303 /* error.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = error.cpp; path = ../error.cpp; sourceTree = "<group>"; };
+		50EA856327BBD31800DB8303 /* error.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = error.h; path = ../error.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -21,6 +25,10 @@
 			children = (
 				50A364EE27B6C02F00FCF27C /* deto.cpp */,
 				50A364EF27B6C02F00FCF27C /* deto.h */,
+				50EA856227BBD31800DB8303 /* error.cpp */,
+				50EA856327BBD31800DB8303 /* error.h */,
+				50EA856027BBCEA400DB8303 /* inputdeto.cpp */,
+				50EA856127BBCEA400DB8303 /* inputdeto.h */,
 				50A364ED27B6C02F00FCF27C /* main.cpp */,
 				50A364F227B6C35F00FCF27C /* pointers.h */,
 				50A364F027B6C32F00FCF27C /* universe.cpp */,

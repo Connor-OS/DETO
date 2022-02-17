@@ -1,0 +1,189 @@
+# Running the code on Enrico's Mac Air
+#    /opt/local/bin/mpiexec-mpich-mp -np 1 ./maske input.dat
+
+
+# ===== SET UNIVERSE OF SUB-COMMUNICATORS ========
+
+# command structure: subcomm Nsubcomms name1 Nproc1 lmp_yes/no seed name2 Nproc2 lammps_yes/no seed .... etc
+# NB: the first subcomm should always be lmp_yes, otherwise thermos cannot be produced
+# Antonello manages deletion, Bernini manages nucletion
+subcomm 1 Antonello 2 lmp_yes 123
+
+
+
+# ===== READ CHEMISTRY DATA BASE ========
+
+# Load chemistry database file, containing molecule types, reactions, and mechanisms
+chemDB chemDB.dat
+
+
+
+# ===== LIST REAL AND TRIAL PARTICLE TYPES TO BE USED IN THE SIM =======
+real_types 1 2
+trial_types 3
+# type 1 = CaCO3 fixed, 2 = CaCO3 free, 3 = CaCO3 trial
+
+
+# ========= INITIALISE LAMMPS AND LOAD INITIAL CONFIGURATION =========
+
+lammps all  	units nano
+lammps all 	atom_style sphere
+lammps all  	atom_modify map yes   # NEEDED FOR NUCLEATE FIXES!!
+lammps all 	boundary f p f
+lammps all  	region boxfoo block -100 100 -100 100 -100 100 units box   #will be overwritten by read_dump below
+lammps all  	create_box  3 boxfoo    #make space for enough types when creating box
+lammps all  	read_dump ../../initial_configs/CaCO3/dump.thick_flat_kinks 1 x y z box yes add keep	#add atoms keeping their original IDs
+
+
+lammps 	all 	variable Diam equal 0.489278566
+lammps  all 	variable eqDist equal $(v_Diam)*(0.74^(1./3.))
+
+lammps all 	set type * diameter $(v_Diam)
+
+
+
+
+#===== Potentials, neighbours, and minimiser style
+
+lammps all   pair_style table linear 4000
+lammps all   pair_coeff * * ../../initial_configs/CaCO3/table.potential Spring_CaCO3-CaCO3
+
+lammps all 	variable skin equal $(v_eqDist)/10.
+lammps all  	neighbor $(v_skin) bin
+lammps all  	neigh_modify delay 0
+lammps all  	neigh_modify exclude type 3 3
+
+
+
+# ======== CONSTANTS IN LAMMPS UNITS
+kB  0.0138064852       # Boltzmann, in nm2 ag ns-2 K-1
+hpl  0.000662607004   # Plank, in nm2 ag / ns
+
+
+
+# ===========   FREEZE BOTTOM LAYER AND EDGE
+lammps all group gBot type 1
+lammps all fix freezeBot gBot setforce 0.0 0.0 0.0
+
+
+
+
+#  ===========   SET INITIAL SOLUTION
+
+
+# beta = 0
+#sol_start uniform 4 H2O 55 Ca+2 0.00 CO3-2 0.00 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 0.1
+# sol_start uniform 4 H2O 55 Ca+2 1.90E-05 CO3-2 1.90E-05 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 0.2
+# sol_start uniform 4 H2O 55 Ca+2 0.0000267 CO3-2 0.0000267 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 0.5
+# sol_start uniform 4 H2O 55 Ca+2 4.33E-05 CO3-2 4.33E-05 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 0.95
+# sol_start uniform 4 H2O 55 Ca+2 6.03E-05 CO3-2 6.03E-05 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 1.10
+sol_start uniform 4 H2O 55 Ca+2 0.000065 CO3-2 0.000065 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 9.38
+# sol_start uniform 4 H2O 55 Ca+2 0.0002 CO3-2 0.0002 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 106.22
+# sol_start uniform 4 H2O 55 Ca+2 0.00075 CO3-2 0.00075 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 994
+# sol_start uniform 4 H2O 55 Ca+2 0.00275 CO3-2 0.00275 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 2015
+# sol_start uniform 4 H2O 55 Ca+2 0.00425 CO3-2 0.00425 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+# beta = 4993
+# sol_start uniform 4 H2O 55 Ca+2 0.0076 CO3-2 0.0076 OH- 0.0000 Temp 298 DH_A 0.51 DH_B 3.29 voidV 0 dV iso 1e30 dVvoidV 0  unitC 1e-24
+
+
+# ======= DISSOLUTION FIX
+
+fix KMC-free delete DelCaCO3 Antonello 2 mech CaCO3dis_apnet sol_in fixed uniform box sol_out uniform box+dV
+
+
+# ======= NUCLEATION FIX - approach based on stored regions, lattices, and minimise
+
+# Stored commands are evaluated each time a KMC event is carried out. They can depend on variables which are evaluated during Krun, when the stored quantity is invoked. Hence the variables must exist in the subcomm that invokes the stored quantity during the relevant Krun
+
+# nucleation to be attempted in the whole box
+lammps  all	variable 	xl equal xlo+1*$(v_eqDist)
+lammps  all	variable 	xr equal xhi-1*$(v_eqDist)
+lammps  all	variable 	yl equal ylo+0*$(v_eqDist)
+lammps  all	variable 	yr equal yhi-0*$(v_eqDist)
+lammps  all	variable 	zl equal zlo+0.5*$(v_eqDist)
+lammps  all	variable 	zr equal zhi-1.*(v_eqDist)
+# keeping these less than zlo and zhi to avoid lost atoms
+store 	region	RegNuc block $(v_xl) $(v_xr) $(v_yl) $(v_yr) $(v_zl) $(v_zr) units box
+
+lammps  all	variable nx equal 1.5*ceil((xhi-xlo)/$(v_eqDist))
+lammps  all	variable ny equal 1.5*ceil((yhi-ylo)/$(v_eqDist))
+lammps  all	variable nz equal 1.5*ceil((zhi-zlo)/$(v_eqDist))
+lammps	all	variable Lx equal (xhi-xlo)/$(v_nx)
+lammps	all	variable Ly equal (yhi-ylo)/$(v_ny)
+lammps	all	variable Lz equal (zhi-zlo)/$(v_nz) 
+lammps	all	variable scale equal v_Lx
+lammps	all	variable aa2 equal v_Ly/v_Lx
+lammps	all	variable aa3 equal v_Lz/v_Lx
+store 	lattice	latNuc custom $(v_scale) a1 1.0 0.0 0.0 a2 0.0 $(v_aa2) 0.0 a3 0.0 0.0 $(v_aa3) basis 0.5 0.5 0.5
+store 	DV	latNuc variable DVnuc equal v_Lx*v_Ly*v_Lz/1.3
+
+lammps	all	variable Qdmax equal v_eqDist/200		
+store minimize minNuc tstep 0.00045  1e-10 0 600 600 min_modify dmax $(v_Qdmax)
+
+fix KMC-free nucleate NucCaCO3 Antonello RegNuc latNuc minNuc 3 2 sphere 0.489278566 wei simple 1 mech CaCO3nuc_apnet sol_in fixed uniform box sol_out uniform box+dV
+
+
+
+
+
+
+
+# ========= DEFINE LAMMPS DUMPS AND THERMOS + VARIABLES ALSO FOR MASKE OUTPUT
+
+lammps all variable N equal atoms
+lammps all variable U equal epair
+lammps all variable P equal press
+ 
+lammps all variable tyatom atom "type == 2"
+lammps all group g_CaCO3 dynamic all var tyatom every 1
+
+lammps all variable NCaCO3 equal count(g_CaCO3)
+
+
+lammps all compute  PEall all pe/atom
+
+
+# the lammps thermo must calculate all the thermo variables and compute you want to output via the MASKE's thermo
+lammps all thermo_style	custom step atoms vol epair press v_NCaCO3
+
+lammps all thermo 1000
+
+thermo 10 thermo.txt conc_Ca+2 conc_CO3-2 conc_H2O conc_OH- lmp_v_N lmp_v_U lmp_v_P lmp_v_NCaCO3
+
+dump Antonello D1 10 all     custom  dump.all id type x y z radius c_PEall
+
+# relax every_Nsteps mode args (for minimize, etol ftol maxiter maxeval min_style 
+# min_modify_args;  for nvt, all args admitted by an nvt fix in lammps)
+#example:      relax 10 minimize 0 0 1000 1000 quickmin dmax .01 20 20 20 
+# relax R1 1 minimize 0 0 1000 1000 cg dmax 0.001 20 20 20 
+
+
+#lammps Antonello dump Dt all custom 1 tdump id type x y z radius
+#lammps Antonello dump_modify Dt every 1 first yes
+
+# =============== running the KMC simulation
+lammps all print "STARTING KRUN" 
+Krun 40000000000000
+
+
+lammps Antonello print "\n SUCCESS \n"
+

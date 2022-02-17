@@ -1,10 +1,8 @@
-/*
-#include "inputmsk.h"
-*/
 #include "deto.h"
 #include "mpi.h"
 #include <unistd.h>   //just for the sleep() function
 #include "universe.h"
+#include "inputdeto.h"
 
 
 using namespace DETO_NS;
@@ -43,10 +41,10 @@ int main(int argc, char **argv)
     
     
     
-    /*
+
     // Read the input file (or, automatically, the restart file if there is one that is active)
-    deto->inputmsk->file();
-     */
+    deto->inputdeto->file();
+    
     
 	deto -> printall();
     

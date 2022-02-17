@@ -21,11 +21,11 @@ public:
 
     Pointers(DETO *ptr) :
     dto(ptr),
+    error(ptr->error),
     /*
      memory(ptr->memory),
-    error(ptr->error),
-    inputmsk(ptr->inputmsk),
      */
+    inputdeto(ptr->inputdeto),
     universe(ptr->universe),
     /*
      lammpsIO(ptr->lammpsIO),
@@ -60,9 +60,9 @@ protected:
     DETO *dto;
     /*
      Memory *&memory;
-    Error *&error;
-    Inputmsk *&inputmsk;
      */
+    Error *&error;
+    Inputdeto *&inputdeto;
     Universe *&universe;
     /*
      LammpsIO *&lammpsIO;

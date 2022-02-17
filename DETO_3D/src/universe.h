@@ -27,7 +27,6 @@ namespace DETO_NS {
 		
 		void create();       // creates the universe of sub-communicators
 		void printall();
-        void addsubcomm(std::string,int,int,int);   //adds one sub communicator with corresponding number of processors
         
         int nsc;            // number of subcommunicators defined
         int color;          // processor-specific color, which identifies what subcomm the processor pertains to
@@ -37,8 +36,7 @@ namespace DETO_NS {
         
         std::vector<std::string> SCnames;    //vector containing the names of the subcommunicators
         std::vector<int> SCnp;    //vector containing the number of processors in each subcommunicator
-        std::vector<int> SClmp; //vector containing flag as whether lammps should be activated and run by this subcomm or not
-        std::vector<int> SCseme; //vector containing random seeds for each subcomm
+        //std::vector<int> SCseme; //vector containing random seeds for each subcomm
          std::vector<int> subMS;    //vector containing the IDs of the submasters of each subcommunicator
         
         int *color_each; //vector containing the color, viz the subcomm id, of each processor
@@ -48,9 +46,6 @@ namespace DETO_NS {
         int me;     // id of the current processor (rank)
         int nprocs;     // number of processor in the universe (Comm_size)
 
-        int flampID;    // ID of submaster of first subcommunicator wih active lammps. All processors know it
-        int flampSC;    // color of subcommunicator wih active lammps. All processors know it
-        
 		
 	private:
 		//std::string fname;              // open inputcprs file

@@ -2,9 +2,9 @@
 
 /*
 #include "memory.h"
-#include "error.h"
-#include "inputmsk.h"
  */
+#include "error.h"
+#include "inputdeto.h"
 #include "universe.h"
  /*
 #include "lammpsIO.h"
@@ -70,9 +70,9 @@ DETO::DETO(int narg, char **arg)
     Ttypes.clear();
 	
 	memory = new Memory(this);
-    error = new Error(this);
-	inputmsk = new Inputmsk(this,narg,arg)
     */
+    error = new Error(this);
+    inputdeto = new Inputdeto(this,narg,arg);
     universe = new Universe(this);
      /*
     lammpsIO = new LammpsIO(this);
@@ -104,17 +104,20 @@ DETO::~DETO()
     if (me==MASTER) fprintf(screen,"Deleting deto class\n");
     MPI_Barrier(MPI_COMM_WORLD);
     
-    /*
+    
      if (me==MASTER) {
-        fprintf(screen,"Deleting inputmsk class\n");
-        inputmsk->printall();
+        fprintf(screen,"Deleting inputdeto class\n");
+        inputdeto->printall();
     }
     MPI_Barrier(MPI_COMM_WORLD);
-    delete inputmsk;
+    delete inputdeto;
+    
+    
     if (me==MASTER) fprintf(screen,"Deleting error class\n");
     MPI_Barrier(MPI_COMM_WORLD);
-
     delete error;
+    
+    /*
     if (me==MASTER) {
         fprintf(screen,"Deleting lammpsIO class\n");
         lammpsIO->printall();

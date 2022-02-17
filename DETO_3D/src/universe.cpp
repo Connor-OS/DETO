@@ -24,8 +24,7 @@ Universe::Universe(DETO *deto) : Pointers(deto)
     nsc = 0;
     color = 0;
     key = 0;
-    flampID = -1;
-    flampSC = -1;
+
 
 }
 
@@ -45,30 +44,14 @@ Universe::~Universe()
 
 
 
-// ---------------------------------------------------------------
-// Printing info about the inputcprs class (possibly useful for debugging)
-void Universe::addsubcomm(std::string name, int np, int lmpyn, int seme)
-{
-    /*
-     SCnames.push_back(name);
-    SCnp.push_back(np);
-    SClmp.push_back(lmpyn);
-    SCseme.push_back(seme);
-     */
-    
-}
-
-
-
-
 
 // ---------------------------------------------------------------
 // Creates the universe of sub-communicators
 void Universe::create()
 {
     
-    /*
-    if (me == MASTER) fprintf(screen,"\nCreating the universe of sub-communicators as defined by the user in the inputcprs file (or in the restart file)...\n");
+    
+    if (me == MASTER) fprintf(screen,"\nCreating the universe of sub-communicators as defined by the user in the input file (or in the restart file)...\n");
     
     // Create cumulative number of processors vector
     std::vector<int> cumnp;
@@ -77,21 +60,14 @@ void Universe::create()
     
     // Find the subcomm to which the current processor pertains. Assign it a color (subcomm number) and key (rank in the subcomm)
     for (int i=0; i<nsc; i++){
-        if (SClmp[i]==1 && flampID<0 && flampSC<0){
-            flampID = cumnp[i] - SCnp[i];
-            flampSC = color;
-        }
         if (me >= cumnp[i]) color++;
     }
+    
     if (me<cumnp[0]) key = me;
     else key = me - cumnp[color-1];
     
-    //just a check
-    //fprintf(screen,"CW_P%d is now in subcomm %d with rank %d\n",me,color,key);
-    
     //splitting the communicator
     MPI_Comm_split(MPI_COMM_WORLD, color, key, &subcomm);
-    
     
     // Create vector with IDs of all submasters
     subMS.push_back(0);
@@ -100,6 +76,7 @@ void Universe::create()
     }
     
     
+    /*
     
     //create log file for each processor, with subcom and rank in subcom specified
     if (msk->wplog) {
@@ -138,7 +115,7 @@ void Universe::create()
     
     // Seeding random generator for each processor
     randm->seedit(SCseme[color]);
-    */
+     */
     
 }
 

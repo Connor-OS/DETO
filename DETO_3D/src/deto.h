@@ -28,15 +28,16 @@ namespace DETO_NS {
         class Error *error;
         class Inputdeto *inputdeto;
         class Universe *universe;
-        /*
+        class Output *output;
         class LammpsIO *lammpsIO;
+        /*
         class Chemistry *chem;
         class Solution *solution;
         class Fix *fix;
         class Krun *krun;
         class Randm *randm;
         class Fix_delete *fix_del;
-        class Output *output;
+        
         class Fix_Cfoo *fix_cfoo;
         class Relax *relax;
         class Setconc *setconc;
@@ -60,10 +61,11 @@ namespace DETO_NS {
         
         FILE *screen;                  // screen output
         
-        /*
+        
         bool wplog;      // if true, each processor writes a processor specific log for debug
         FILE *plog;                  // processor-specific log file output
         std::string plogfname;
+        /*
         bool wthermo;      // if true, the MASTER writes the thermo file
         FILE *thermo;                  // thermo outup file: written by master only
         std::string th_fname;
@@ -74,8 +76,6 @@ namespace DETO_NS {
 	bool nulog_flag;     // true if nufeb log is to be generated
 	std::ofstream nulog; // nufeb log file
 
-	bool speclog_flag;     // true if speciation log is to be generated
-	std::ofstream speclog; // speciation log file
 	
          */
         

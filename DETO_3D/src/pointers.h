@@ -27,8 +27,10 @@ public:
      */
     inputdeto(ptr->inputdeto),
     universe(ptr->universe),
+    output(ptr->output),
+    lammpsIO(ptr->lammpsIO),
     /*
-     lammpsIO(ptr->lammpsIO),
+     
     chem(ptr->chem),
     solution(ptr->solution),
     fix(ptr->fix),
@@ -38,11 +40,10 @@ public:
 #endif
     krun(ptr->krun),
     randm(ptr->randm),
-    output(ptr->output),
      */
+    plog(ptr->plog),
     screen(ptr->screen){}
     /*
-    plog(ptr->plog),
     thermo(ptr->thermo),
     fix_cfoo(ptr->fix_cfoo),
     relax(ptr->relax),
@@ -64,8 +65,10 @@ protected:
     Error *&error;
     Inputdeto *&inputdeto;
     Universe *&universe;
+    Output *&output;
+    LammpsIO *&lammpsIO;
     /*
-     LammpsIO *&lammpsIO;
+     
     Chemistry *&chem;
     Solution *&solution;
     Fix *&fix;
@@ -81,13 +84,13 @@ protected:
     Krun *&krun;
     Randm *&randm;
     Setconc *&setconc;
-    Output *&output;
+    
     Fix_nucleate *&fix_nucl;
     Store *&store;
      */
     FILE *&screen;
-    /*
     FILE *&plog;
+    /*
     FILE *&thermo;
      */
 };

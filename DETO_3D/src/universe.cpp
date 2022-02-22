@@ -2,8 +2,8 @@
 /*
  #include "error.h"
 #include "randm.h"
-#include "output.h"
  */
+#include "output.h"
 #include <string.h>
 
 using namespace DETO_NS;
@@ -76,10 +76,9 @@ void Universe::create()
     }
     
     
-    /*
     
     //create log file for each processor, with subcom and rank in subcom specified
-    if (msk->wplog) {
+    if (dto->wplog) {
         std::string fname;
         std::ostringstream ss;
         ss << me;
@@ -92,21 +91,18 @@ void Universe::create()
         ss.clear();
         ss << key;
         fname = fname + ss.str()+".plog";
-        msk->plogfname=fname;
+        dto->plogfname=fname;
         output->createplog(fname);
     }
 
-    if (msk->nulog_flag) {
+    
+    /*
+     if (msk->nulog_flag) {
       std::stringstream ss;
       ss << "p" << me << ".nulog";
       msk->nulog.open(ss.str());
     }
-
-    if (msk->speclog_flag) {
-      std::stringstream ss;
-      ss << "p" << me << ".speclog";
-      msk->speclog.open(ss.str());
-    }
+*/
     
     // All processors tell every other processor their color (subcomm id) for later use (when sending subcomm-specific stuff, e.g. random number seed)
     color_each = new int[nprocs];
@@ -114,7 +110,8 @@ void Universe::create()
     MPI_Allgather(MPI_IN_PLACE,1,MPI_INT,color_each,1,MPI_INT,MPI_COMM_WORLD);
     
     // Seeding random generator for each processor
-    randm->seedit(SCseme[color]);
+    /*
+     randm->seedit(SCseme[color]);
      */
     
 }

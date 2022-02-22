@@ -6,8 +6,10 @@
 #include "error.h"
 #include "inputdeto.h"
 #include "universe.h"
- /*
+#include "output.h"
 #include "lammpsIO.h"
+ /*
+
 #include "chemistry.h"
 #include "solution.h"
 #include "fix.h"
@@ -17,7 +19,6 @@
 #include "setconc.h"
 #include "krun.h"
 #include "randm.h"
-#include "output.h"
 #include "fix_nucleate.h"
 #include "store.h"
 
@@ -37,11 +38,11 @@ DETO::DETO(int narg, char **arg)
 {
     screen = NULL;
     screen=stdout;
+    wplog = false;
     /*
     plog = NULL;
-    wplog = false;
+    
     nulog_flag = false;
-    speclog_flag = true;
     */
     
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
@@ -74,8 +75,10 @@ DETO::DETO(int narg, char **arg)
     error = new Error(this);
     inputdeto = new Inputdeto(this,narg,arg);
     universe = new Universe(this);
-     /*
+    output = new Output(this);
     lammpsIO = new LammpsIO(this);
+     /*
+    
     chem = new Chemistry(this);
     solution = new Solution(this);
     fix = new Fix(this);
@@ -85,7 +88,6 @@ DETO::DETO(int narg, char **arg)
 #endif
     krun = new Krun(this);
     randm = new Randm(this);
-    output = new Output(this);
     fix_cfoo = new Fix_Cfoo(this);
     relax = new Relax(this);
     setconc = new Setconc(this);
@@ -117,13 +119,19 @@ DETO::~DETO()
     MPI_Barrier(MPI_COMM_WORLD);
     delete error;
     
-    /*
+    if (me==MASTER) fprintf(screen,"Deleting output class\n");
+    MPI_Barrier(MPI_COMM_WORLD);
+    delete output;
+    
+    
     if (me==MASTER) {
         fprintf(screen,"Deleting lammpsIO class\n");
         lammpsIO->printall();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     delete lammpsIO;
+    
+    /*
     if (me==MASTER) {
         fprintf(screen,"Deleting chemistry class\n");
         chem->printall();

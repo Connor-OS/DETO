@@ -12,6 +12,7 @@ set(SOURCES
   src/deto.cpp
   src/universe.cpp
   src/inputdeto.cpp
+  src/output.cpp
   src/error.cpp)
   
 #find_library(LAMMPS_LIBRARIES lammps PATHS ${CMAKE_SOURCE_DIR}/lammps/build NO_DEFAULT_PATH)

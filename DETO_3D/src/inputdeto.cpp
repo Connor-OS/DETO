@@ -200,17 +200,15 @@ void Inputdeto::execline(std::string read_string)
                 }
                 fprintf(screen, "\n");
             }
-            
-            
+        
             universe->create();
             
-            fprintf(screen,"\nProcessor \"%d\"asigned with colour\"%d\"and key \"%d\"\n",me,universe->color,universe->key);
-            
-            /*
+            fprintf(screen,"\nProcessor \"%d\"assigned with colour\"%d\"and key \"%d\"\n",me,universe->color,universe->key);
+        
             lammpsIO->create();
-            foundSubcomm = true;
+            /*foundSubcomm = true;
+             */
             
-     */
             MPI_Barrier(MPI_COMM_WORLD);
         }
         /*

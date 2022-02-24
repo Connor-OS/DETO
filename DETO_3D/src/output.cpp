@@ -2,7 +2,7 @@
 #include "universe.h"
 #include "error.h"
 /*#include "chemistry.h"
-#include "lammpsIO.h"
+ #include "lammpsIO.h"
 #include "fix.h"
 #ifdef MASKE_WITH_NUFEB
 #include "fix_nufeb.h"

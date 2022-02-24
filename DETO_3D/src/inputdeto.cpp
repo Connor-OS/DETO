@@ -1,8 +1,9 @@
 #include "inputdeto.h"
 #include "error.h"
 #include "universe.h"
+#include "lammpsIO.h"
 /*
- #include "lammpsIO.h"
+
 #include "chemistry.h"
 #include "solution.h"
 #include "fix.h"
@@ -211,6 +212,48 @@ void Inputdeto::execline(std::string read_string)
             
             MPI_Barrier(MPI_COMM_WORLD);
         }
+        else if (strcmp(word.c_str(), "lammps") ==0)  {
+            if (lammpsIO->lammps_active) {
+                //fprintf(screen, "In %s LAMMMPS doing: %s\n",(universe->SCnames[universe->color]).c_str(),(lss.str()).c_str());
+                //std::getline (inFile, read_string);
+                //std::istringstream iss(read_string);
+                
+                std::string subs, newstring;
+                lss >> firstWord;
+                // add subcomm name to dump name ----
+                if (strcmp(firstWord.c_str(),"dump")==0) {
+                    newstring = "dump ";
+                    for (int i=0; i<4; i++) {
+                        lss >> subs;
+                        newstring = newstring+subs+" ";
+                    }
+                    lss >> subs;
+                    subs = subs+"."+universe->SCnames[universe->color];
+                    newstring = newstring+subs+" ";
+                    while (lss >> subs) {
+                        newstring = newstring+subs+" ";
+                    }
+                    //fprintf(screen, "\nString is \"%s\"\n",newstring.c_str());
+                }
+                else{
+                    newstring = firstWord+" ";
+                    while (lss >> subs) {
+                        newstring = newstring+subs+" ";
+                    }
+                    if (strcmp(firstWord.c_str(),"thermo_style")==0) {
+                        lammpsIO->lmpThSt = newstring;
+                    }
+                }
+                //---
+                //fprintf(screen, "In %s LAMMMPS doing: %s\n",(universe->SCnames[universe->color]).c_str(),newstring.c_str());
+                lammpsIO->lammpsdo(newstring);
+            }
+            else {
+                std::string err_msg;
+                err_msg = "ERROR: lammps not active on a processor";
+                error->errsimple(err_msg);
+            }
+        }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
             int tt;
@@ -241,53 +284,6 @@ void Inputdeto::execline(std::string read_string)
         else if (strcmp(word.c_str(), "hpl") == 0) {
             lss >> msk->hpl;
             if (me == MASTER) fprintf(screen, "\n hpl = %e", msk->hpl);
-        }
-        else if (strcmp(word.c_str(), "lammps") ==0)  {
-            if (lammpsIO->lammps_active) {
-                //fprintf(screen, "In %s LAMMMPS doing: %s\n",(universe->SCnames[universe->color]).c_str(),(lss.str()).c_str());
-                //std::getline (inFile, read_string);
-                //std::istringstream iss(read_string);
-                std::string subcname;
-                lss >> subcname;
-                if (strcmp(subcname.c_str(),(universe->SCnames[universe->color]).c_str())==0 || strcasecmp(subcname.c_str(),"all")==0 ) {
-                    std::string subs, newstring;
-                    lss >> firstWord;
-                    // add subcomm name to dump name ----
-                    if (strcmp(firstWord.c_str(),"dump")==0) {
-                        newstring = "dump ";
-                        for (int i=0; i<4; i++) {
-                            lss >> subs;
-                            newstring = newstring+subs+" ";
-                        }
-                        lss >> subs;
-                        subs = subs+"."+universe->SCnames[universe->color];
-                        newstring = newstring+subs+" ";
-                        while (lss >> subs) {
-                            newstring = newstring+subs+" ";
-                        }
-                        //fprintf(screen, "\nString is \"%s\"\n",newstring.c_str());
-                    }
-                    else{
-                        newstring = firstWord+" ";
-                        while (lss >> subs) {
-                            newstring = newstring+subs+" ";
-                        }
-                        if (strcmp(firstWord.c_str(),"thermo_style")==0) {
-                            lammpsIO->lmpThSt = newstring;
-                        }
-                    }
-                    //---
-                    //fprintf(screen, "In %s LAMMMPS doing: %s\n",(universe->SCnames[universe->color]).c_str(),newstring.c_str());
-
-                    lammpsIO->lammpsdo(newstring);
-                }
-                else {
-                    break;   //breaks this execline function, going back to main function and reading next line
-                }
-            }
-            else {
-                getout=true; // seems to be doing the same as "break" above... not sure though.. I'll keep it as is for now
-            }
         }
         else if (strcmp(word.c_str(), "sol_start") == 0){
             if (me == MASTER) fprintf(screen, "\nFound sol_start\n");

@@ -36,10 +36,12 @@ namespace DETO_NS {
         void printall();
         void lammpsdo(std::string); //passes a command to lammps
         
+        std::string lmpThSt;    // string recording the themo style from input: used to add and evaluate tem computes when needed in source code of lammps
+        
         /*
         std::string units;
         std::string atomstyle;
-        std::string lmpThSt;    // string recording the themo style from input: used to add and evaluate tem computes when needed in source code of lammps
+        
         double timestep;
         std::stringstream ss;
          */

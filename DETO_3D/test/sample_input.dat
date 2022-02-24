@@ -8,3 +8,11 @@
 
 # command structure: subcomm Nsubcomms
 subcomm 2
+
+
+# ====== INITIAL SETTINGS FOR ALL LAMMPS INSTANCES =======
+lammps  	units nano
+lammps 	atom_style sphere
+lammps 	boundary f p f
+lammps  	region boxfoo block -100 100 -100 100 -100 100 units box   #will be overwritten by read_dump below
+lammps  	create_box  3 boxfoo    #make space for enough types when creating box

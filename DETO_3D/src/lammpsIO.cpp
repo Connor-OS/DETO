@@ -20,7 +20,7 @@
 using namespace DETO_NS;
 
 
-LammpsIO::LammpsIO(MASKE *deto) : Pointers(deto)
+LammpsIO::LammpsIO(DETO *deto) : Pointers(deto)
 {
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
@@ -28,11 +28,11 @@ LammpsIO::LammpsIO(MASKE *deto) : Pointers(deto)
     if (me == MASTER) fprintf(screen,"Generating lammpsIO class\n");
 
     lammps_active=false;
+    lmpThSt = "thermo_style custom step atoms";
     /*
     units = "real";
     atomstyle = "ellipsoid";
     timestep = 1.;
-    lmpThSt = "thermo_style custom step atoms";
      */
 }
 

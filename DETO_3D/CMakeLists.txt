@@ -13,15 +13,15 @@ set(SOURCES
   src/universe.cpp
   src/inputdeto.cpp
   src/output.cpp
+  src/lammpsIO.cpp
   src/error.cpp)
   
-#find_library(LAMMPS_LIBRARIES lammps PATHS ${CMAKE_SOURCE_DIR}/lammps/build NO_DEFAULT_PATH)
+find_library(LAMMPS_LIBRARIES lammps PATHS ${CMAKE_SOURCE_DIR}/lammps/build NO_DEFAULT_PATH)
 
 
 add_executable(deto ${SOURCES})
-#target_include_directories(deto PUBLIC ${MPI_CXX_INCLUDE_PATH} lammps/src)
-#target_link_libraries(deto ${MPI_CXX_LIBRARIES} ${LAMMPS_LIBRARIES} ${PHREEQC_LIBRARIES} ${JPEG_LIBRARIES} ${PNG_LIBRARIES} ${VTK_LIBRARIES})
-target_link_libraries(deto ${MPI_CXX_LIBRARIES})
+target_include_directories(deto PUBLIC ${MPI_CXX_INCLUDE_PATH} lammps/src)
+target_link_libraries(deto ${MPI_CXX_LIBRARIES} ${LAMMPS_LIBRARIES} ${JPEG_LIBRARIES} ${PNG_LIBRARIES} ${VTK_LIBRARIES})
 
 if (DETO_WAIT_ATTACH)
   target_compile_definitions(deto PUBLIC DETO_WAIT_ATTACH)

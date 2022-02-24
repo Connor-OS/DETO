@@ -1,0 +1,3 @@
+[submodule "DETO_3D/lammps"]
+	path = DETO_3D/lammps
+	url = https://github.com/lammps/lammps.git

@@ -30,6 +30,7 @@ namespace DETO_NS {
         class Universe *universe;
         class Output *output;
         class LammpsIO *lammpsIO;
+        class Optimize *optimize;
         /*
         class Chemistry *chem;
         class Solution *solution;

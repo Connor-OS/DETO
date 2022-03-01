@@ -2,6 +2,7 @@
 #include "error.h"
 #include "universe.h"
 #include "lammpsIO.h"
+#include "optimize.h"
 /*
 
 #include "chemistry.h"
@@ -145,6 +146,7 @@ void Inputdeto::file()
     inFile.close();
 
     if (me == MASTER) fprintf(screen,"DONE Reading input file");
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
@@ -253,6 +255,11 @@ void Inputdeto::execline(std::string read_string)
                 err_msg = "ERROR: lammps not active on a processor";
                 error->errsimple(err_msg);
             }
+        }
+        else if (strcmp(word.c_str(), "opt_map_chi") == 0) {
+            std::string mapfname;
+            lss >> mapfname;
+            optimize->read_chimap(mapfname);
         }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
@@ -502,13 +509,13 @@ void Inputdeto::execline(std::string read_string)
             lss >> deltat;
             krun->proceed(deltat);
         }
+         */
         else{
             std::string msg = "ERROR: command unknown in input or restart file: "+word;
             error->errsimple(msg);
 
         }
          
-         */
         
     }
         

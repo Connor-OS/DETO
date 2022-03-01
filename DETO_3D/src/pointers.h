@@ -29,6 +29,7 @@ public:
     universe(ptr->universe),
     output(ptr->output),
     lammpsIO(ptr->lammpsIO),
+    optimize(ptr->optimize),
     /*
      
     chem(ptr->chem),
@@ -67,6 +68,7 @@ protected:
     Universe *&universe;
     Output *&output;
     LammpsIO *&lammpsIO;
+    Optimize *&optimize;
     /*
      
     Chemistry *&chem;

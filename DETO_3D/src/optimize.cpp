@@ -52,7 +52,6 @@ void Optimize::read_chimap(std::string mapfname)
     else{
         MPI_Barrier(MPI_COMM_WORLD);
         std::map<std::string, std::vector<double> > chi_map; // this holds values associated with chi 
-        std::vector<std::string> chi_index; // index for chi_map
         std::map<std::string, std::vector<double> >::iterator it;
        // READ FILE (all processors need to know this)
         while (!mapFile.eof()) {

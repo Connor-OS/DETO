@@ -51,7 +51,9 @@ void Optimize::read_chimap(std::string mapfname)
     }
     else{
         MPI_Barrier(MPI_COMM_WORLD);
-        
+        std::map<std::string, std::vector<double> > chi_map; // this holds values associated with chi 
+        std::vector<std::string> chi_index; // index for chi_map
+        std::map<std::string, std::vector<double> >::iterator it;
        // READ FILE (all processors need to know this)
         while (!mapFile.eof()) {
             MPI_Barrier(MPI_COMM_WORLD);
@@ -66,7 +68,41 @@ void Optimize::read_chimap(std::string mapfname)
                     }
                     else if (strcmp(word.c_str(), "chi") == 0) {
                         if (found_nchi==true){
-                            //READ THE TABLE
+                            // Insert map keys
+                            chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
+                            chi_index.push_back(word);
+                            while (lss >> word) {
+                                chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
+                                chi_index.push_back(word);
+                            }
+                            // Populate chi_map 
+                            for(int i=0;i<nchi;i++){
+                                std::getline (mapFile, read_string);
+                                if (!read_string.empty()){
+                                    std::istringstream lss(read_string);
+                                    for(it = chi_map.begin(); it != chi_map.end(); it++){
+                                        double value;
+                                        lss >> value;
+                                        chi_map[it->first].push_back(value);
+                                    }
+                                }
+                                else{
+                                    err_msg = "ERROR: Fewer than specified chi's given";
+                                    error->errsimple(err_msg);
+                                }
+                            }
+                            // Print Chi map to screen
+                            fprintf(screen,"Chi Map is:\n");
+                            for(it = chi_map.begin(); it != chi_map.end(); it++){
+                                fprintf(screen,"%s  ",it->first.c_str());
+                            }
+                            fprintf(screen,"\n-------------------------\n");
+                            for(int i=0;i<nchi;i++){
+                                for(it = chi_map.begin(); it != chi_map.end(); it++){
+                                    fprintf(screen,"%f ",chi_map[it->first][i]);
+                                }
+                                fprintf(screen,"\n");
+                            }
                         }
                         else {
                             err_msg = "ERROR: num_chi not found in map_chi file before specifying table of chi's and related quantities to set";

@@ -15,7 +15,7 @@ lammps  	units nano
 lammps 	atom_style sphere
 lammps 	boundary f p f
 lammps  	region boxfoo block -10 10 -10 10 -10 10 units box   #will be overwritten by read_dump below
-lammps  	create_box 10 boxfoo    #make space for enough types when creating box
+lammps  	create_box 11 boxfoo    #make space for enough types when creating box
 
 lammps lattice fcc 1.5
 lammps create_atoms 1 box
@@ -25,3 +25,8 @@ lammps run 1
 
 # loading chi map from file
 opt_map_chi chimap.dat
+
+# loading the command defining lammps potentials from a separate file (if too many to specify directly here)
+read_potentials   potfile.dat
+
+

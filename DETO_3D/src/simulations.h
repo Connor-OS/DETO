@@ -1,10 +1,9 @@
-#ifndef OPTIMIZE_H
-#define OPTIMIZE_H
+#ifndef SIMULATIONS_H
+#define SIMULATIONS_H
 
 #include "pointers.h"
 #include <string>
 #include <vector>
-#include <map>
 //#include "mpi.h"
 //#include <string>
 //#include <vector>
@@ -18,22 +17,18 @@
 
 namespace DETO_NS {
 	
-	class Optimize : protected Pointers {
+	class Simulations : protected Pointers {
 	public:
-        Optimize(class DETO *);
-		~Optimize();
+        Simulations(class DETO *);
+		~Simulations();
     
         int me;     // id of the current processor (rank)
         
-        std::map<std::string, std::vector<double> > chi_map; // a map recording the content of the chi_map file provided by the user
-        std::map<std::string, std::vector<double> >::iterator it; // map iterator
         
-        void read_chimap(std::string);
         void printall();
         
 	private:
-        std::string err_msg, read_string, word;
-        int nchi;   //number of chi values in the optimization
+        //std::string err_msg, read_string, word;
         
         
         //void check_name_unique(std::string);

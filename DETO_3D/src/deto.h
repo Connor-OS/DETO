@@ -31,6 +31,7 @@ namespace DETO_NS {
         class Output *output;
         class LammpsIO *lammpsIO;
         class Optimize *optimize;
+        class Simulations *sims;
         /*
         class Chemistry *chem;
         class Solution *solution;

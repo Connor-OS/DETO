@@ -9,6 +9,7 @@
 #include "output.h"
 #include "lammpsIO.h"
 #include "optimize.h"
+#include "simulations.h"
  /*
 
 #include "chemistry.h"
@@ -79,6 +80,7 @@ DETO::DETO(int narg, char **arg)
     output = new Output(this);
     lammpsIO = new LammpsIO(this);
     optimize = new Optimize(this);
+    sims = new Simulations(this);
      /*
     
     chem = new Chemistry(this);
@@ -140,6 +142,13 @@ DETO::~DETO()
     }
     MPI_Barrier(MPI_COMM_WORLD);
     delete optimize;
+    
+    if (me==MASTER) {
+        fprintf(screen,"Deleting optimize class\n");
+        sims->printall();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    delete sims;
     
     /*
     if (me==MASTER) {

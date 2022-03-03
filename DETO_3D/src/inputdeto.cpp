@@ -261,6 +261,25 @@ void Inputdeto::execline(std::string read_string)
             lss >> mapfname;
             optimize->read_chimap(mapfname);
         }
+        else if (strcmp(word.c_str(), "read_potentials") == 0) {
+            std::string potfname;
+            lss >> potfname;
+            
+            std::ifstream potFile(potfname.c_str());
+            if (!potFile.is_open()) {
+                err_msg = "ERROR: cannot read file \""+potfname+"\"";
+                error->errsimple(err_msg);
+            }
+            else{
+                MPI_Barrier(MPI_COMM_WORLD);
+               // READ FILE (all processors need to know this)
+                while (!potFile.eof()) {
+                    MPI_Barrier(MPI_COMM_WORLD);
+                    std::getline (potFile, read_string2);
+                    lammpsIO->lammpsdo(read_string2);
+                }
+            }
+        }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
             int tt;

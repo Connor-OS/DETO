@@ -51,8 +51,8 @@ void Optimize::read_chimap(std::string mapfname)
     }
     else{
         MPI_Barrier(MPI_COMM_WORLD);
-        std::map<std::string, std::vector<double> > chi_map; // this holds values associated with chi 
-        std::map<std::string, std::vector<double> >::iterator it;
+        std::map<std::string, std::vector<std::string> > chi_map; // this holds values associated with chi 
+        std::map<std::string, std::vector<std::string> >::iterator it; // map iterator
        // READ FILE (all processors need to know this)
         while (!mapFile.eof()) {
             MPI_Barrier(MPI_COMM_WORLD);
@@ -68,11 +68,9 @@ void Optimize::read_chimap(std::string mapfname)
                     else if (strcmp(word.c_str(), "chi") == 0) {
                         if (found_nchi==true){
                             // Insert map keys
-                            chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
-                            chi_index.push_back(word);
+                            chi_map.insert(std::pair<std::string, std::vector<std::string> > (word, std::vector<std::string>()));
                             while (lss >> word) {
-                                chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
-                                chi_index.push_back(word);
+                                chi_map.insert(std::pair<std::string, std::vector<std::string> > (word, std::vector<std::string>()));
                             }
                             // Populate chi_map 
                             for(int i=0;i<nchi;i++){
@@ -80,9 +78,9 @@ void Optimize::read_chimap(std::string mapfname)
                                 if (!read_string.empty()){
                                     std::istringstream lss(read_string);
                                     for(it = chi_map.begin(); it != chi_map.end(); it++){
-                                        double value;
-                                        lss >> value;
-                                        chi_map[it->first].push_back(value);
+                                        // double value;
+                                        lss >> word;
+                                        chi_map[it->first].push_back(word);
                                     }
                                 }
                                 else{
@@ -98,7 +96,7 @@ void Optimize::read_chimap(std::string mapfname)
                             fprintf(screen,"\n-------------------------\n");
                             for(int i=0;i<nchi;i++){
                                 for(it = chi_map.begin(); it != chi_map.end(); it++){
-                                    fprintf(screen,"%f ",chi_map[it->first][i]);
+                                    fprintf(screen,"%s\t",chi_map[it->first][i].c_str());
                                 }
                                 fprintf(screen,"\n");
                             }
@@ -115,7 +113,7 @@ void Optimize::read_chimap(std::string mapfname)
         
         mapFile.close();
 
-        if (me == MASTER) fprintf(screen,"DONE Reading map chi file");
+        if (me == MASTER) fprintf(screen,"DONE Reading map chi file\n");
 
     }
 }

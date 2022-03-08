@@ -3,6 +3,7 @@
 #include "universe.h"
 #include "lammpsIO.h"
 #include "optimize.h"
+#include "simulations.h"
 /*
 
 #include "chemistry.h"
@@ -261,7 +262,7 @@ void Inputdeto::execline(std::string read_string)
             lss >> mapfname;
             optimize->read_chimap(mapfname);
         }
-        else if (strcmp(word.c_str(), "read_potentials") == 0) {
+        /*else if (strcmp(word.c_str(), "read_potentials") == 0) {
             std::string potfname;
             lss >> potfname;
             
@@ -279,6 +280,14 @@ void Inputdeto::execline(std::string read_string)
                     lammpsIO->lammpsdo(read_string2);
                 }
             }
+        }*/
+        else if (strcmp(word.c_str(), "simulation") == 0) {
+            std::string read_string2;
+            std::getline(lss, read_string2);
+            if (me==MASTER) {
+                fprintf(screen,"\n inputdeto -- Adding simulation:  %s \n",read_string2.c_str());
+            }
+            sims->add(read_string2);
         }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {

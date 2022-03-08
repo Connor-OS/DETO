@@ -37,6 +37,24 @@ Simulations::~Simulations()
 
 
 
+// ---------------------------------------------------------------
+void Simulations::add(std::string read_string)
+{
+// record name in a vector
+    // record type in a vector and, depending on type, record associated parameters (none if "run", some if "cstgs"
+    // record repeat yes/no in a boolean vector
+    // record repeat attributes in a vector (empty entry if repeat = no, otherwsie whatever is needed for the repeat (I think a file to load something from)
+    
+}
+
+
+// ---------------------------------------------------------------
+void Simulations::add_attribute(std::string read_string)
+{
+// find simulation id matching specified name
+    // add string to a vector of vectors of string (one list of attributes per simulation) at the mathcing simulation ID
+    
+}
 
 
 

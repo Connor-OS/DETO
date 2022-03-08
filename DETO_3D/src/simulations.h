@@ -26,6 +26,9 @@ namespace DETO_NS {
         
         
         void printall();
+        void add(std::string);
+        
+        void add_attribute(std::string);
         
 	private:
         //std::string err_msg, read_string, word;

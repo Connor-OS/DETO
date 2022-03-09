@@ -11,20 +11,19 @@ subcomm 2
 
 
 # ====== INITIAL SETTINGS FOR ALL LAMMPS INSTANCES =======
-lammps	dimension	3
-lammps	units		si
-lammps	boundary	s s s
-lammps	atom_style	hybrid sphere bond
+lammps	dimension	    2
+lammps	units		    si
+lammps	boundary	    s s p
+lammps	atom_style	    hybrid sphere bond
 
 lammps	variable    	nelx equal 75
-lammps	variable    	nely equal 1
-lammps	variable    	nelz equal 25
+lammps	variable    	nely equal 25
 
-lammps	lattice     	fcc 1.5	
-lammps	region		box block 0 $(v_nelx) 0 $(v_nely) 0 $(v_nelz) units lattice				
-lammps	create_box	12 box bond/types 56 extra/bond/per/atom 12					
-lammps	create_atoms	1 box					
-lammps	 mass        	* 1
+lammps	lattice     	hex 1
+lammps	region		    box block 0 $(v_nelx-1) 0 $((v_nely-1)/2) -0.1 0.1 units lattice
+lammps	create_box	    12 box bond/types 56 extra/bond/per/atom 12
+lammps	create_atoms	1 box
+lammps	mass        	* 1
 lammps   set type 1 diameter 1
 
 lammps	neighbor	0.001 bin					
@@ -33,26 +32,26 @@ lammps	neigh_modify	delay 0
 # loading the command defining lammps potentials from a separate file (if too many to specify directly here)
 lammps include  potfile.dat
 					
-lammps	pair_style	zero	1.051				
+lammps	pair_style	zero	1.1051				
 lammps	pair_coeff	* *					
 							
 lammps	bond_style	harmonic					
 lammps	bond_coeff	*	100	0.7			
 # --------------------------------------------------
 
-lammps	create_bonds	many	all	all	1	0.6	0.8
+lammps	create_bonds	many	all	all	1	0.9	1.1
 
 lammps	dump		1 all atom 100 dump.beam								
 lammps	thermo		200				
 
-lammps	region		1 block INF 0.01 INF INF INF 0.1 units box				
-lammps	region		2 block $(v_nelx) INF INF INF INF 0.01 units box	
+lammps	region		1 block INF 0.01 INF 0.1 INF INF units lattice
+lammps	region		2 block $(v_nelx-1) INF INF 0.01 INF INF units lattice	
 lammps	group		support1 region 1				
 lammps	group		support2 region 2				
 lammps	set 		group support1 type 2				
 lammps	set 		group support2 type 2	
-lammps	fix		support1 support1 setforce 0 0 0				
-lammps	fix		support2 support2 setforce 0 0 0	
+lammps	fix 		support1 support1 setforce 0 0 0				
+lammps	fix	    	support2 support2 setforce 0 0 0	
 
 
 # ====== LOADING CHI MAP AND POTENTIALS FILE =======
@@ -68,15 +67,15 @@ opt_map_chi chimap.dat
 
 simulation  Sim1 run repeat no        # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
  						
-add_attribute Sim1	variable half_minus equal $(v_nelx)/2-0.2					
-add_attribute Sim1	variable    	half_plus equal $(v_nelx)/2+0.2								
-add_attribute Sim1	region		3 block $(v_half_minus) $(v_half_plus) INF INF $(v_nelz) INF units box										
+add_attribute Sim1	variable    half_minus equal $(v_nelx-1)/2-0.2
+add_attribute Sim1	variable    half_plus equal $(v_nelx-1)/2+0.2
+add_attribute Sim1	region		3 block $(v_half_minus) $(v_half_plus) $((v_nely-1)/2) INF INF INF units lattice										
 			
 add_attribute Sim1	group		force_group region 3				
 							
 add_attribute Sim1	set 		group force_group type 2				
 			
-add_attribute Sim1	fix		force force_group addforce 0 0 -.04
+add_attribute Sim1	fix		    force force_group addforce 0 -.1 0
 add_attribute Sim1	fix_modify	force energy yes	
 
 add_attribute Sim1	minimize	1.0e-10 1.0e-10 1000 2000			

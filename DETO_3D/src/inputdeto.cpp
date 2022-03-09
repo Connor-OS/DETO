@@ -289,6 +289,11 @@ void Inputdeto::execline(std::string read_string)
             }
             sims->add(read_string2);
         }
+        else if (strcmp(word.c_str(), "add_attribute") == 0) {
+            std::string read_string2;
+            std::getline(lss, read_string2);
+            sims->add_attribute(read_string2);
+        }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
             int tt;

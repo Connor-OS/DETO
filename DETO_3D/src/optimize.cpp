@@ -1,6 +1,7 @@
 #include "optimize.h"
 #include <sstream>
 #include "error.h"
+#include "algorithm"
 //#include "universe.h"
 
 //#include "chemistry.h"
@@ -66,9 +67,17 @@ void Optimize::read_chimap(std::string mapfname)
                     else if (strcmp(word.c_str(), "chi") == 0) {
                         if (found_nchi==true){
                             // Insert map keys
+                            bool material_set = false;
+                            bool type_set = false;
                             chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
-                            while (lss >> word) {
+                            while (lss >> word){
                                 chi_map.insert(std::pair<std::string, std::vector<double> > (word, std::vector<double>()));
+                                if(word == "material"){material_set = true;}
+                                if(word == "type"){type_set = true;}
+                            }
+                            if(material_set == false || type_set == false){
+                                    err_msg = "ERROR: Please specify material and type in chi map";
+                                    error->errsimple(err_msg);
                             }
                             // Populate chi_map 
                             for(int i=0;i<nchi;i++){

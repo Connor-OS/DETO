@@ -23,8 +23,13 @@ namespace DETO_NS {
 		~Simulations();
     
         int me;     // id of the current processor (rank)
-        
-        
+        std::vector<std::string> sim_names; //vector holding sim names
+        std::vector<std::string> sim_types; //vector holding sim types
+        std::vector<bool> sim_is_repeat; //vector of bool specifying if repeat
+        std::vector<std::string> sim_repeat_file; //vector holding path to repeat file data
+
+        std::vector<std::vector<std::string>> sim_attributes; //vector sim attributes
+
         void printall();
         void add(std::string);
         

@@ -21,7 +21,7 @@ lammps	variable    	nely equal 25
 
 lammps	lattice     	hex 1
 lammps	region		    box block 0 $(v_nelx-1) 0 $((v_nely-1)/2) -0.1 0.1 units lattice
-lammps	create_box	    12 box bond/types 56 extra/bond/per/atom 12
+lammps	create_box	    12 box bond/types 68 extra/bond/per/atom 12
 lammps	create_atoms	1 box
 lammps	mass        	* 1
 lammps   set type 1 diameter 1

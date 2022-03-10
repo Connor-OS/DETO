@@ -1,7 +1,6 @@
 #include "optimize.h"
 #include <sstream>
 #include "error.h"
-#include "algorithm"
 //#include "universe.h"
 
 //#include "chemistry.h"

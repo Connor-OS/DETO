@@ -12,22 +12,22 @@ The code makes extensive use of LAMMPS objects and syntax therefore the user is 
 
 The user manual is layed out as follows
 
-- [0. Introduction]
-- [1. Instaling and Building DETO_3D]
-  - [1.0 cloning th project]
-  - [1.1 building submodules]
-  - [1.2 building DETO_3D] 
-- [2. Running DETO_3D]
-  - [2.1 Input script]
-- [3. commands]
-  - [3.1 subcomm command]
-  - [3.2 lammps command]
-  - [3.3 simulation command]
-  - [3.4 add_attribute command]
-  - [3.5 opt_map_chi command]
-- [4. Examples]
-  - [4.1 simply supported beam]
-  - [4.2 granular mixer]
+- [0. Introduction](https://connor-os.github.io/DETO/0.0_introduction)
+- [1. Instaling and Building DETO_3D](https://connor-os.github.io/DETO/1.0_instaling)
+  - [1.0 cloning th project](https://connor-os.github.io/DETO/1.1_cloning)
+  - [1.1 building submodules](https://connor-os.github.io/DETO/1.1_submodule)
+  - [1.2 building DETO_3D](https://connor-os.github.io/DETO/1.2_building)
+- [2. Running DETO_3D](https://connor-os.github.io/DETO/2.0_running)
+  - [2.1 Input script](https://connor-os.github.io/DETO/2.1_input)
+- [3. commands](https://connor-os.github.io/DETO/3.0_commands)
+  - [3.1 subcomm command](https://connor-os.github.io/DETO/3.1_subcomm)
+  - [3.2 lammps command](https://connor-os.github.io/DETO/3.2_lammps)
+  - [3.3 simulation command](https://connor-os.github.io/DETO/3.3_simulation)
+  - [3.4 add_attribute command](https://connor-os.github.io/DETO/3.4_add_attribute)
+  - [3.5 opt_map_chi command](https://connor-os.github.io/DETO/3.5_opt_map_chi)
+- [4. Examples](https://connor-os.github.io/DETO/4.0_examples)
+  - [4.1 simply supported beam](https://connor-os.github.io/DETO/4.1_simply_supported)
+  - [4.2 granular mixer](https://connor-os.github.io/DETO/4.2_granular)
 
 ### Contact
 

@@ -44,29 +44,10 @@ void Simulations::add(std::string read_string)
     std::string sim_name, sim_type, repstr, repYN;
     
     std::istringstream lss(read_string);
-    lss >> sim_name >> sim_type >> repstr >> repYN;
+    lss >> sim_name >> sim_type;
     sim_names.push_back(sim_name);
     sim_types.push_back(sim_type);
-    if (strcmp(repstr.c_str(), "repeat") != 0) {
-        std::string msg = "Error: keyword \"repeat\" must follow simulation type in input script\n";
-        error->errsimple(msg);
-    }
-    if (strcmp(repYN.c_str(), "yes") == 0){
-        sim_is_repeat.push_back(1);
-        std::string repfname;
-        lss >> repfname;
-        sim_repeat_file.push_back(repfname);
-    }
-    else if (strcmp(repYN.c_str(), "no") == 0) {
-        sim_is_repeat.push_back(0);
-        sim_repeat_file.push_back("NULL");
-    }
-    else {
-        std::string msg = "Error: repeat must be \"yes\" or \"no\", case sensitive. Instead I found "+repYN+"\n";
-        error->errsimple(msg);
-    }
-    
-    
+
     // default values for additional inputs related to the simulations - will be overwritten if sim is "cstgs"
     cstgs_varname.push_back("NULL");
     cstgs_type.push_back("NULL");
@@ -92,8 +73,27 @@ void Simulations::add(std::string read_string)
             cstgs_tol[pos] = tol;
         }
     }
-    
     cstgs_crit.push_back("NULL");   // this will be provided separaetly by the user through dedicated "Criterion sim_ID string" command in the input scrupt
+
+    lss >> repstr >> repYN;
+    if (strcmp(repstr.c_str(), "repeat") != 0) {
+        std::string msg = "Error: keyword \"repeat\" must follow simulation type in input script\n";
+        error->errsimple(msg);
+    }
+    if (strcmp(repYN.c_str(), "yes") == 0){
+        sim_is_repeat.push_back(1);
+        std::string repfname;
+        lss >> repfname;
+        sim_repeat_file.push_back(repfname);
+    }
+    else if (strcmp(repYN.c_str(), "no") == 0) {
+        sim_is_repeat.push_back(0);
+        sim_repeat_file.push_back("NULL");
+    }
+    else {
+        std::string msg = "Error: repeat must be \"yes\" or \"no\", case sensitive. Instead I found "+repYN+"\n";
+        error->errsimple(msg);
+    }
     
     sim_attributes.push_back(std::vector<std::string>());
     

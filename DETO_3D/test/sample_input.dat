@@ -75,7 +75,9 @@ add_attribute Sim1	group		force_group region 3
 							
 add_attribute Sim1	set 		group force_group type 2				
 			
-add_attribute Sim1	fix		    force force_group addforce 0 -.1 0
+add_attribute Sim1	variable		nrg equal pe     # this will be recorded into an objective later: DO NOT DELETE VIA ADD_ATTRIBUTE!
+add_attribute Sim1	variable		pressure equal press     # this will be recorded into an objective later: DO NOT DELETE VIA ADD_ATTRIBUTE!
+add_attribute Sim1	fix		force force_group addforce 0 -.1 0
 add_attribute Sim1	fix_modify	force energy yes	
 
 add_attribute Sim1	minimize	1.0e-10 1.0e-10 1000 2000			
@@ -88,9 +90,13 @@ add_attribute Sim1  	variable 	half_plus delete
 add_attribute Sim1  	variable 	half_minus delete
 
 
+add_objective Sim1 c1 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
+add_objective Sim1 c2 pressure 
+
+
 # ======= SET SIMULATION NUMBER 2 (CSTGS TYPE, NO REPEAT)=======
 
-simulation  Sim2 cstgs cstgs_force linear_search 1 10 repeat no        # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
+simulation  Sim2 cstgs var_force linear_search 1 10 repeat no        # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
 
 add_attribute Sim2	variable    half_minus equal $(v_nelx-1)/2-0.2
 add_attribute Sim2	variable    half_plus equal $(v_nelx-1)/2+0.2

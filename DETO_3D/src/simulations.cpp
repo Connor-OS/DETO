@@ -76,6 +76,7 @@ void Simulations::add(std::string read_string)
     cstgs_crit.push_back("NULL");   // this will be provided separaetly by the user through dedicated "Criterion sim_ID string" command in the input scrupt
 
     lss >> repstr >> repYN;
+    n_repeats.push_back(1);
     if (strcmp(repstr.c_str(), "repeat") != 0) {
         std::string msg = "Error: keyword \"repeat\" must follow simulation type in input script\n";
         error->errsimple(msg);
@@ -85,6 +86,7 @@ void Simulations::add(std::string read_string)
         std::string repfname;
         lss >> repfname;
         sim_repeat_file.push_back(repfname);
+        //TODO: must read number of repeates from file and     sim_obj_names.push_back(vector<vector<string>>)       for (i=0;i<nrepeats;i++) {  sim_obj_names[sim_obj_names.size()-1].push_back(vector<string>) }
     }
     else if (strcmp(repYN.c_str(), "no") == 0) {
         sim_is_repeat.push_back(0);
@@ -118,9 +120,35 @@ void Simulations::add_attribute(std::string read_string)
             }
         }
     }
+    // TODO: Implement error if sim name not found
 }
 
 
+// ---------------------------------------------------------------
+void Simulations::add_objective(std::string read_string)
+{
+    std::string sim_ID;
+    std::istringstream lss(read_string);
+    lss >> sim_ID;
+    for(int i = 0; i < sim_names.size(); i++){
+        if(strcmp(sim_ID.c_str(),sim_names[i].c_str()) == 0){
+            std::string read_string2;
+            std::getline(lss, read_string2);
+            int j = 0;
+            if (sim_is_rpeat[i]){
+                for (j=0; j<n_repeats[i]; j++){
+                    sim_obj_names[i][j].push_back(read_string2);
+                    //TODO: same for vector of string with lammps variable names as read from input file
+                    //TODO: same for vector of double with initial default values (all zeros)
+                }
+            }
+            if (me==MASTER){
+            fprintf(screen,"simulations -- in %s adding attribute %s \n",sim_names[i].c_str(),sim_attributes[i][sim_attributes[i].size()-1].c_str());
+            }
+        }
+    }
+    // TODO: Implement error if sim name not found
+}
 
 // ---------------------------------------------------------------
 // Printing info about the inputcprs class (possibly useful for debugging)

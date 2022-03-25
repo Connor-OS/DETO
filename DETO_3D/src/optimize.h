@@ -29,13 +29,11 @@ namespace DETO_NS {
         std::map<std::string, std::vector<double> >::iterator it; // map iterator
         
         void read_chimap(std::string);
-        void read_repeat(std::string);
         void printall();
         
 	private:
         std::string err_msg, read_string, word;
         int nchi;   //number of chi values in the optimization
-        int nrep;   //number of repeat values in repeat table
         
         //void check_name_unique(std::string);
 

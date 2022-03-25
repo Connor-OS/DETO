@@ -284,9 +284,6 @@ void Inputdeto::execline(std::string read_string)
         else if (strcmp(word.c_str(), "simulation") == 0) {
             std::string read_string2;
             std::getline(lss, read_string2);
-            if (me==MASTER) {
-                fprintf(screen,"\n inputdeto -- Adding simulation:  %s \n",read_string2.c_str());
-            }
             sims->add(read_string2);
         }
         else if (strcmp(word.c_str(), "add_attribute") == 0) {

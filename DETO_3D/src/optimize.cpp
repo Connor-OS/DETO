@@ -149,64 +149,6 @@ void Optimize::read_chimap(std::string mapfname)
     }
 }
 
-void Optimize::read_repeat(std::string repeatfname)
-{
-    struct repeat_table
-    {
-        std::vector<std::string> variables;
-        std::vector<std::vector<double>> values;
-    };
-
-    struct repeat_table Repeat_table;
-
-    std::ifstream repeatFile(repeatfname.c_str());
-    bool found_nrep = false;
-
-    if (!repeatFile.is_open())
-    {
-        err_msg = "ERROR: cannot read file \"" + repeatfname + "\"";
-        error->errsimple(err_msg);
-    }
-    else
-    {
-        MPI_Barrier(MPI_COMM_WORLD);
-        // READ FILE (all processors need to know this)
-        while (!repeatFile.eof())
-        {
-            MPI_Barrier(MPI_COMM_WORLD);
-            std::getline(repeatFile, read_string);
-            if (!read_string.empty())
-            {
-                std::istringstream lss(read_string);
-                while (lss >> word)
-                {
-                    if (strncmp(word.c_str(), "#", 1) == 0) break;
-                    else if (strcmp(word.c_str(), "num_rep") == 0)
-                    {
-                        lss >> nrep;
-                        found_nrep = true;
-                        
-                    }
-                    else if (strcmp(word.c_str(), "") != 0)
-                    {
-                        if (found_nrep == true)
-                        {
-                            while (lss >> word)
-                            {
-                                Repeat_table.variables.push_back(word);
-                                Repeat_table.values.push_back(std::vector<double>());
-                            }
-                            for(int i=0; i < nrep; i++)
-                            {
-                                //fill repeat table
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 // ---------------------------------------------------------------
 // Printing info about the inputcprs class (possibly useful for debugging)

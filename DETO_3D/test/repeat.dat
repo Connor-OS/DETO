@@ -1,14 +1,9 @@
 #number of repeat variables in the table followed by variable names and table of values
 
-n_rep 10
+num_rep 5
 repeat_force repeat_stiffness
 1	50
 2	55
 3	65
 4	70
 5	75
-6	80
-7	85
-8	90
-9	95
-10	100

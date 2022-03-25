@@ -119,6 +119,8 @@ add_attribute Sim2  	region 		3 delete
 add_attribute Sim2  	variable 	half_plus delete
 add_attribute Sim2  	variable 	half_minus delete
 
+add_objective Sim2 c3 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
+add_objective Sim2 c4 pressure 
 
 # ======= SET SIMULATION NUMBER 3 (run TYPE, REPEAT)=======
 
@@ -147,3 +149,6 @@ add_attribute Sim3  	group 		force_group delete
 add_attribute Sim3  	region 		3 delete
 add_attribute Sim3  	variable 	half_plus delete
 add_attribute Sim3  	variable 	half_minus delete
+
+add_objective Sim3 c5 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
+add_objective Sim3 c6 pressure 

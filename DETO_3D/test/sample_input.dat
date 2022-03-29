@@ -63,7 +63,7 @@ opt_map_chi chimap.dat
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======
 
-simulation		Sim1 run repeat no        # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
+simulation		Sim1 run repeat no      # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
  						
 add_attribute Sim1	variable	half_minus equal $(v_nelx-1)/2-0.2
 add_attribute Sim1	variable	half_plus equal $(v_nelx-1)/2+0.2
@@ -94,7 +94,7 @@ add_objective Sim1 c2 pressure
 
 # ======= SET SIMULATION NUMBER 2 (CSTGS TYPE, NO REPEAT)=======
 
-simulation  Sim2 cstgs var_force binary 1 10 100000 0.01 repeat no        # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
+simulation  Sim2 cstgs var_force binary 1 10 100000 0.01 repeat no  crit 'varb < varc' varb varc      # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
 
 #simulation  Sim2 cstgs var_force increment linear "initial_value" "step" "max_value" repeat no 
 #simulation  Sim2 cstgs var_force increment power "initial_value" "step" "exponent" "max_value" repeat no 

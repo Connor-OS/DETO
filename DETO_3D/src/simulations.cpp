@@ -55,12 +55,15 @@ void Simulations::add(std::string read_string)
     cstgs_par2.push_back(-1.);
     cstgs_par3.push_back(-1.);
     cstgs_par4.push_back(-1.);
+    cstgs_crit.push_back("NULL");
     
     if (strcmp(sim_type.c_str(), "cstgs") == 0) {
         int pos = cstgs_varname.size()-1;
         std::string varname, ttype, incty;
         double par1, par2, par3, par4;
         lss >> varname >> ttype;
+        cstgs_varname[pos] = varname;
+        cstgs_type[pos] = ttype;
         if (strcmp(ttype.c_str(), "binary") == 0) {
             lss >> par1 >> par2 >> par3 >> par4;
             cstgs_par1[pos] = par1;
@@ -86,10 +89,9 @@ void Simulations::add(std::string read_string)
             cstgs_par3[pos] = par3;
             cstgs_par4[pos] = par4;
         }
-        
-        
     }
-    cstgs_crit.push_back("NULL");   // this will be provided separaetly by the user through dedicated "Criterion sim_ID string" command in the input scrupt
+    
+   
 
     // default values for repeat inputs - will be overwritten if sim is repeat
     sim_rep_vars.push_back(std::vector<std::string>());
@@ -118,6 +120,37 @@ void Simulations::add(std::string read_string)
     {
         err_msg = "Error: repeat must be \"yes\" or \"no\", case sensitive. Instead I found "+repYN+"\n";
         error->errsimple(err_msg);
+    }
+    
+    
+    cstgs_crit_vnms.push_back(std::vector<std::string>());
+    if (strcmp(sim_type.c_str(), "cstgs") == 0)  {
+        int pos = cstgs_varname.size()-1;
+        std::string kcrit;
+        lss >> kcrit;
+        if (strcmp(kcrit.c_str(), "crit") == 0){
+            std::getline(lss, read_string2);
+            //fprintf(screen,"DEBUG: getline records this \"%s\"\n",read_string2.c_str());
+            std::string delimiter = "'";
+            size_t spos = 0;
+            std::string critStr;
+            spos = read_string2.find(delimiter);
+            read_string2.erase(0, spos + delimiter.length());
+            spos = read_string2.find(delimiter);
+            critStr = read_string2.substr(0, spos);
+            cstgs_crit[pos] = critStr;
+            read_string2.erase(0, spos + delimiter.length());
+        
+            std::istringstream lss2(read_string2);
+            std::string vnam;
+            while (lss2 >> vnam){
+                if  (strncmp(vnam.c_str(), "#", 1) == 0) break;
+                else cstgs_crit_vnms[pos].push_back(vnam);
+            }
+        }
+        else {
+            // TODO: implement error that crit keyword has not been found for cstgs simulation type (crit must be specified for cstgs simulations)
+        }
     }
 
     // default containers for objectives - will be filled out by seperate add_objective command
@@ -269,7 +302,11 @@ void Simulations::printall()
         // print cstgs parameters
         if(true)    //sim_types[i].compare("cstgs") == 0
         {
-            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Criterion: %s\n",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_crit[i].c_str());
+            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Criterion: %s\n Lammps vars: ",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_crit[i].c_str());
+            for (int j=0; j<cstgs_crit_vnms[i].size(); j++){
+                fprintf(screen,"%s ",cstgs_crit_vnms[i][j].c_str());
+            }
+            fprintf(screen,"\n ");
         }
         // print repeat parameters
         if(true)   //n_repeats[i] != 1

@@ -36,6 +36,7 @@ namespace DETO_NS {
         // if "binary" , then par1 = left value, par2 = right value, par3 = max number increments, par 4 = tolerance
        
         std::vector<std::string> cstgs_crit; //criterion to escape a cstgs sim
+        std::vector<std::vector<std::string>> cstgs_crit_vnms; //name of lammps variables used in the criterion string
         
         std::vector<int> n_repeats; //number of repeats
         std::vector<std::string> sim_repeat_file; //vector holding path to repeat file data
@@ -60,7 +61,7 @@ namespace DETO_NS {
         void read_repeat(std::string);
         
 	private:
-        std::string err_msg, read_string, word;
+        std::string err_msg, read_string, word, read_string2;
         
         
         //void check_name_unique(std::string);

@@ -48,11 +48,6 @@ void Simulations::add(std::string read_string)
     sim_names.push_back(sim_name);
     sim_types.push_back(sim_type);
 
-    if(me == MASTER)
-    {
-    fprintf(screen,"---------ADDING SIMULATION----------\nID %s \nSIM type: %s\n",sim_names[sim_names.size()-1].c_str(), sim_types[sim_types.size()-1].c_str());
-    }
-
     // default values for cstgs inputs - will be overwritten if sim is "cstgs"
     cstgs_varname.push_back("NULL");
     cstgs_type.push_back("NULL");
@@ -69,9 +64,11 @@ void Simulations::add(std::string read_string)
         cstgs_type[pos] = ttype;
         cstgs_par1[pos] = par1;
         cstgs_par2[pos] = par2;
-        if (strcmp(ttype.c_str(), "binary_chop") == 0) {
+        if (strcmp(ttype.c_str(), "binary_chop") == 0)
+        {
             lss >> tolstr >> tol;
-            if (strcmp(tolstr.c_str(), "tol") != 0) {
+            if (strcmp(tolstr.c_str(), "tol") != 0)
+            {
                 err_msg = "Error: tolerance must be specified through \"tol\" keyword when using binary_chop";
                 error->errsimple(err_msg);
             }
@@ -86,24 +83,25 @@ void Simulations::add(std::string read_string)
     n_repeats.push_back(1);
 
     lss >> repstr >> repYN;
-    if(me == MASTER){fprintf(screen,"Is repeat: %s\n",repYN.c_str());}
     
-    if (strcmp(repstr.c_str(), "repeat") != 0) {
+    if (strcmp(repstr.c_str(), "repeat") != 0) 
+    {
         err_msg = "Error: keyword \"repeat\" must follow simulation type in input script\n";
         error->errsimple(err_msg);
     }
-    if (strcmp(repYN.c_str(), "yes") == 0){
-        sim_is_repeat.push_back(1);
+    if (strcmp(repYN.c_str(), "yes") == 0)
+    {
         std::string repfname;
         lss >> repfname;
         sim_repeat_file.push_back(repfname);
         read_repeat(repfname);
     }
-    else if (strcmp(repYN.c_str(), "no") == 0) {
-        sim_is_repeat.push_back(0);
+    else if (strcmp(repYN.c_str(), "no") == 0)
+    {
         sim_repeat_file.push_back("NULL");
     }
-    else {
+    else 
+    {
         err_msg = "Error: repeat must be \"yes\" or \"no\", case sensitive. Instead I found "+repYN+"\n";
         error->errsimple(err_msg);
     }
@@ -162,9 +160,6 @@ void Simulations::add_objective(std::string read_string)
                 sim_obj_LMPnames[i][j].push_back(obj_LMPname);
                 sim_obj_val[i][j].push_back(0.);
             }
-            if (me==MASTER){
-            fprintf(screen,"Adding objective to sim: %s objective: %s LAMMPS name: %s\n",sim_names[i].c_str(),sim_obj_names[i][0][sim_obj_names[i][0].size()-1].c_str(),sim_obj_LMPnames[i][0][sim_obj_LMPnames[i][0].size()-1].c_str());
-            }
             return;
         }
     }
@@ -175,6 +170,7 @@ void Simulations::add_objective(std::string read_string)
 void Simulations::read_repeat(std::string repeatfname)
 {
     std::ifstream repeatFile(repeatfname.c_str());
+    // std::vector<double>
     bool found_nrep = false;
     
     if (!repeatFile.is_open())
@@ -200,13 +196,14 @@ void Simulations::read_repeat(std::string repeatfname)
                     {
                         lss >> n_repeats[n_repeats.size()-1];
                         found_nrep = true;
+                        break;
                     }
-                    else if(strcmp(word.c_str(), "") != 0)
+                    else if(strcmp(word.c_str(), "VARS:") == 0)
                     {
                         if (found_nrep == true)
                         {
-                            sim_rep_vars[sim_rep_vars.size()-1].push_back(word);
-                            sim_rep_val[sim_rep_val.size()-1].push_back(std::vector<double>());
+                            // sim_rep_vars[sim_rep_vars.size()-1].push_back(word);
+                            // sim_rep_val[sim_rep_val.size()-1].push_back(std::vector<double>());
                             while (lss >> word)
                             {
                                 sim_rep_vars[sim_rep_vars.size()-1].push_back(word);// How can I get rid of this messy code, repeating lines in an outside the loop?
@@ -242,25 +239,6 @@ void Simulations::read_repeat(std::string repeatfname)
             }
         }
     }
-    // Print the repeat map to the output
-    if (me == MASTER)
-    {
-        fprintf(screen,"\nRepeat map is:\n");
-        for (int i = 0; i < sim_rep_vars[sim_rep_vars.size()-1].size(); i++)
-        {
-            fprintf(screen,"%s  ",sim_rep_vars[sim_rep_vars.size()-1][i].c_str());
-        }
-        fprintf(screen, "\n-------------------------\n");
-        for (int i = 0; i < n_repeats[n_repeats.size()-1]; i++)
-        {
-            for (int j = 0; j < sim_rep_vars[sim_rep_vars.size()-1].size(); j++)
-            {
-                fprintf(screen,"%f ",sim_rep_val[sim_rep_val.size()-1][j][i]);
-            }
-            fprintf(screen, "\n");
-        }
-        fprintf(screen, "\n");
-    }
 }
 
 // ---------------------------------------------------------------
@@ -269,6 +247,50 @@ void Simulations::printall()
 {
 	fprintf(screen,"\n---------ALL ABOUT Simulations----------\n");
 	//fprintf(screen,"inputcprs filename =  %s\n",fname.c_str());
+    for(int i=0; i<sim_names.size(); i++) 
+    {
+        fprintf(screen,"ID: %s\n  Type: %s\n",sim_names[i].c_str(),sim_types[i].c_str());
+        // print cstgs parameters
+        if(true)    //sim_types[i].compare("cstgs") == 0
+        {
+            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Tolerance: %.2f\n  Criterion: %s\n",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_tol[i],cstgs_crit[i].c_str());
+        }
+        // print repeat parameters
+        if(true)   //n_repeats[i] != 1
+        {
+            fprintf(screen,"  Repeat: %d\n  Repeat file: %s\n",n_repeats[i],sim_repeat_file[i].c_str()); 
+            for (int j=0; j<sim_rep_vars[i].size(); j++)
+            {
+                fprintf(screen,"  %s  ",sim_rep_vars[i][j].c_str());
+            }
+            fprintf(screen,"\n");
+            for (int j = 0; j < n_repeats[i]; j++)
+            {
+                for (int k = 0; k < sim_rep_vars[i].size(); k++)
+                {
+                    fprintf(screen,"  %f ",sim_rep_val[i][k][j]);
+                }
+                fprintf(screen, "\n");
+            }
+        }
+        else
+        {
+            fprintf(screen,"Repeat: no\n");
+        }
+        // print objectives
+        fprintf(screen,"\nObjectives:\n");
+        for(int j=0; j<sim_obj_names[i][0].size(); j++)
+        {
+            fprintf(screen,"  Objective: %s\n  Lammps name: %s\n",sim_obj_names[i][0][j].c_str(),sim_obj_LMPnames[i][0][j].c_str());
+        }
+        // print attributes
+        fprintf(screen,"\nAttributes:\n");
+        for(int j=0; j<sim_attributes[i].size(); j++)
+        {
+            fprintf(screen,"  %s\n",sim_attributes[i][j].c_str());
+        }
+        fprintf(screen,"\n---------------------------------------\n");
+    }
 	fprintf(screen,"---------------------------------------\n\n");
 	
 }

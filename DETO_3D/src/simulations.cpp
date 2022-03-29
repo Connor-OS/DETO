@@ -58,25 +58,41 @@ void Simulations::add(std::string read_string)
     cstgs_type.push_back("NULL");
     cstgs_par1.push_back(-1.);
     cstgs_par2.push_back(-1.);
-    cstgs_tol.push_back(100000000);
+    cstgs_par3.push_back(-1.);
+    cstgs_par4.push_back(-1.);
     
     if (strcmp(sim_type.c_str(), "cstgs") == 0) {
         int pos = cstgs_varname.size()-1;
-        std::string varname, tolstr, ttype;
-        double par1, par2, tol;
-        lss >> varname >> ttype >> par1 >> par2;
-        cstgs_varname[pos] = varname;
-        cstgs_type[pos] = ttype;
-        cstgs_par1[pos] = par1;
-        cstgs_par2[pos] = par2;
-        if (strcmp(ttype.c_str(), "binary_chop") == 0) {
-            lss >> tolstr >> tol;
-            if (strcmp(tolstr.c_str(), "tol") != 0) {
-                err_msg = "Error: tolerance must be specified through \"tol\" keyword when using binary_chop";
-                error->errsimple(err_msg);
-            }
-            cstgs_tol[pos] = tol;
+        std::string varname, ttype, incty;
+        double par1, par2, par3, par4;
+        lss >> varname >> ttype;
+        if (strcmp(ttype.c_str(), "binary") == 0) {
+            lss >> par1 >> par2 >> par3 >> par4;
+            cstgs_par1[pos] = par1;
+            cstgs_par2[pos] = par2;
+            cstgs_par3[pos] = par3;
+            cstgs_par4[pos] = par4;
         }
+        if (strcmp(ttype.c_str(), "increment") == 0) {
+            lss >> incty;
+            if (strcmp(incty.c_str(), "linear") == 0) {
+                lss >> par1 >> par2 >> par3;
+                par4 = -1.;
+            }
+            else if (strcmp(incty.c_str(), "power") == 0) {
+                lss >> par1 >> par2 >> par3 >> par4;
+            }
+            else if (strcmp(incty.c_str(), "log") == 0) {
+                lss >> par1 >> par2 >> par3;
+                par4 = -1.;
+            }
+            cstgs_par1[pos] = par1;
+            cstgs_par2[pos] = par2;
+            cstgs_par3[pos] = par3;
+            cstgs_par4[pos] = par4;
+        }
+        
+        
     }
     cstgs_crit.push_back("NULL");   // this will be provided separaetly by the user through dedicated "Criterion sim_ID string" command in the input scrupt
 
@@ -172,10 +188,14 @@ void Simulations::add_objective(std::string read_string)
     error->errsimple(err_msg);
 }
 
+
+// ---------------------------------------------------------------
 void Simulations::read_repeat(std::string repeatfname)
 {
     std::ifstream repeatFile(repeatfname.c_str());
     bool found_nrep = false;
+    int simpos;
+    simpos = sim_names.size()-1;
     
     if (!repeatFile.is_open())
     {
@@ -198,31 +218,30 @@ void Simulations::read_repeat(std::string repeatfname)
                     if (strncmp(word.c_str(), "#", 1) == 0) break;
                     else if (strcmp(word.c_str(), "num_rep") == 0)
                     {
-                        lss >> n_repeats[n_repeats.size()-1];
+                        lss >> n_repeats[simpos];
                         found_nrep = true;
                     }
-                    else if(strcmp(word.c_str(), "") != 0)
+                    else if(strcmp(word.c_str(), "VARS:") == 0)
                     {
                         if (found_nrep == true)
                         {
-                            sim_rep_vars[sim_rep_vars.size()-1].push_back(word);
-                            sim_rep_val[sim_rep_val.size()-1].push_back(std::vector<double>());
+
                             while (lss >> word)
                             {
-                                sim_rep_vars[sim_rep_vars.size()-1].push_back(word);// How can I get rid of this messy code, repeating lines in an outside the loop?
-                                sim_rep_val[sim_rep_val.size()-1].push_back(std::vector<double>());
+                                sim_rep_vars[simpos].push_back(word);
+                                sim_rep_val[simpos].push_back(std::vector<double>());
                             }
-                            for(int i=0; i < n_repeats[n_repeats.size()-1]; i++)
+                            for(int i=0; i < n_repeats[simpos]; i++)
                             {
                                 std::getline(repeatFile, read_string);
                                 if (!read_string.empty())
                                 {
                                     std::istringstream lss(read_string);
-                                    for (int j = 0; j < sim_rep_vars[sim_rep_vars.size()-1].size(); j++)
+                                    for (int j = 0; j < sim_rep_vars[simpos].size(); j++)
                                     {
                                         double tmp;
                                         lss >> tmp;
-                                        sim_rep_val[sim_rep_val.size()-1][j].push_back(tmp);
+                                        sim_rep_val[simpos][j].push_back(tmp);
                                     }
                                 }
                                 else

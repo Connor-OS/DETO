@@ -27,9 +27,14 @@ namespace DETO_NS {
         
         std::vector<std::string> sim_types; //vector holding sim types (run or cstgs)
         std::vector<std::string> cstgs_varname;    // name of variables to be changed during a cstgs simulation
-        std::vector<std::string> cstgs_type;    // type of change (binary_chop or lin_increment) for cstgs sims
-        std::vector<double> cstgs_par1,cstgs_par2;    // parameters guiding update of var in cstgs sims
-        std::vector<double> cstgs_tol;    // tolerance for cgtgs of binary_chop type
+        std::vector<std::string> cstgs_type;    // type of change (binary or increment) for cstgs sims
+        std::vector<std::string> cstgs_incty;    // type of "increment" search: can be linear, power, or log
+        std::vector<double> cstgs_par1,cstgs_par2, cstgs_par3, cstgs_par4;    // parameters guiding update of var in cstgs sims.
+        // If  "increment linear" then par1 = start value, par2 = step, par3 = max number increments
+        // if "increment power", then par1 = start value, par2 = step, par3 = exponent, par4 = max number increments
+        // if "increment log", then par1 = start value, par2 = step, par3 = max number increments
+        // if "binary" , then par1 = left value, par2 = right value, par3 = max number increments, par 4 = tolerance
+       
         std::vector<std::string> cstgs_crit; //criterion to escape a cstgs sim
         
         std::vector<bool> sim_is_repeat; //vector of bool specifying if repeat
@@ -41,8 +46,8 @@ namespace DETO_NS {
         std::vector<std::vector<std::vector<std::string>>> sim_obj_LMPnames; // 
         std::vector<std::vector<std::vector<double>>> sim_obj_val; //one list of objectives names and values for each simulation in a repat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of objectives names and value for that simulation)
 
-        std::vector<std::vector<std::string>> sim_rep_vars;
-        std::vector<std::vector<std::vector<double>>> sim_rep_val;
+        std::vector<std::vector<std::string>> sim_rep_vars;      // vector of lammps-like variables in repeat file: one vector for each simulation
+        std::vector<std::vector<std::vector<double>>> sim_rep_val;  // vector of values for each variable in repeat file, one for each simulation
 
         void printall();
         void add(std::string);

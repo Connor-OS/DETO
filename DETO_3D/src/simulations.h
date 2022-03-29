@@ -47,13 +47,9 @@ namespace DETO_NS {
         std::vector<std::vector<std::vector<std::string>>> sim_obj_LMPnames; // LAMMPS varaible names linked to objective
         std::vector<std::vector<std::vector<double>>> sim_obj_val; //one list of objectives names and values for each simulation in a repat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of objectives names and value for that simulation)
 
-<<<<<<< HEAD
         std::vector<std::vector<std::string>> sim_rep_vars;      // vector of lammps-like variables in repeat file: one vector for each simulation
         std::vector<std::vector<std::vector<double>>> sim_rep_val;  // vector of values for each variable in repeat file, one for each simulation
-=======
-        std::vector<std::vector<std::string>> sim_rep_vars; // name of LAMMPS variables for repeat
-        std::vector<std::vector<std::vector<double>>> sim_rep_val; // values to be repeated at
->>>>>>> experimental
+
 
         void printall();
         void add(std::string);

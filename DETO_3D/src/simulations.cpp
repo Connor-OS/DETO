@@ -269,7 +269,7 @@ void Simulations::printall()
         // print cstgs parameters
         if(true)    //sim_types[i].compare("cstgs") == 0
         {
-            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Tolerance: %.2f\n  Criterion: %s\n",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_tol[i],cstgs_crit[i].c_str());
+            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Criterion: %s\n",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_crit[i].c_str());
         }
         // print repeat parameters
         if(true)   //n_repeats[i] != 1

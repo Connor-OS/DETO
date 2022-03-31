@@ -36,6 +36,7 @@ void Optimize::read_chimap(std::string mapfname)
 {
     std::ifstream mapFile(mapfname.c_str());
     bool found_nchi = false;
+    // struct Chi_map chi_map;
 
     if (!mapFile.is_open())
     {
@@ -62,17 +63,21 @@ void Optimize::read_chimap(std::string mapfname)
                         lss >> nchi;
                         found_nchi = true;
                     }
-                    else if (strcmp(word.c_str(), "chi") == 0)
+                    else if (strcmp(word.c_str(), "PROPERTIES:") == 0)
                     {
                         if (found_nchi == true)
                         {
                             // Insert map keys
                             bool material_set = false;
                             bool type_set = false;
-                            chi_map.insert(std::pair<std::string, std::vector<double>>(word, std::vector<double>()));
                             while (lss >> word)
                             {
-                                chi_map.insert(std::pair<std::string, std::vector<double>>(word, std::vector<double>()));
+                                chi_map.properties.push_back(word);
+                                chi_map.values.push_back(std::vector<double>());
+                                for(int i=0; i<nchi; i++) {
+                                    chi_map.values[chi_map.values.size()-1].push_back(0);
+                                }
+
                                 if (word == "material")
                                 {
                                     material_set = true;
@@ -94,12 +99,12 @@ void Optimize::read_chimap(std::string mapfname)
                                 if (!read_string.empty())
                                 {
                                     std::istringstream lss(read_string);
-                                    for (it = chi_map.begin(); it != chi_map.end(); it++)
+                                    for (int j=0; j<chi_map.properties.size(); j++)
                                     {
                                         // double value;
                                         double tempval;
                                         lss >> tempval;
-                                        chi_map[it->first].push_back(tempval);
+                                        chi_map.values[j][i] = tempval;
                                     }
                                 }
                                 else
@@ -123,31 +128,22 @@ void Optimize::read_chimap(std::string mapfname)
                 }
             }
         }
-
         mapFile.close();
+    }
+}
 
-        if (me == MASTER)
-        {
-            fprintf(screen, "DONE Reading map chi file\n");
-            // Print Chi map to screen
-            fprintf(screen, "\nChi Map is:\n");
-            for (it = chi_map.begin(); it != chi_map.end(); it++)
-            {
-                fprintf(screen, "%s  ", it->first.c_str());
+void Optimize::initalize_chi()
+{
+    for (int i=0; i<nchi; i++) {
+        for (int j=0; j<chi_map.properties.size(); j++) {
+            // lammpsIO->lammpsdo("set  type %d %s %g",type,chi_map.properties[j],chi_map.values[j][i])
+            if (me == MASTER) {
+                fprintf(screen,"set  type %d %s %g",type,chi_map.properties[j],chi_map.values[j][i]);
             }
-            fprintf(screen, "\n-------------------------\n");
-            for (int i = 0; i < nchi; i++)
-            {
-                for (it = chi_map.begin(); it != chi_map.end(); it++)
-                {
-                    fprintf(screen, "%e\t", chi_map[it->first][i]);
-                }
-                fprintf(screen, "\n");
-            }
-            fprintf(screen, "\n");
         }
     }
 }
+    
 
 
 // ---------------------------------------------------------------
@@ -156,5 +152,17 @@ void Optimize::printall()
 {
     fprintf(screen, "\n---------ALL ABOUT OPTIMIZE----------\n");
     // fprintf(screen,"inputcprs filename =  %s\n",fname.c_str());
+    fprintf(screen,"Chi Map\n");
+    for(int i=0; i<chi_map.properties.size(); i++) {
+        fprintf(screen,"%s ",chi_map.properties[i].c_str());
+    }
+    fprintf(screen, "\n-------------------------\n");
+    for (int i = 0; i < nchi; i++) {
+        for(int j=0; j<chi_map.properties.size(); j++) {
+            fprintf(screen,"%.2f ",chi_map.values[j][i]);
+        }
+        fprintf(screen,"\n");
+    }
+    
     fprintf(screen, "---------------------------------------\n\n");
 }

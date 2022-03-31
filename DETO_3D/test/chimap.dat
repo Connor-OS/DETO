@@ -2,7 +2,7 @@
 
 num_chi 11
 
-chi	material	type  	diameter
+PROPERTIES: chi material type diameter
 0.001	0	1	1
 0.1	0	2	1
 0.2	0	3	1

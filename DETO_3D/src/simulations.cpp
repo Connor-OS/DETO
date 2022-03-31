@@ -300,42 +300,35 @@ void Simulations::printall()
     {
         fprintf(screen,"ID: %s\n  Type: %s\n",sim_names[i].c_str(),sim_types[i].c_str());
         // print cstgs parameters
-        if(true)    //sim_types[i].compare("cstgs") == 0
-        {
-            fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Criterion: %s\n Lammps vars: ",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_crit[i].c_str());
-            for (int j=0; j<cstgs_crit_vnms[i].size(); j++){
-                fprintf(screen,"%s ",cstgs_crit_vnms[i][j].c_str());
-            }
-            fprintf(screen,"\n ");
+        fprintf(screen,"  cstg type: %s\n  cstg variable: %s\n  Parameters: %.2f %.2f\n  Criterion: %s\n  Lammps vars: ",cstgs_type[i].c_str(),cstgs_varname[i].c_str(),cstgs_par1[i],cstgs_par2[i],cstgs_crit[i].c_str());
+        for (int j=0; j<cstgs_crit_vnms[i].size(); j++){
+            fprintf(screen,"%s ",cstgs_crit_vnms[i][j].c_str());
         }
+        fprintf(screen,"\n");
+
         // print repeat parameters
-        if(true)   //n_repeats[i] != 1
+        fprintf(screen,"  Repeat: %d\n  Repeat file: %s\n",n_repeats[i],sim_repeat_file[i].c_str()); 
+        for (int j=0; j<sim_rep_vars[i].size(); j++)
         {
-            fprintf(screen,"  Repeat: %d\n  Repeat file: %s\n",n_repeats[i],sim_repeat_file[i].c_str()); 
-            for (int j=0; j<sim_rep_vars[i].size(); j++)
-            {
-                fprintf(screen,"  %s  ",sim_rep_vars[i][j].c_str());
-            }
-            fprintf(screen,"\n");
-            for (int j = 0; j < n_repeats[i]; j++)
-            {
-                for (int k = 0; k < sim_rep_vars[i].size(); k++)
-                {
-                    fprintf(screen,"  %f ",sim_rep_val[i][k][j]);
-                }
-                fprintf(screen, "\n");
-            }
+            fprintf(screen,"  %s  ",sim_rep_vars[i][j].c_str());
         }
-        else
+        fprintf(screen,"\n");
+        for (int j = 0; j < n_repeats[i]; j++)
         {
-            fprintf(screen,"Repeat: no\n");
+            for (int k = 0; k < sim_rep_vars[i].size(); k++)
+            {
+                fprintf(screen,"  %.2f ",sim_rep_val[i][k][j]);
+            }
+            fprintf(screen, "\n");
         }
+
         // print objectives
         fprintf(screen,"\nObjectives:\n");
         for(int j=0; j<sim_obj_names[i][0].size(); j++)
         {
             fprintf(screen,"  Objective: %s\n  Lammps name: %s\n",sim_obj_names[i][0][j].c_str(),sim_obj_LMPnames[i][0][j].c_str());
         }
+
         // print attributes
         fprintf(screen,"\nAttributes:\n");
         for(int j=0; j<sim_attributes[i].size(); j++)

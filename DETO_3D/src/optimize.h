@@ -24,11 +24,22 @@ namespace DETO_NS {
 		~Optimize();
     
         int me;     // id of the current processor (rank)
-        
-        std::map<std::string, std::vector<double> > chi_map; // a map recording the content of the chi_map file provided by the user
-        std::map<std::string, std::vector<double> >::iterator it; // map iterator
+
+        struct Chi_map // structure containing the information mapping chi's to type and other properties
+        {
+            std::vector<std::string> properties;
+            std::vector<std::vector<double>> values;
+            // std::vector<int> types; //probably this vector will be included to streamline seting the atom types
+        };
+        struct Chi_map chi_map; // Instance of chi_map
+
+        /////////////////////
+        std::vector<std::vector<int>> chi // vector containing the particle ID's for each chi value
+        /////////////////////
+
         
         void read_chimap(std::string);
+        void initalize_chi();
         void printall();
         
 	private:

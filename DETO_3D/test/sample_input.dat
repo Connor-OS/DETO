@@ -60,7 +60,6 @@ opt_map_chi chimap.dat
 
 
 
-
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======
 
 simulation		Sim1 run repeat no      # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)

@@ -132,6 +132,8 @@ void Optimize::read_chimap(std::string mapfname)
     }
 }
 
+// ---------------------------------------------------------------
+// function initializing values of chi from chi_map
 void Optimize::initalize_chi()
 {
     for (int i=0; i<nchi; i++) {
@@ -144,6 +146,39 @@ void Optimize::initalize_chi()
     }
 }
     
+
+
+// ---------------------------------------------------------------
+// running the optimization
+void Optimize::optrun()
+{
+    // initialize chi values from types and set other type-related quantities in the chi_map file too
+    // initialize_chi();
+    // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
+    // TODO: when reading chi_map also read number of materials. If any of the specified material ID in chi_map does not fit the number (e.g., you specify material 0 and 1 but you had given only num_mater = 1) then produce error
+    // When defining the chi vector, you can make as long as all atoms in lammps, but assign 2 x max_chi (from chi_map) to the atoms whose type is not included din the chi_map (so they wil visualize as chi = max, i.e. solid, in OVITO)
+    
+    
+    // for certain optimization types, e.g. GA, we may have to create a first set of chi_vectors to then initite the while loop
+    // initialize_chipop();
+    
+    // start the while loop (exit conditions may be a tolerance on chi changes or a number of steps)
+    // while (optimization not converged) {
+    
+        // create a population of M chi_vectors (e.g. take the current chi_vector and randomly move particle to chi category above or below, or use sensitivies, or cross-breed and mutate for GA, etc...).  In doing this, we must respect constraints on chi_vectors (e.g. total chi for each material or else)
+    
+        // for each individual chi_vector in the population, run all the simulations and evaluate its objectives (this is to be done in parallel, so each subcomm takes care of a fracion of the M individuals
+    
+        // compute the overall objective associated to each individual chi vector (i.e. a combination of the single objectives coming from all the simulations for that chi vector)
+    
+        // pick one or more chi_vectors to generate the next population
+    
+    // end of while loop
+    // }
+    
+    // some criterion to pick the winner chi_vector (e.g. the one with lowest objective value)
+    
+}
 
 
 // ---------------------------------------------------------------

@@ -33,18 +33,22 @@ namespace DETO_NS {
         };
         struct Chi_map chi_map; // Instance of chi_map
 
-        /////////////////////
-        std::vector<std::vector<int>> chi // vector containing the particle ID's for each chi value
-        /////////////////////
-
         
         void read_chimap(std::string);
         void initalize_chi();
+        void optrun();
         void printall();
         
 	private:
         std::string err_msg, read_string, word;
+        double chi_max; // max value of chi specified in chi_map
         int nchi;   //number of chi values in the optimization
+        
+        int natoms; // number of atoms in LAMMPS
+        std::vector<dobule> chi;   // chi values per atom (those with type not in chi_map will be assigne chi > chi_max
+        std::vector<int> aID;  // ID of all atoms in LAMMPS
+        std::vector<int> atype;  // type of all atoms in LAMMPS
+        
         
         //void check_name_unique(std::string);
 

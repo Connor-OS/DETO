@@ -2,7 +2,7 @@
 #include <sstream>
 #include "error.h"
 #include "lammpsIO.h"
-//#include "universe.h"
+#include "universe.h"
 
 //#include "chemistry.h"
 //#include "store.h"
@@ -148,6 +148,7 @@ void Optimize::read_chimap(std::string mapfname)
 }
 
 
+// ---------------------------------------------------------------
 void Optimize::add_constraint(std::string read_string)
 {   
     std::string constraint_type;
@@ -171,10 +172,70 @@ void Optimize::add_constraint(std::string read_string)
     }
 }
 
+
 // ---------------------------------------------------------------
 // function initializing values of chi from chi_map
-void Optimize::initalize_chi(int natoms)
-{   
+void Optimize::initialize_chi()
+{
+    std::string tolmp;
+    tolmp = "compute tempID all property/atom id"; // temp compute to get id of all atoms
+    lammpsIO->lammpsdo(tolmp);
+    
+    
+    
+    tolmp = "compute tempType all property/atom type";  // temp compute reading type per atom
+    lammpsIO->lammpsdo(tolmp);
+    
+    tolmp = "dump tdID all custom 1 dump.temp_"+universe->SCnames[universe->color]+" c_tempID c_tempType x y z";    //temp dump to update variables and computes
+    lammpsIO->lammpsdo(tolmp);
+    lammpsIO->lammpsdo("run 1");     // a run1 in lammps to dump the temp and so prepare variables and computes
+
+    fprintf(screen,"\n\n PROC %d, HERE OK2 \n\n",me);
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    
+    // extracting unsorted atom ids
+    natoms = static_cast<int> (lammpsIO->lmp->atom->natoms); // total number of atoms in lammps, all groups all fixes)
+    nlocal = static_cast<int> (lammpsIO->lmp->atom->nlocal); // number of atoms in current processore, all types all fixes)
+    
+    lID = ((double *) lammps_extract_compute(lammpsIO->lmp,(char *) "tempID",1,1));
+      // NB: each processor in subcom pulls out the ID of their atoms. We will put them all into a single vector, IDuns, to be managed by the submaster. The way that seems to work is to scan aID of each processor looking for the first nlocal atoms with non-zero id. Ids after those are random. The first nonzero nlocal ids are passed to the submaster, which eventually sorts them.
+    ltype = ((double *) lammps_extract_compute(lammpsIO->lmp,(char *) "tempType",1,1));
+        
+
+    
+    
+    // get number of atoms from LAMMPS (all procs do this)
+    /*natoms = lammpsIO->extract_natoms();
+    
+    // extract vector of lammps types
+    aID = (int*)lammpsIO->extract_atom_varaiable("id");
+    atype = (int*)lammpsIO->extract_atom_varaiable("type");
+    */
+    sleep(me);
+    fprintf(screen,"\n\n PROC %d, natoms = %d\n\n",me,natoms);
+    for(int i=0; i<natoms; i++) {
+        fprintf(screen,"PROC %d, ID: %f type: %f\n",me,lID[i],ltype[i]);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    
+    // TODO: processors must communicate their IDS to the other and local MASTER (viz. proc with key == 0 in current bcomm) must assemble the local IDs and types into its global vectors aID, atype).  Then key == 0 must associate chi to each type.
+    // for each lammps type assign corresponding chi from chi_map
+    
+    
+    
+    // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
+    // TODO: when reading chi_map also read number of materials. If any of the specified material ID in chi_map does not fit the number (e.g., you specify material 0 and 1 but you had given only num_mater = 1) then produce error
+    // When defining the chi vector, you can make as long as all atoms in lammps, but assign 2 x max_chi (from chi_map) to the atoms whose type is not included din the chi_map (so they wil visualize as chi = max, i.e. solid, in OVITO)
+   
+    
+    
+    
+    
+    
+    
+    
     for(int i=0; i<natoms; i++){
         auto type_index = find(chi_map.properties.begin(), chi_map.properties.end(), "type");
 
@@ -191,27 +252,12 @@ void Optimize::initalize_chi(int natoms)
 // ---------------------------------------------------------------
 // running the optimization
 void Optimize::optrun()
-{   
-    int* atomID;
-    int* atomtype;
-    natoms = lammpsIO->extract_natoms();
-    atomID = (int*)lammpsIO->extract_atom_varaiable("id");
-    atomtype = (int*)lammpsIO->extract_atom_varaiable("type");
-    for(int i=0; i<natoms; i++) {
-        aID.push_back(*(atomID+i));
-        atype.push_back(*(atomtype+i));
-    }
-    // if (me == MASTER) {
-    //     fprintf(screen,"\n\nAtoms in simulation: %d\n\n",natoms);
-    //     for(int i=0; i<natoms; i++) {
-    //         fprintf(screen,"ID: %d type: %d\n",aID[i],atype[i]);
-    //         }
-    // }
+{
     // initialize chi values from types and set other type-related quantities in the chi_map file too
-    // initialize_chi();
-    // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
-    // TODO: when reading chi_map also read number of materials. If any of the specified material ID in chi_map does not fit the number (e.g., you specify material 0 and 1 but you had given only num_mater = 1) then produce error
-    // When defining the chi vector, you can make as long as all atoms in lammps, but assign 2 x max_chi (from chi_map) to the atoms whose type is not included din the chi_map (so they wil visualize as chi = max, i.e. solid, in OVITO)
+
+    initialize_chi();
+    
+   
     
     
     // for certain optimization types, e.g. GA, we may have to create a first set of chi_vectors to then initite the while loop

@@ -27,7 +27,7 @@ namespace DETO_NS {
 
         void read_chimap(std::string);
         void add_constraint(std::string);
-        void initalize_chi(int);
+        void initialize_chi();
         void optrun();
         void printall();
         
@@ -51,9 +51,12 @@ namespace DETO_NS {
         int nmat;   //number of material values in the optimization
 
         int natoms; // number of atoms in LAMMPS
+        int nlocal; // number of atoms in current proc from LAMMPS
         std::vector<double> chi;   // chi values per atom (those with type not in chi_map will be assigne chi > chi_max
-        std::vector<int> aID;  // ID of all atoms in LAMMPS
-        std::vector<int> atype;  // type of all atoms in LAMMPS
+        double* lID;  // ID of all LAMMPS atoms in this proc
+        double* ltype;  // type of all LAMMPS atoms in this proc
+        int* aID;  // ID of all atoms in LAMMPS
+        int* atype;  // type of all atoms in LAMMPS
         
         
         //void check_name_unique(std::string);

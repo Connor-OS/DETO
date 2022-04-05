@@ -45,11 +45,11 @@ lammps	thermo		200
 lammps	region		1 block INF 0.01 INF 0.1 INF INF units lattice
 lammps	region		2 block $(v_nelx-1) INF INF 0.01 INF INF units lattice	
 lammps	group		support1 region 1				
-lammps	group		support2 region 2				
+lammps	group		support2 region 2
 lammps	set 		group support1 type 2				
 lammps	set 		group support2 type 2	
 lammps	fix 		support1 support1 setforce 0 0 0				
-lammps	fix	    	support2 support2 setforce 0 0 0	
+lammps	fix	    	support2 support2 setforce 0 0 0
 
 
 # ====== LOADING CHI MAP AND POTENTIALS FILE =======
@@ -58,6 +58,11 @@ lammps	fix	    	support2 support2 setforce 0 0 0
 opt_map_chi chimap.dat
 
 
+
+
+# constraints added with constrain function of type: volume or local_volume
+constraint          1 volume 0.6
+constraint          1 local_volume 0.8 5.2
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======

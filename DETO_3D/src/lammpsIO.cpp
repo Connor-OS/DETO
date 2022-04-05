@@ -80,7 +80,6 @@ void LammpsIO::create()
         std::string todo;
         todo = "log log."+universe->SCnames[universe->color]+".lammps";
         lammpsIO->lammpsdo(todo);
-
         
         
     }
@@ -98,8 +97,32 @@ void LammpsIO::lammpsdo(std::string todo)
 }
 
 
+// ---------------------------------------------------------------
+// Extract number of atoms in simulation
+double LammpsIO::extract_natoms()
+{   
+    double natoms = lammps_get_natoms(lmp);
+    return natoms;
+}
 
 
+// ---------------------------------------------------------------
+// Extract per atom variable of atoms in simulation
+void* LammpsIO::extract_atom_varaiable(std::string toextract)
+{   
+    void* atom_properties = lammps_extract_atom(lmp,toextract.c_str());
+    return atom_properties;
+}
+
+
+// ---------------------------------------------------------------
+// Extract per atom variable of atoms in simulation
+void* LammpsIO::gather_atom_varaiable(char * toextract)
+{   
+    // void *atom_properties;
+    // lammps_gather_atoms(lmp,toextract,type?,count?, atom_properties);
+    // return atom_properties;
+}
 
 
 // ---------------------------------------------------------------

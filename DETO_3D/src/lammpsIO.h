@@ -35,6 +35,9 @@ namespace DETO_NS {
         void create();  //Create a new Lammps instance
         void printall();
         void lammpsdo(std::string); //passes a command to lammps
+        double extract_natoms();
+        void* extract_atom_varaiable(std::string);
+        void* gather_atom_varaiable(char *);
         
         std::string lmpThSt;    // string recording the themo style from input: used to add and evaluate tem computes when needed in source code of lammps
         

@@ -143,10 +143,10 @@ DETO::~DETO()
     MPI_Barrier(MPI_COMM_WORLD);
     delete optimize;
     
-    if (me==MASTER) {
-        fprintf(screen,"Deleting optimize class\n");
-        sims->printall();
-    }
+    // if (me==MASTER) {
+    //     fprintf(screen,"Deleting simulations class\n");
+    //     sims->printall();
+    // }
     MPI_Barrier(MPI_COMM_WORLD);
     delete sims;
     

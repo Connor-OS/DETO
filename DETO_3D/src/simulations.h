@@ -57,6 +57,7 @@ namespace DETO_NS {
         
         void add_attribute(std::string);
         void add_objective(std::string);
+        void add_constraint(std::string);
 
         void read_repeat(std::string);
         

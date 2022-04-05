@@ -1,11 +1,11 @@
 #include "optimize.h"
 #include <sstream>
 #include "error.h"
+#include "lammpsIO.h"
 //#include "universe.h"
 
 //#include "chemistry.h"
 //#include "store.h"
-//#include "lammpsIO.h"
 //#include "error.h"
 /*#include <stdlib.h>
 #include <stdio.h>
@@ -36,6 +36,7 @@ void Optimize::read_chimap(std::string mapfname)
 {
     std::ifstream mapFile(mapfname.c_str());
     bool found_nchi = false;
+    bool found_nmat = false;
     // struct Chi_map chi_map;
 
     if (!mapFile.is_open())
@@ -63,13 +64,24 @@ void Optimize::read_chimap(std::string mapfname)
                         lss >> nchi;
                         found_nchi = true;
                     }
+                    else if (strcmp(word.c_str(), "num_mater") == 0)
+                    {
+                        lss >> nmat;
+                        found_nmat = true;
+                        for(int i=0; i<nmat; i++){
+                            vol_constraint.push_back(-1.0);
+                            local_vol_constraint.push_back(-1.0);
+                            local_vol_radius.push_back(-1.0);
+                        }
+                    }
                     else if (strcmp(word.c_str(), "PROPERTIES:") == 0)
                     {
-                        if (found_nchi == true)
+                        if (found_nchi == true && found_nmat == true)
                         {
                             // Insert map keys
                             bool material_set = false;
                             bool type_set = false;
+                            bool chi_set = false;
                             while (lss >> word)
                             {
                                 chi_map.properties.push_back(word);
@@ -77,7 +89,10 @@ void Optimize::read_chimap(std::string mapfname)
                                 for(int i=0; i<nchi; i++) {
                                     chi_map.values[chi_map.values.size()-1].push_back(0);
                                 }
-
+                                if (word == "chi")
+                                {
+                                    chi_set = true;
+                                }
                                 if (word == "material")
                                 {
                                     material_set = true;
@@ -87,9 +102,9 @@ void Optimize::read_chimap(std::string mapfname)
                                     type_set = true;
                                 }
                             }
-                            if (material_set == false || type_set == false)
+                            if (material_set == false || type_set == false || chi_set == false)
                             {
-                                err_msg = "ERROR: Please specify material and type in chi map";
+                                err_msg = "ERROR: Please specify chi, material, and type in chi map";
                                 error->errsimple(err_msg);
                             }
                             // Populate chi_map
@@ -132,18 +147,43 @@ void Optimize::read_chimap(std::string mapfname)
     }
 }
 
+
+void Optimize::add_constraint(std::string read_string)
+{   
+    std::string constraint_type;
+    int mat_ID;
+    double constraint, radius;
+    std::istringstream lss(read_string);
+    lss >> mat_ID >> constraint_type >> constraint;
+    if(constraint_type == "volume") {
+        fprintf(screen,"adding vol %f to material %d\n",constraint,mat_ID);
+        vol_constraint[mat_ID-1] = constraint;
+    }
+    else if(constraint_type == "local_volume") {
+        lss >> radius;
+        fprintf(screen,"adding vol %f and %f to material %d\n",constraint,radius,mat_ID);
+        local_vol_constraint[mat_ID-1] = constraint;
+        local_vol_radius[mat_ID-1] = radius;
+    }
+    else {
+        err_msg = "Unrecognized constraint type specified in: " + read_string;
+        error->errsimple(err_msg);
+    }
+}
+
 // ---------------------------------------------------------------
 // function initializing values of chi from chi_map
-void Optimize::initalize_chi()
-{
-    for (int i=0; i<nchi; i++) {
-        for (int j=0; j<chi_map.properties.size(); j++) {
-            // lammpsIO->lammpsdo("set  type %d %s %g",type,chi_map.properties[j],chi_map.values[j][i])
-            if (me == MASTER) {
-                fprintf(screen,"set  type %d %s %g",type,chi_map.properties[j],chi_map.values[j][i]);
-            }
-        }
+void Optimize::initalize_chi(int natoms)
+{   
+    for(int i=0; i<natoms; i++){
+        auto type_index = find(chi_map.properties.begin(), chi_map.properties.end(), "type");
+
+        auto chi_index = find(chi_map.properties.begin(), chi_map.properties.end(), "chi");
+        
+        // chi.push_back(chi value at this point)
     }
+    //if vol constraint set. i.e target_vol:
+        //apply constraint with bisecting alg
 }
     
 
@@ -151,7 +191,22 @@ void Optimize::initalize_chi()
 // ---------------------------------------------------------------
 // running the optimization
 void Optimize::optrun()
-{
+{   
+    int* atomID;
+    int* atomtype;
+    natoms = lammpsIO->extract_natoms();
+    atomID = (int*)lammpsIO->extract_atom_varaiable("id");
+    atomtype = (int*)lammpsIO->extract_atom_varaiable("type");
+    for(int i=0; i<natoms; i++) {
+        aID.push_back(*(atomID+i));
+        atype.push_back(*(atomtype+i));
+    }
+    // if (me == MASTER) {
+    //     fprintf(screen,"\n\nAtoms in simulation: %d\n\n",natoms);
+    //     for(int i=0; i<natoms; i++) {
+    //         fprintf(screen,"ID: %d type: %d\n",aID[i],atype[i]);
+    //         }
+    // }
     // initialize chi values from types and set other type-related quantities in the chi_map file too
     // initialize_chi();
     // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
@@ -186,7 +241,7 @@ void Optimize::optrun()
 void Optimize::printall()
 {
     fprintf(screen, "\n---------ALL ABOUT OPTIMIZE----------\n");
-    // fprintf(screen,"inputcprs filename =  %s\n",fname.c_str());
+    //Print chi map
     fprintf(screen,"Chi Map\n");
     for(int i=0; i<chi_map.properties.size(); i++) {
         fprintf(screen,"%s ",chi_map.properties[i].c_str());
@@ -198,6 +253,16 @@ void Optimize::printall()
         }
         fprintf(screen,"\n");
     }
+    //Print constraints
+    fprintf(screen,"\nGloal volume constraints: \n");
+    for(int i=0; i<nmat; i++) {
+        fprintf(screen,"f%d : %f ",i,vol_constraint[i]);
+    }
+    fprintf(screen,"\n");
+    fprintf(screen,"Local volume constraints: \n");
+    for(int i=0; i<nmat; i++) {
+        fprintf(screen,"f%d : %f radius: %f",i,local_vol_constraint[i],local_vol_radius[i]);
+    }
     
-    fprintf(screen, "---------------------------------------\n\n");
+    fprintf(screen, "\n---------------------------------------\n\n");
 }

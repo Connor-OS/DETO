@@ -12,7 +12,7 @@ The code makes extensive use of LAMMPS objects and syntax therefore the user is 
 
 The user manual is layed out as follows
 
-- [0. Introduction](https://connor-os.github.io/DETO/0.0_introduction)
+- [[0.0_introduction]]
 - [1. Instaling and Building DETO_3D](https://connor-os.github.io/DETO/1.0_instaling)
   - [1.0 cloning th project](https://connor-os.github.io/DETO/1.1_cloning)
   - [1.1 building submodules](https://connor-os.github.io/DETO/1.1_submodule)

@@ -1,3 +1,5 @@
+# Commands reference
+
 This section details all the DETO specific input commands that can be used in an input script. In many cases these commands will be used in combination with LAMMPS commands. Therefore the user is directed towards the [LAMMPS Manual](https://docs.lammps.org/Manual.html) for a detailed explanation of these.
   
 - [3.1 subcomm command](3.1_subcomm.md)

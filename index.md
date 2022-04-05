@@ -1,4 +1,4 @@
-## DETO_3D User Manual
+# DETO_3D User Manual
 
 DETO_3D is a multiscale topology optimisation code using the discrete element method. For designing and optimising structures or systems with a focus on descrete behaviours.
 
@@ -13,7 +13,7 @@ The code makes extensive use of LAMMPS objects and syntax therefore the user is 
 The user manual is layed out as follows
 
 - [0. introduction](0_introduction.md)
-- [1. Instaling and Building DETO_3D](1_index.md)
+- [1. Instaling and Building DETO_3D](1_instaling/1_index.md)
   - [1.1 cloning the project](1_instaling/1.1_cloning.md)
   - [1.2 building submodules](1_instaling/1.2_submodules.md)
   - [1.3 building DETO_3D](1_instaling/1.3_building.md)
@@ -31,4 +31,4 @@ The user manual is layed out as follows
 
 ### Contact
 
-If you have any questions about the code or how to use it. Feel free to email it's creator at: c.o'shaughnessy1@newcastle.ac.uk
+If you have any questions about the code or how to use it. Feel free to email it's creator at: c.o'shaughnessy1@ncl.ac.uk

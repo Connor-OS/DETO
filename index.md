@@ -12,22 +12,22 @@ The code makes extensive use of LAMMPS objects and syntax therefore the user is 
 
 The user manual is layed out as follows
 
-- [[0.0_introduction]]
-- [1. Instaling and Building DETO_3D](https://connor-os.github.io/DETO/1.0_instaling)
-  - [1.0 cloning th project](https://connor-os.github.io/DETO/1.1_cloning)
-  - [1.1 building submodules](https://connor-os.github.io/DETO/1.1_submodule)
-  - [1.2 building DETO_3D](https://connor-os.github.io/DETO/1.2_building)
-- [2. Running DETO_3D](https://connor-os.github.io/DETO/2.0_running)
-  - [2.1 Input script](https://connor-os.github.io/DETO/2.1_input)
-- [3. commands](https://connor-os.github.io/DETO/3.0_commands)
-  - [3.1 subcomm command](https://connor-os.github.io/DETO/3.1_subcomm)
-  - [3.2 lammps command](https://connor-os.github.io/DETO/3.2_lammps)
-  - [3.3 simulation command](https://connor-os.github.io/DETO/3.3_simulation)
-  - [3.4 add_attribute command](https://connor-os.github.io/DETO/3.4_add_attribute)
-  - [3.5 opt_map_chi command](https://connor-os.github.io/DETO/3.5_opt_map_chi)
-- [4. Examples](https://connor-os.github.io/DETO/4.0_examples)
-  - [4.1 simply supported beam](https://connor-os.github.io/DETO/4.1_simply_supported)
-  - [4.2 granular mixer](https://connor-os.github.io/DETO/4.2_granular)
+- [0. introduction](0_introduction.md)
+- [1. Instaling and Building DETO_3D](1_index.md)
+  - [1.1 cloning the project](1_instaling/1.1_cloning.md)
+  - [1.2 building submodules](1_instaling/1.2_submodules.md)
+  - [1.3 building DETO_3D](1_instaling/1.3_building.md)
+- [2. Running DETO_3D](2_instaling/2_index.md)
+  - [2.1 Input script](2_instaling/2.1_input.md)
+- [3. commands](3_instaling/3_index.md)
+  - [3.1 subcomm command](3_instaling/3.1_subcomm.md)
+  - [3.2 lammps command](3_instaling/3.2_lammps.md)
+  - [3.3 simulation command](3_instaling/3.3_simulation.md)
+  - [3.4 add_attribute command](3_instaling/3.4_add_attribute.md)
+  - [3.5 opt_map_chi command](3_instaling/3.5_opt_map_chi.md)
+- [4. Examples](4_instaling/4_index.md)
+  - [4.1 simply supported beam](4_instaling/4.1_simply_supported.md)
+  - [4.2 granular mixer](4_instaling/4.2_granular.md)
 
 ### Contact
 

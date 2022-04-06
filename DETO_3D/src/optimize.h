@@ -32,12 +32,12 @@ namespace DETO_NS {
         void printall();
         
 	private:
-        struct Chi_map // structure containing the information mapping chi's to type and other properties
+        struct Chi_map // structure containing the information mapping chi to type and other properties
         {
-            // std::vector<double> chis;
-            // std::vector<int> types;
+            std::vector<double> chis;
+            std::vector<int> types;
             std::vector<std::string> properties;
-            std::vector<std::vector<double>> values; //probably this vector will be included to streamline seting the atom types
+            std::vector<std::vector<double>> values;
         };
         struct Chi_map chi_map; // Instance of chi_map
 

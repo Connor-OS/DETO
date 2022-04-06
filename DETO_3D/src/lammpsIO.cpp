@@ -119,9 +119,20 @@ void* LammpsIO::extract_atom_varaiable(std::string toextract)
 // Extract per atom variable of atoms in simulation
 void* LammpsIO::gather_atom_varaiable(char * toextract)
 {   
-    // void *atom_properties;
-    // lammps_gather_atoms(lmp,toextract,type?,count?, atom_properties);
-    // return atom_properties;
+    int64_t natoms;
+    int tagintsize = lammps_extract_setting(lmp, "tagint");
+    if (tagintsize == 4)
+        natoms = *(int32_t *)lammps_extract_global(lmp, "natoms");
+    else
+        natoms = *(int64_t *)lammps_extract_global(lmp, "natoms");
+    void *atom_properties;
+    atom_properties = malloc(natoms*2*tagintsize);
+    lammps_gather_concat(lmp,toextract,1,1, atom_properties);
+
+    void * properties = atom_properties;
+    // free(atom_properties);
+    
+    return properties;
 }
 
 

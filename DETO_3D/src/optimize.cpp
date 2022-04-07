@@ -188,22 +188,71 @@ void Optimize::initialize_chi()
     natoms = (int)lammpsIO->lmp->atom->natoms; // total number of atoms in lammps, all groups all fixes)
     nlocal = (int)lammpsIO->lmp->atom->nlocal; // number of atoms in current processore, all types all fixes)
     
-    lID = (double *)lammps_extract_compute(lammpsIO->lmp,(char *) "tempID",1,1);
+    aID = (double *)lammps_extract_compute(lammpsIO->lmp,(char *) "tempID",1,1);
       // NB: each processor in subcom pulls out the ID of their atoms. We will put them all into a single vector, IDuns, to be managed by the submaster. The way that seems to work is to scan aID of each processor looking for the first nlocal atoms with non-zero id. Ids after those are random. The first nonzero nlocal ids are passed to the submaster, which eventually sorts them.
-    ltype = (double *)lammps_extract_compute(lammpsIO->lmp,(char *) "tempType",1,1);
+    atype = (double *)lammps_extract_compute(lammpsIO->lmp,(char *) "tempType",1,1);
     
-    int localID[nlocal], localtype[nlocal];
+    
+    int tID[nlocal], ttype[nlocal];
     for(int i=0; i<nlocal; i++) {
-        localID[i] = lID[i];
-        localtype[i] = ltype[i];
+        if (aID[i]<1){
+            err_msg = "ERROR: zero or negative atom ID recorded from LAMMPS. If this happens, LAMMPS is probably creating non-contiguous ID and type vectors per processor. Change DETO code to cope with that...";
+            error->errsimple(err_msg);
+        }
+        tID[i] = (int) aID[i];
+        ttype[i] = (int) atype[i];
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    
+    //MPI send size of each tID to submaster. Submaster creates array with enough space and assigns positions to accept IDs.  All procs then send tIDarr to sub master
+    nploc =universe->SCnp[universe->color];
+    key = universe->key;
+    nID_each = new int[nploc];
+    nID_each[key] = nlocal;   //each processor in subcomm records its number of atoms (nlocal) at location = key of its nID_each
+    
+    if (key>0) {
+        int dest = 0;
+        MPI_Send(&nID_each[key], 1, MPI_INT, dest, 1, (universe->subcomm));
+    }
+    if (key==0 && nploc>1) {
+        for (int source=1; source<nploc; source++) {
+            MPI_Recv(&nID_each[source], 1, MPI_INT, source, 1, (universe->subcomm), &status);
+        }
+    }
+    
+    
+    
+    // pass local ID arrays to submaster
+    IDpos = new int[nploc];  // position of local tID array in submaster's unsorted list of IDs
+    if (key==0) {
+        IDpos[0]=0;
+        for (int i=1; i<nploc; i++) {
+            IDpos[i] =IDpos[i-1]+nID_each[i-1];
+        }
+    }
+    IDuns = new int[natoms];
+    if (key>0) {
+        int dest = 0;
+        MPI_Send(&tID[0], nlocal, MPI_INT, dest, 1, (universe->subcomm));
+    }
+    if (key==0) {
+        for (int i=0; i<nID_each[0]; i++) {
+            IDuns[i] = tID[i];
+        }
+        for (int source=1; source<nploc; source++) {
+            MPI_Recv(&IDuns[IDpos[source]], nID_each[source], MPI_INT, source, 1, (universe->subcomm), &status);
+        }
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    int atomID[natoms],atomtype[natoms];
-    if (me != MASTER) {
-        MPI_Send(&nlocal, 1, MPI_INT, MASTER, 0, MPI_COMM_WORLD);
-        MPI_Send(&localID, nlocal, MPI_INT, MASTER, 1, MPI_COMM_WORLD);
-        MPI_Send(&localtype, nlocal, MPI_INT, MASTER, 2, MPI_COMM_WORLD);
+    
+    /*
+    
+    
+    if (me != MASTER && universe-->color==0) {
+        MPI_Send(&nlocal, 1, MPI_INT, MASTER, 0, universe->subcomm);
+        MPI_Send(&localID, nlocal, MPI_INT, MASTER, 1, universe->subcomm);
+        MPI_Send(&localtype, nlocal, MPI_INT, MASTER, 2, universe->subcomm);
     }
     else if (me == MASTER) {
         int atom_index = 0;
@@ -232,14 +281,16 @@ void Optimize::initialize_chi()
     MPI_Bcast(&atomtype, natoms, MPI_INT, MASTER, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
-
+*/
+    
     // extract vector of lammps types
     // aID = (int*)lammpsIO->gather_atom_varaiable("id");
     // atype = (int*)lammpsIO->gather_atom_varaiable("type");
 
     sleep(me);
     for(int i=0; i<natoms; i++) {
-        fprintf(screen,"PROC %d ID: %d type %d\n",me,atomID[i],atomtype[i]);
+        //fprintf(screen,"PROC %d ID: %d type %d\n",me,atomID[i],atomtype[i]);
+        if (key==0){fprintf(screen,"PROC %d ID: %d\n",me,IDuns[i]);} //,atomtype[i]);
     }
     
     
@@ -251,6 +302,11 @@ void Optimize::initialize_chi()
     // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
     // TODO: when reading chi_map also read number of materials. If any of the specified material ID in chi_map does not fit the number (e.g., you specify material 0 and 1 but you had given only num_mater = 1) then produce error
     // When defining the chi vector, you can make as long as all atoms in lammps, but assign 2 x max_chi (from chi_map) to the atoms whose type is not included din the chi_map (so they wil visualize as chi = max, i.e. solid, in OVITO)
+    
+    delete IDuns;
+    delete IDpos;
+    delete nID_each;
+
 }
     
 

@@ -7,7 +7,7 @@
 # ===== SET UNIVERSE OF SUB-COMMUNICATORS ========
 
 # command structure: subcomm Nsubcomms
-subcomm 1
+subcomm 2
 
 
 # ====== INITIAL SETTINGS FOR ALL LAMMPS INSTANCES =======

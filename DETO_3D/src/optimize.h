@@ -53,17 +53,24 @@ namespace DETO_NS {
         int natoms; // number of atoms in LAMMPS
         int nlocal; // number of atoms in current proc from LAMMPS
         std::vector<double> chi;   // chi values per atom (those with type not in chi_map will be assigne chi > chi_max
-        double* lID;  // ID of all LAMMPS atoms in this proc
-        double* ltype;  // type of all LAMMPS atoms in this proc
-        int* aID;  // ID of all atoms in LAMMPS
-        int* atype;  // type of all atoms in LAMMPS
+
+        double* aID;  // ID of all atoms in LAMMPS in current proc
+        double* atype;  // type of all atoms in LAMMPS in current proc
+        int* IDuns; // unsortd IDs of all atoms in LAMMPS
+        int* nID_each;  //array with number of IDs in each processor in current subcomm
         
-        
+        int nploc;  // number of processors in local subcomm
         //void check_name_unique(std::string);
+        
+        int* IDpos;     // position of local tID array in submaster's unsorted list of IDs
+        
+        int key;   // rank of current proc in current subcomm
 
 		//std::string fname;              // open inputcprs file
         //int me;     // id of the current processor (rank)
 		
+        MPI_Status status;
+        
 	};
 	
 }

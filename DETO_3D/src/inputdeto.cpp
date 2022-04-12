@@ -146,7 +146,7 @@ void Inputdeto::file()
     
     inFile.close();
 
-    if (me == MASTER) fprintf(screen,"DONE Reading input file");
+    if (me == MASTER) fprintf(screen,"DONE Reading input file\n");
     MPI_Barrier(MPI_COMM_WORLD);
 }
 

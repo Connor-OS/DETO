@@ -28,6 +28,8 @@ namespace DETO_NS {
         void read_chimap(std::string);
         void add_constraint(std::string);
         void initialize_chi();
+        void constrain_vol();
+        void constrain_local_vol();
         void optrun();
         void printall();
         
@@ -57,10 +59,10 @@ namespace DETO_NS {
         double* aID;  // ID of all atoms in LAMMPS in current proc
         double* atype;  // type of all atoms in LAMMPS in current proc
         int* IDuns; // unsortd IDs of all atoms in LAMMPS
+        int* typeuns; //unsorted types of all atoms in LAMMPS
         int* nID_each;  //array with number of IDs in each processor in current subcomm
         
         int nploc;  // number of processors in local subcomm
-        //void check_name_unique(std::string);
         
         int* IDpos;     // position of local tID array in submaster's unsorted list of IDs
         

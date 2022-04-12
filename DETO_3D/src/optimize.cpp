@@ -204,9 +204,8 @@ void Optimize::initialize_chi()
     }
     MPI_Barrier(MPI_COMM_WORLD);
     
-    
     //MPI send size of each tID to submaster. Submaster creates array with enough space and assigns positions to accept IDs.  All procs then send tIDarr to sub master
-    nploc =universe->SCnp[universe->color];
+    nploc = universe->SCnp[universe->color];
     key = universe->key;
     nID_each = new int[nploc];
     nID_each[key] = nlocal;   //each processor in subcomm records its number of atoms (nlocal) at location = key of its nID_each
@@ -221,79 +220,73 @@ void Optimize::initialize_chi()
         }
     }
     
-    
-    
     // pass local ID arrays to submaster
     IDpos = new int[nploc];  // position of local tID array in submaster's unsorted list of IDs
     if (key==0) {
         IDpos[0]=0;
         for (int i=1; i<nploc; i++) {
-            IDpos[i] =IDpos[i-1]+nID_each[i-1];
+            IDpos[i] = IDpos[i-1] + nID_each[i-1];
         }
     }
+    // MPI send ID's and types from each processor to the submaster. 
     IDuns = new int[natoms];
+    typeuns = new int[natoms];
     if (key>0) {
         int dest = 0;
         MPI_Send(&tID[0], nlocal, MPI_INT, dest, 1, (universe->subcomm));
+        MPI_Send(&ttype[0], nlocal, MPI_INT, dest, 2, (universe->subcomm));
     }
     if (key==0) {
         for (int i=0; i<nID_each[0]; i++) {
             IDuns[i] = tID[i];
+            typeuns[i] = ttype[i];
         }
         for (int source=1; source<nploc; source++) {
             MPI_Recv(&IDuns[IDpos[source]], nID_each[source], MPI_INT, source, 1, (universe->subcomm), &status);
+            MPI_Recv(&typeuns[IDpos[source]], nID_each[source], MPI_INT, source, 2, (universe->subcomm), &status);
         }
     }
-
-    
-    /*
-    
-    
-    if (me != MASTER && universe-->color==0) {
-        MPI_Send(&nlocal, 1, MPI_INT, MASTER, 0, universe->subcomm);
-        MPI_Send(&localID, nlocal, MPI_INT, MASTER, 1, universe->subcomm);
-        MPI_Send(&localtype, nlocal, MPI_INT, MASTER, 2, universe->subcomm);
-    }
-    else if (me == MASTER) {
-        int atom_index = 0;
-        for(int i=0; i<nlocal; i++) {
-            atomID[atom_index] = localID[atom_index];
-            atomtype[atom_index] = localtype[atom_index];
-            atom_index++;
-        }
-        for(int i=0; i<2; i++) {
-            int temp;
-            MPI_Recv(&temp, 1, MPI_INT, i+1, 0, MPI_COMM_WORLD ,MPI_STATUS_IGNORE);
-            int tempID[temp],temptype[temp];
-            MPI_Recv(&tempID, temp, MPI_INT, i+1, 1, MPI_COMM_WORLD ,MPI_STATUS_IGNORE);
-            MPI_Recv(&temptype, temp, MPI_INT, i+1, 2, MPI_COMM_WORLD ,MPI_STATUS_IGNORE);
-            for(int j=0; j<temp; j++) {
-                atomID[atom_index] = tempID[j];
-                atomtype[atom_index] = temptype[j];
-                atom_index++;
-            }
-        }
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    
-
-    MPI_Bcast(&atomID, natoms, MPI_INT, MASTER, MPI_COMM_WORLD);
-    MPI_Bcast(&atomtype, natoms, MPI_INT, MASTER, MPI_COMM_WORLD);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-*/
-    
-    // extract vector of lammps types
-    // aID = (int*)lammpsIO->gather_atom_varaiable("id");
-    // atype = (int*)lammpsIO->gather_atom_varaiable("type");
 
     sleep(me);
-    for(int i=0; i<natoms; i++) {
-        //fprintf(screen,"PROC %d ID: %d type %d\n",me,atomID[i],atomtype[i]);
-        if (key==0){fprintf(screen,"PROC %d ID: %d\n",me,IDuns[i]);} //,atomtype[i]);
+    if (key==0) {
+        fprintf(screen,"\nID and type constructed at submaster\n-------------------\n");
+        for(int i=0; i<natoms; i++) {
+            fprintf(screen,"PROC %d ID: %d type %d\n",me,IDuns[i],typeuns[i]);
+        }
     }
+
     
-    
+    //  initialise a chi vector on the submaster
+    if(key == 0) {
+        for(int i=0; i<natoms; i++) {
+            bool type_found = false;
+            for(int j=0; j<chi_map.types.size(); j++) {
+                if(typeuns[i] == chi_map.types[j]) {
+                    chi.push_back(chi_map.chis[j]);
+                    type_found = true;
+                }
+            }
+            if(type_found == false) {
+                chi.push_back(2);
+            }
+        }
+        if(me == MASTER) {
+            fprintf(screen,"\n------------------\nUnnormalised chi\n-------------------\n\n");
+            for (int i=0; i<natoms; i++) {
+                fprintf(screen,"%f\n",chi[i]);
+            }
+        }
+        //Enforce Volume constraint, or local volume constraint if any are defined here
+        constrain_vol();
+        // constrain_local_vol();
+    }
+    if(me == MASTER) {
+        fprintf(screen,"\n------------------\nNormalised chi\n-------------------\n\n");
+        for (int i=0; i<natoms; i++) {
+            fprintf(screen,"%f\n",chi[i]);
+        }
+    }
+
     // TODO: processors must communicate their IDS to the other and local MASTER (viz. proc with key == 0 in current bcomm) must assemble the local IDs and types into its global vectors aID, atype).  Then key == 0 must associate chi to each type.
     // for each lammps type assign corresponding chi from chi_map
     
@@ -309,6 +302,43 @@ void Optimize::initialize_chi()
 
 }
     
+
+// ---------------------------------------------------------------
+// running the optimization
+void Optimize::constrain_vol()
+{
+    for(int i=0; i<nmat; i++) {
+        if(vol_constraint[i] > 0){
+            double l1 = -1.;
+            double l2 = 1.;
+            double lmid,chi_sum;
+            double chi_constrained[natoms];
+            while (l2-l1 > 1e-8){
+                chi_sum = 0.;
+                lmid = 0.5*(l2+l1);
+                for (int j=0; j<natoms; j++) {
+                    chi_constrained[j] = chi[j]+lmid;
+                    if(chi_constrained[j] > 1) chi_constrained[j] = 1;
+                    if(chi_constrained[j] < 0) chi_constrained[j] = 0;
+                    chi_sum += chi_constrained[j];
+                }
+                if ( (chi_sum - vol_constraint[i]*(double)natoms) > 0 ) l2 = lmid;
+                else l1 = lmid;
+            }
+            for (int j=0; j<natoms; j++) {
+                chi[j] = chi_constrained[j];
+            }
+        }
+    }
+}
+
+
+// ---------------------------------------------------------------
+// running the optimization
+void Optimize::constrain_local_vol()
+{
+
+}
 
 
 // ---------------------------------------------------------------

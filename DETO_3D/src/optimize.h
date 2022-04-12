@@ -22,9 +22,10 @@ namespace DETO_NS {
 	public:
         Optimize(class DETO *);
 		~Optimize();
-    
+            
         int me;     // id of the current processor (rank)
 
+        
         void read_chimap(std::string);
         void add_constraint(std::string);
         void initialize_chi();
@@ -36,13 +37,15 @@ namespace DETO_NS {
 	private:
         struct Chi_map // structure containing the information mapping chi to type and other properties
         {
-            std::vector<double> chis;
-            std::vector<int> types;
-            std::vector<std::string> properties;
-            std::vector<std::vector<double>> values;
+            std::vector<double> chis;       // vector containing "chi" values in chi map file column
+            std::vector<int> types;         // vector containing "types" values in chi map file column
+            std::vector<std::string> properties;    // vector containing names of "other properties" in chi map file
+            std::vector<std::vector<double>> values;   // matrix containing values of "other properties" in chi map file
         };
         struct Chi_map chi_map; // Instance of chi_map
 
+        std::vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
+        
         std::vector<double> vol_constraint; // volume constraint number between 0 and 1 per material
         std::vector<double> local_vol_constraint; // local volume constraint number between 0 and 1 and radius per material
         std::vector<double> local_vol_radius;

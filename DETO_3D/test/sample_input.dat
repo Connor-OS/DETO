@@ -67,8 +67,8 @@ opt_map_chi chimap.dat
 
 
 # constraints added with constrain function of type: volume or local_volume
-constraint          1 volume 0.6
-constraint          1 local_volume 0.8 5.2
+opt_constraint          1 volume 0.6
+opt_constraint          1 local_volume 0.8 5.2
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======

@@ -22,6 +22,7 @@ Optimize::Optimize(DETO *deto) : Pointers(deto)
 
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
+    
 }
 
 // ---------------------------------------------------------------
@@ -229,8 +230,10 @@ void Optimize::initialize_chi()
         }
     }
     // MPI send ID's and types from each processor to the submaster. 
-    IDuns = new int[natoms];
-    typeuns = new int[natoms];
+    if (key==0){
+        IDuns = new int[natoms];
+        typeuns = new int[natoms];
+    }
     if (key>0) {
         int dest = 0;
         MPI_Send(&tID[0], nlocal, MPI_INT, dest, 1, (universe->subcomm));
@@ -247,6 +250,7 @@ void Optimize::initialize_chi()
         }
     }
 
+    // DEBUG: delete this before running final version of the code
     sleep(me);
     if (key==0) {
         fprintf(screen,"\nID and type constructed at submaster\n-------------------\n");
@@ -258,6 +262,7 @@ void Optimize::initialize_chi()
     
     //  initialise a chi vector on the submaster
     if(key == 0) {
+        // todo: compute chi_avg and chi_max
         for(int i=0; i<natoms; i++) {
             bool type_found = false;
             for(int j=0; j<chi_map.types.size(); j++) {
@@ -267,7 +272,7 @@ void Optimize::initialize_chi()
                 }
             }
             if(type_found == false) {
-                chi.push_back(2);
+                chi.push_back(2);    // todo: push_back(fabs(chi_avg)+chi_max).... do this per-material
             }
         }
         if(me == MASTER) {
@@ -278,7 +283,8 @@ void Optimize::initialize_chi()
         }
         //Enforce Volume constraint, or local volume constraint if any are defined here
         constrain_vol();
-        // constrain_local_vol();
+        constrain_local_vol();    //todo: to be implemented... not in a rush though
+        
     }
     if(me == MASTER) {
         fprintf(screen,"\n------------------\nNormalised chi\n-------------------\n\n");
@@ -308,7 +314,7 @@ void Optimize::initialize_chi()
 void Optimize::constrain_vol()
 {
     for(int i=0; i<nmat; i++) {
-        if(vol_constraint[i] > 0){
+        if(vol_constraint[i] > 0){   // replace this condition with if(flag)...
             double l1 = -1.;
             double l2 = 1.;
             double lmid,chi_sum;

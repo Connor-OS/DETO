@@ -39,17 +39,19 @@ namespace DETO_NS {
         {
             std::vector<double> chis;       // vector containing "chi" values in chi map file column
             std::vector<int> types;         // vector containing "types" values in chi map file column
+            std::vector<std::string> material;         // vector containing "material" values in chi map file column
             std::vector<std::string> properties;    // vector containing names of "other properties" in chi map file
             std::vector<std::vector<double>> values;   // matrix containing values of "other properties" in chi map file
         };
         struct Chi_map chi_map; // Instance of chi_map
 
         std::vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
-        
+
+        std::vector<bool> vol_constraintYN; // vector specifying if a volume constraint is set for each material    
         std::vector<double> vol_constraint; // volume constraint number between 0 and 1 per material
+        std::vector<bool> local_vol_constraintYN; // vector specifying if a local volume constraint is set for each material      
         std::vector<double> local_vol_constraint; // local volume constraint number between 0 and 1 and radius per material
-        std::vector<double> local_vol_radius;
-        
+        std::vector<double> local_vol_radius;  
         std::string err_msg, read_string, word;
         double chi_max; // max value of chi specified in chi_map
         int nchi;   //number of chi values in the optimization

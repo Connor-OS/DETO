@@ -4,14 +4,14 @@ num_chi 11
 num_mater 1
 
 PROPERTIES: chi material type diameter
-0.001	0	1	1
-0.1	    0	2	1
-0.2	    0	3	1
-0.3	    0	4	1
-0.4	    0	5	1
-0.5	    0	6	1
-0.6	    0	7	1
-0.7	    0	8	1
-0.8	    0	9	1
-0.9	    0	10	1
-1	    0	11	1
+0.001	steel	1	1
+0.1	    steel	2	1
+0.2	    steel	3	1
+0.3	    steel	4	1
+0.4	    steel	5	1
+0.5	    steel	6	1
+0.6	    steel	7	1
+0.7	    steel	8	1
+0.8	    steel	9	1
+0.9	    steel	10	1
+1	    concrete	11	1

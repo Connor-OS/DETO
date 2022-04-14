@@ -35,6 +35,7 @@ Optimize::~Optimize()
 // Printing info about the inputcprs class (possibly useful for debugging)
 void Optimize::read_chimap(std::string mapfname)
 {
+    fprintf(screen,"OKAY till HERE\n");
     std::ifstream mapFile(mapfname.c_str());
     bool found_nchi = false;
     bool found_nmat = false;
@@ -45,7 +46,7 @@ void Optimize::read_chimap(std::string mapfname)
     }
     else {
         MPI_Barrier(MPI_COMM_WORLD);
-        // READ FILE (all processors need to know this)
+        // READ chi_map file
         while (!mapFile.eof()) {
             MPI_Barrier(MPI_COMM_WORLD);
             std::getline(mapFile, read_string);
@@ -61,7 +62,9 @@ void Optimize::read_chimap(std::string mapfname)
                         lss >> nmat;
                         found_nmat = true;
                         for(int i=0; i<nmat; i++){
+                            vol_constraintYN.push_back(false);
                             vol_constraint.push_back(-1.0);
+                            local_vol_constraintYN.push_back(false);
                             local_vol_constraint.push_back(-1.0);
                             local_vol_radius.push_back(-1.0);
                         }
@@ -72,61 +75,77 @@ void Optimize::read_chimap(std::string mapfname)
                             bool material_set = false;
                             bool type_set = false;
                             bool chi_set = false;
+                            std::vector<int> delete_pos; 
+                            int pos = 0;
+                            fprintf(screen,"OKAY till HERE!\n");
                             while (lss >> word) {
+                                if (word == "chi") {
+                                    chi_set = true;
+                                    delete_pos.push_back(pos);
+                                }
+                                else if (word == "material") {
+                                    material_set = true;
+                                    delete_pos.push_back(pos);
+                                }
+                                else if (word == "type") {
+                                    type_set = true;
+                                    delete_pos.push_back(pos);
+                                }
                                 chi_map.properties.push_back(word);
                                 chi_map.values.push_back(std::vector<double>());
                                 for(int i=0; i<nchi; i++) {
                                     chi_map.values[chi_map.values.size()-1].push_back(0);
                                 }
-                                if (word == "chi") {
-                                    chi_set = true;
-                                }
-                                if (word == "material") {
-                                    material_set = true;
-                                }
-                                if (word == "type") {
-                                    type_set = true;
-                                }
+                                pos++;
                             }
                             if (material_set == false || type_set == false || chi_set == false) {
                                 err_msg = "ERROR: Please specify chi, material, and type in chi map";
                                 error->errsimple(err_msg);
                             }
+
+                            fprintf(screen,"OKAY till HERE!!\n");
                             // Populate chi_map
                             for (int i = 0; i < nchi; i++) {
                                 std::getline(mapFile, read_string);
                                 if (!read_string.empty()) {
                                     std::istringstream lss(read_string);
+                                    double tempval;
+                                    int tempint;
+                                    // lss >> word;
                                     for (int j=0; j<chi_map.properties.size(); j++) {
-                                        // double value;
-                                        double tempval;
-                                        lss >> tempval;
-                                        chi_map.values[j][i] = tempval;
+                                        if (strcmp(chi_map.properties[j].c_str(),"chi") == 0) {
+                                            fprintf(screen,"found chi!");
+                                            lss >> tempval;
+                                            chi_map.chis.push_back(tempval);
+                                        }
+                                        else if (strcmp(chi_map.properties[j].c_str(),"material") == 0) {
+                                            fprintf(screen,"found material!");
+                                            lss >> word;
+                                            chi_map.material.push_back(word);
+                                        }
+                                        else if (strcmp(chi_map.properties[j].c_str(),"type") == 0) {
+                                            fprintf(screen,"found type!");
+                                            lss >> tempint;
+                                            chi_map.types.push_back(tempint);                                           
+                                        }
+                                        else {
+                                            lss >> tempval;
+                                            chi_map.values[j][i] = tempval; 
+                                        }
                                     }
                                 }
                                 else {
                                     err_msg = "ERROR: Fewer than specified chi's given";
                                     error->errsimple(err_msg);
                                 }
+                                fprintf(screen,"OKAY till HERE!!!\n");
                             }
-                            // Move chi and type into separate vectors
-                            int c_i,t_i;
-                            for(int i=0; i<chi_map.properties.size(); i++) {
-                                if(chi_map.properties[i] == "chi") {
-                                    c_i =  i;
-                                    for(int j=0; j<nchi; j++) {
-                                        chi_map.chis.push_back(chi_map.values[i][j]);
-                                    }
-                                }
-                                if(chi_map.properties[i] == "type") {
-                                    t_i = i;
-                                    for(int j=0; j<nchi; j++) {
-                                        chi_map.types.push_back((int)chi_map.values[i][j]);
-                                    }
-                                }
+                            // // Move chi and type into separate vectors
+                            sort(delete_pos.begin(), delete_pos.end(), std::greater<int>());
+                            for(int i=0; i < delete_pos.size(); i++) {
+                                chi_map.values.erase(chi_map.values.begin()+delete_pos[i]);
+                                chi_map.properties.erase(chi_map.properties.begin()+delete_pos[i]);                                 
                             }
-                            chi_map.values.erase(chi_map.values.begin()+c_i,chi_map.values.begin()+t_i);
-                            chi_map.properties.erase(chi_map.properties.begin()+c_i,chi_map.properties.begin()+t_i); 
                         }
                         else {
                             err_msg = "ERROR: num_chi not found in map_chi file before specifying table of chi's and related quantities to set";
@@ -153,10 +172,10 @@ void Optimize::add_constraint(std::string read_string)
     double constraint, radius;
     std::istringstream lss(read_string);
     lss >> mat_ID >> constraint_type >> constraint;
-    if(constraint_type == "volume") {
+    if(constraint_type == "totchi") {
         vol_constraint[mat_ID-1] = constraint;
     }
-    else if(constraint_type == "local_volume") {
+    else if(constraint_type == "local_totchi") {
         lss >> radius;
         local_vol_constraint[mat_ID-1] = constraint;
         local_vol_radius[mat_ID-1] = radius;
@@ -251,13 +270,13 @@ void Optimize::initialize_chi()
     }
 
     // DEBUG: delete this before running final version of the code
-    sleep(me);
-    if (key==0) {
-        fprintf(screen,"\nID and type constructed at submaster\n-------------------\n");
-        for(int i=0; i<natoms; i++) {
-            fprintf(screen,"PROC %d ID: %d type %d\n",me,IDuns[i],typeuns[i]);
-        }
-    }
+    // sleep(me);
+    // if (key==0) {
+    //     fprintf(screen,"\nID and type constructed at submaster\n-------------------\n");
+    //     for(int i=0; i<natoms; i++) {
+    //         fprintf(screen,"PROC %d ID: %d type %d\n",me,IDuns[i],typeuns[i]);
+    //     }
+    // }
 
     
     //  initialise a chi vector on the submaster
@@ -387,13 +406,13 @@ void Optimize::printall()
     fprintf(screen, "\n---------ALL ABOUT OPTIMIZE----------\n");
     //Print chi map
     fprintf(screen,"Chi Map\n");
-    fprintf(screen,"Chi type ");
+    fprintf(screen,"Chi type material ");
     for(int i=0; i<chi_map.properties.size(); i++) {
         fprintf(screen,"%s ",chi_map.properties[i].c_str());
     }
     fprintf(screen, "\n-------------------------\n");
     for (int i = 0; i < nchi; i++) {
-        fprintf(screen,"%f %d ",chi_map.chis[i],chi_map.types[i]);
+        fprintf(screen,"%f %d %s ",chi_map.chis[i],chi_map.types[i],chi_map.material[i].c_str());
         for(int j=0; j<chi_map.properties.size(); j++) {
             fprintf(screen,"%.2f ",chi_map.values[j][i]);
         }

@@ -71,7 +71,7 @@ Inputdeto::~Inputdeto()
 
 
 // ---------------------------------------------------------------
-// Reading inputmsk file (not from restart)
+// Reading inputdeto file (not from restart)
 void Inputdeto::file()
 {
 	

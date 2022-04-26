@@ -19,6 +19,7 @@ The user manual is layed out as follows
   - [1.3 building DETO_3D](1_instaling/1.3_building.md)
 - [2. Running DETO_3D](2_running/2_index.md)
   - [2.1 Input script](2_running/2.1_input.md)
+  - [2.2 chimap](2_running/2.2_chimap.md)
 - [3. commands](3_commands/3_index.md)
   - [3.1 subcomm command](3_commands/3.1_subcomm.md)
   - [3.2 lammps command](3_commands/3.2_lammps.md)

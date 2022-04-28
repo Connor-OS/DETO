@@ -44,9 +44,13 @@ namespace DETO_NS {
             
             std::vector<std::string> properties;    // vector containing names of "other properties" in chi map file
             std::vector<std::vector<std::vector<double>>> values;   // matrix containing values of "other properties" in chi map file per material
+        
+            std::vector<double> chi_max; // max value of chi specified in chi_map for each material
+            std::vector<double> chi_min; // max value of chi specified in chi_map for each material
+            std::vector<double> chi_avg; // average value of chi specified in chi_map for each material
+            std::vector<int> nchi;   //vector containing the number of chi values per material in the optimization
         };
         struct Chi_map chi_map; // Instance of chi_map
-        struct Chi_map chi_map_sorted; // Instance of sorted chi_map per material
 
         std::vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
 
@@ -55,10 +59,9 @@ namespace DETO_NS {
         std::vector<bool> local_vol_constraintYN; // vector specifying if a local volume constraint is set for each material      
         std::vector<double> local_vol_constraint; // local volume constraint number between 0 and 1 per material
         std::vector<double> local_vol_radius;  // Radius over which local material volume is constrained per material
+        std::vector<std::string> constraint_method; // type of application of constraint per material, can be either scale or shift
+        std::vector<std::string> local_constraint_method; // type of application of local constraint per material, can be either scale or shift
         std::string err_msg, read_string, word;
-        std::vector<double> chi_max; // max value of chi specified in chi_map for each material
-        std::vector<double> chi_avg; // average value of chi specified in chi_map for each material
-        std::vector<int> nchi;   //vector containing the number of chi values per material in the optimization
         int tot_nchi; // total number of chi in chi map all materials
         int nmat;   //number of materials in the optimization
 

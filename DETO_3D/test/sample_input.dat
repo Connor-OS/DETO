@@ -67,8 +67,9 @@ opt_map_chi chimap.dat
 
 
 # constraints added with constrain function of type: volume or local_volume
-opt_constraint          1 totchi 0.6
-opt_constraint          1 local_totchi 0.8 5.2
+opt_constraint          steel totchi scale 0.6
+opt_constraint          concrete totchi shift 0.4
+opt_constraint          steel local_totchi scale 0.8 5.2
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======

@@ -3,13 +3,14 @@
 #include "error.h"
 #include "lammpsIO.h"
 #include "universe.h"
+#include "output.h"
+#include <iostream>
 
 //#include "chemistry.h"
 //#include "store.h"
 //#include "error.h"
 /*#include <stdlib.h>
 #include <stdio.h>
-#include <iostream>
 #include <fstream>
 */
 
@@ -174,13 +175,14 @@ void Optimize::read_chimap(std::string mapfname)
 
 
 // ---------------------------------------------------------------
+// add a constraint per material that can later be enforced on the design
 void Optimize::add_constraint(std::string read_string)
 {   
     std::string material,constraint_type,method;
     double constraint, radius;
     std::istringstream lss(read_string);
     lss >> material >> constraint_type >> method >> constraint;
-    if(constraint_type == "totchi") {
+    if(constraint_type == "avgchi") {
         for(int i=0; i<nmat; i++) {
             if(chi_map.material[i] == material) {
                 vol_constraintYN[i] = true;
@@ -189,7 +191,7 @@ void Optimize::add_constraint(std::string read_string)
             }
         }
     }
-    else if(constraint_type == "local_totchi") {
+    else if(constraint_type == "local_avgchi") {
         lss >> radius;
         for(int i=0; i<nmat; i++) {
             if(chi_map.material[i] == material) {
@@ -203,6 +205,22 @@ void Optimize::add_constraint(std::string read_string)
     else {
         err_msg = "Unrecognized constraint type specified in: " + read_string;
         error->errsimple(err_msg);
+    }
+}
+
+
+// ---------------------------------------------------------------
+// function setting the properties of the optimization
+void Optimize::set_opt_type(std::string read_string)
+{
+    std::istringstream lss(read_string);
+    lss >> opt_type;
+    if(strcmp(opt_type.c_str(),"sensitivity") == 0) {
+        pop_size = 1;
+        lss >> opt_par1 >> opt_par2;
+    }
+    else if(strcmp(opt_type.c_str(),"genetic") == 0) {
+        lss >> pop_size >> opt_par1 >> opt_par2;
     }
 }
 
@@ -269,10 +287,10 @@ void Optimize::initialize_chi()
         }
     }
     // MPI send ID's and types from each processor to the submaster. 
-    if (key==0){
-        IDuns = new int[natoms];
-        typeuns = new int[natoms];
-    }
+    
+    IDuns = new int[natoms];
+    typeuns = new int[natoms];
+    
     if (key>0) {
         int dest = 0;
         MPI_Send(&tID[0], nlocal, MPI_INT, dest, 1, (universe->subcomm));
@@ -289,124 +307,137 @@ void Optimize::initialize_chi()
         }
     }
 
-    // DEBUG: delete this before running final version of the code
-    // sleep(me);
-    // if (key==0) {
-    //     fprintf(screen,"\nID and type constructed at submaster\n-------------------\n");
-    //     for(int i=0; i<natoms; i++) {
-    //         fprintf(screen,"PROC %d ID: %d type %d\n",me,IDuns[i],typeuns[i]);
-    //     }
-    // }
-
-    
     //  initialise a chi vector on the submaster
     if(key == 0) {
-        // todo: compute chi_map.chi_avg and chi_map.chi_max
+
         for(int i=0; i<natoms; i++) {
             bool type_found = false;
             for(int j=0; j<nmat; j++) {
                 for(int k=0; k<chi_map.types[j].size(); k++) {
                     if(typeuns[i] == chi_map.types[j][k]) {
                         chi.push_back(chi_map.chis[j][k]);
+                        mat.push_back(chi_map.material[j]);
+                        mat_index.push_back(j);
                         type_found = true;
                     }
                 }
             }
             if(type_found == false) {
                 chi.push_back(2);    // todo: push_back(fabs(chi_map.chi_avg)+chi_map.chi_max+fabs(chi_map.chi_max)).... do this per-material use greatest chi_map.chi_avg and chi_map.chi_max between all materials
-            }
-        }
-        if(me == MASTER) {
-            fprintf(screen,"\n------------------\nUnnormalised chi\n-------------------\n\n");
-            for (int i=0; i<natoms; i++) {
-                fprintf(screen,"%f\n",chi[i]);
+                mat.push_back("non-opt");
+                mat_index.push_back(-1);
             }
         }
         //Enforce Volume constraint, or local volume constraint if any are defined here
-        constrain_vol();
-        constrain_local_vol();    //todo: to be implemented... not in a rush though
-        
+        constrain_avg_chi();
+        constrain_local_avg_chi();    //todo: to be implemented... not in a rush though
     }
-    if(me == MASTER) {
-        fprintf(screen,"\n------------------\nNormalised chi\n-------------------\n\n");
-        for (int i=0; i<natoms; i++) {
-            fprintf(screen,"%f\n",chi[i]);
+    
+    //Broadcast chi vector to each processor
+    chi_each = new double[natoms];
+    mat_each = new int[natoms];
+    // ID = new int[natoms];
+    if(key == 0) {
+        chi_each = &chi[0];
+        mat_each = &mat_index[0];
+        // ID = &IDuns[0];
+    }
+    MPI_Bcast(&chi_each[0],natoms,MPI_DOUBLE,0,(universe->subcomm));
+    MPI_Bcast(&mat_each[0],natoms,MPI_INT,0,(universe->subcomm));
+    MPI_Bcast(&IDuns[0],natoms,MPI_INT,0,(universe->subcomm));
+
+    if(me > 0) {
+        for(int i=0; i<natoms; i++) {
+            // IDuns[i] = ID[i];
+            chi.push_back(chi_each[i]);
+            mat_index.push_back(mat_each[i]);
+            if(mat_each[i] > -1) mat.push_back(chi_map.material[mat_each[i]]);
+            else mat.push_back("non-opt");
         }
     }
 
-    // TODO: processors must communicate their IDS to the other and local MASTER (viz. proc with key == 0 in current bcomm) must assemble the local IDs and types into its global vectors aID, atype).  Then key == 0 must associate chi to each type.
-    // for each lammps type assign corresponding chi from chi_map
-    
-    
-    
-    // In this class we need a per-particle vector of chi values, so we need to extract from LAMMPS all the particles with type included in the chi_map list. Actually, we need a chi vector for each material tpye (also, listed in chi_map file)
-    // TODO: when reading chi_map also read number of materials. If any of the specified material ID in chi_map does not fit the number (e.g., you specify material 0 and 1 but you had given only num_mater = 1) then produce error
-    // When defining the chi vector, you can make as long as all atoms in lammps, but assign 2 x max_chi (from chi_map) to the atoms whose type is not included din the chi_map (so they wil visualize as chi = max, i.e. solid, in OVITO)
-    
-    // delete IDuns;
-    // delete IDpos;
-    // delete nID_each;
+    // To generate inital population: why dont we, extend chi into a matrix, then apply a special level of mutation to each vector
 
+    output->toplog("\n------------------\nNormalised chi\n-------------------\n\n");
+    for (int i=0; i<natoms; i++) {
+        std::string logmsg = "";
+        std::ostringstream ss;
+        ss << IDuns[i] << " " << chi[i] << " " << mat[i]; 
+        logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+        output->toplog(logmsg);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);     
+    load_chi();
 }
     
 
 // ---------------------------------------------------------------
 // Function to constrain the total chi in the simulation, does not contain material
-void Optimize::constrain_vol() // This function needs to have different modes for different volume constraints
+void Optimize::constrain_avg_chi() // This function needs to have different modes for different volume constraints
 //It is best not to use this function with negative chi as it is untested
 {
+    double chi_constrained[natoms];
+    for(int i=0; i<natoms; i++) {
+        chi_constrained[i] = chi[i]; 
+    }
     for(int i=0; i<nmat; i++) {
         double chi_sum = 0.;
+        int natoms_mat = 0;
         if(vol_constraintYN[i] == true){
             if(std::strcmp(constraint_method[i].c_str(),"scale") == 0) {
                 double l1 = 0.;  // chi_min - chi_map.chi_avg/10
-                double l2 = 1000;//chi_map.chi_max[i]*(1/chi_map.chi_min[i]);   // chi_map.chi_max //maybe this constraint only works for positive chi
+                double l2 = 1000; //chi_map.chi_max[i]*(1/chi_map.chi_min[i]);   // chi_map.chi_max //maybe this constraint only works for positive chi
                 double lmid; //different constraint types can allow us to accomidate more
-                double chi_constrained[natoms];
                 while (l2-l1 > 1e-8){
+                    natoms_mat = 0;
                     chi_sum = 0.;
                     lmid = 0.5*(l2+l1);
                     for (int j=0; j<natoms; j++) {
-                        chi_constrained[j] = chi[j]*lmid;
-                        if(chi_constrained[j] > chi_map.chi_max[i]) chi_constrained[j] = chi_map.chi_max[i];
-                        if(chi_constrained[j] < chi_map.chi_min[i]) chi_constrained[j] = chi_map.chi_min[i];
-                        chi_sum += chi_constrained[j];
+                        if(mat[j] == chi_map.material[i]) {
+                            chi_constrained[j] = chi[j]*lmid;
+                            if(chi_constrained[j] > chi_map.chi_max[i]) chi_constrained[j] = chi_map.chi_max[i];
+                            if(chi_constrained[j] < chi_map.chi_min[i]) chi_constrained[j] = chi_map.chi_min[i];
+                            chi_sum += chi_constrained[j];
+                            natoms_mat++;
+                        }
                     }
-                    if ((chi_sum - vol_constraint[i]*(double)natoms) > 0) l2 = lmid;
+                    if ((chi_sum - vol_constraint[i]*(double)natoms_mat) > 0) l2 = lmid;
                     else l1 = lmid;
-                }
-                for (int j=0; j<natoms; j++) {
-                    chi[j] = chi_constrained[j];
                 }
             }
             else if(std::strcmp(constraint_method[i].c_str(),"shift") == 0) {
                 double l1 = -chi_map.chi_max[i];
                 double l2 = chi_map.chi_max[i];
                 double lmid;
-                double chi_constrained[natoms];
                 while (l2-l1 > 1e-8){
+                    natoms_mat = 0;
                     chi_sum = 0.;
                     lmid = 0.5*(l2+l1);
                     for (int j=0; j<natoms; j++) {
-                        chi_constrained[j] = chi[j]+lmid;
-                        if(chi_constrained[j] > chi_map.chi_max[i]) chi_constrained[j] = chi_map.chi_max[i];
-                        if(chi_constrained[j] < chi_map.chi_min[i]) chi_constrained[j] = chi_map.chi_min[i];
-                        chi_sum += chi_constrained[j];
+                        if(mat[j] == chi_map.material[i]) {
+                            chi_constrained[j] = chi[j]+lmid;
+                            if(chi_constrained[j] > chi_map.chi_max[i]) chi_constrained[j] = chi_map.chi_max[i];
+                            if(chi_constrained[j] < chi_map.chi_min[i]) chi_constrained[j] = chi_map.chi_min[i];
+                            chi_sum += chi_constrained[j];
+                            natoms_mat++;
+                        }
                     }
-                    if ((chi_sum - vol_constraint[i]*(double)natoms) > 0) l2 = lmid;
+                    if ((chi_sum - vol_constraint[i]*(double)natoms_mat) > 0) l2 = lmid;
                     else l1 = lmid;
-                }
-                for (int j=0; j<natoms; j++) {
-                    chi[j] = chi_constrained[j];
                 }
             }
             else {
                 err_msg = "ERROR: Unrecognised constraint method";
+                error->errsimple(err_msg); // return an error flag because inside submaster
+                error_flag = true;
+            }
+            if ((chi_sum - vol_constraint[i]*(double)natoms_mat) > 0.1 || (chi_sum - vol_constraint[i]*(double)natoms_mat) < -0.1) {
+                err_msg = "ERROR: was not able to apply constraint sucessfully to %s",chi_map.material[i].c_str();
                 error->errsimple(err_msg);
             }
-            if ((chi_sum - vol_constraint[i]*(double)natoms) > 0.1 || (chi_sum - vol_constraint[i]*(double)natoms) < -0.1) {
-                err_msg = "ERROR: was not able to apply volume constraint sucessfully";
-                error->errsimple(err_msg);
+            for (int j=0; j<natoms; j++) {
+                chi[j] = chi_constrained[j];
             }
         }
     }
@@ -415,9 +446,40 @@ void Optimize::constrain_vol() // This function needs to have different modes fo
 
 // ---------------------------------------------------------------
 // running the optimization
-void Optimize::constrain_local_vol()
+void Optimize::constrain_local_avg_chi()
 {
 
+}
+
+// ---------------------------------------------------------------
+// running the optimization
+void Optimize::load_chi()
+// This function maps a continues chi vector to it's closest discrete counterpart and then sets the lammpsinstance on it's own subcomm to be using this chi arrangment
+// this should be called imediatly before any lammps run takes place (probably with the chi vector passeed as an argument)
+{
+    for(int i=0; i<natoms; i++) {
+        int k = 0;
+        for(int j=0; j<chi_map.material.size(); j++) {
+            if(std::strcmp(mat[i].c_str(),chi_map.material[j].c_str()) == 0) {
+                int l1 = 0;
+                int l2 = chi_map.nchi[j]-1;
+                while(l2-l1 > 1) {
+                    int k = (l1+l2)/2;
+                    if(chi[i] < chi_map.chis[j][k]) l2 = k;
+                    else l1 = k;
+                }
+                if((chi_map.chis[j][l1]+chi_map.chis[j][l2])/2 > chi[i]) k = l1;
+                else k = l2;
+                std::string set_type = "set atom " + std::to_string(IDuns[i]) + " type " + std::to_string(chi_map.types[j][k]);
+                output->toplog(set_type);
+                lammpsIO->lammpsdo(set_type);
+            }
+        }
+    }
+    fprintf(screen,"\nCOMPLETED LOAD CHI\n");
+    MPI_Barrier(MPI_COMM_WORLD);
+//assign chi to closest discrete mapping in local vector
+//lammpsIO()->lammpsdo(set atom 1492 type 3) assign particles to there newly defined chi via look up in chi_map
 }
 
 
@@ -429,11 +491,8 @@ void Optimize::optrun()
 
     initialize_chi();
     
-   
-    
-    
     // for certain optimization types, e.g. GA, we may have to create a first set of chi_vectors to then initite the while loop
-    // initialize_chipop();
+    // initialize_chipop();// used if GA is specified
     
     // start the while loop (exit conditions may be a tolerance on chi changes or a number of steps)
     // while (optimization not converged) {
@@ -448,7 +507,6 @@ void Optimize::optrun()
     
     // end of while loop
     // }
-    
     // some criterion to pick the winner chi_vector (e.g. the one with lowest objective value)
     
 }

@@ -40,10 +40,10 @@ DETO::DETO(int narg, char **arg)
 {
     screen = NULL;
     screen=stdout;
-    wplog = false;
-    /*
-    plog = NULL;
+    wplog = true;
     
+    plog = NULL;
+    /*
     nulog_flag = false;
     */
     

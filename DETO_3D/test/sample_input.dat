@@ -16,8 +16,8 @@ lammps	units		si
 lammps	boundary	s s p
 lammps	atom_style	hybrid sphere bond
 
-lammps	variable    	nelx equal 15
-lammps	variable    	nely equal 5
+lammps	variable    	nelx equal 45
+lammps	variable    	nely equal 25
 
 lammps	lattice     	hex 1
 lammps	region		box block 0 $(v_nelx-1) 0 $((v_nely-1)/2) -0.1 0.1 units lattice
@@ -45,15 +45,16 @@ lammps	thermo		200
 lammps	region		1 block INF 0.01 INF 0.1 INF INF units lattice
 lammps	region		2 block $(v_nelx-1) INF INF 0.01 INF INF units lattice
 lammps	region		3 block INF $(v_nelx/6) INF INF INF INF units lattice
-lammps  region      4 cylinder z 60 6 8 INF INF units lattice
+lammps  region      4 cylinder z 30 6 8 INF INF units lattice
 lammps	group		support1 region 1				
 lammps	group		support2 region 2
 lammps	group		non_opt region 3
 lammps	group		disk region 4
-lammps	set 		group support1 type 2				
-lammps	set 		group support2 type 2
-lammps	set 		group non_opt type 6
-lammps	set 		group disk type 6
+lammps  set         atom * type 14
+#lammps	set 		group support1 type 2	
+#lammps	set 		group support2 type 16
+lammps	set 		group non_opt type 24
+lammps	set 		group disk type 5
 lammps	fix 		support1 support1 setforce 0 0 0				
 lammps	fix	    	support2 support2 setforce 0 0 0
 
@@ -67,9 +68,9 @@ opt_map_chi chimap.dat
 
 
 # constraints added with constrain function of type: volume or local_volume
-opt_constraint          steel totchi scale 0.6
-opt_constraint          concrete totchi shift 0.4
-opt_constraint          steel local_totchi scale 0.8 5.2
+opt_constraint          steel avgchi scale 0.6
+opt_constraint          concrete avgchi shift 0.4
+opt_constraint          steel local_avgchi scale 0.8 5.2
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======
@@ -166,3 +167,7 @@ add_attribute Sim3  	variable 	half_minus delete
 
 add_objective Sim3 c5 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
 add_objective Sim3 c6 pressure 
+
+#opt_type genetic tour var pop_size cross_rate mut_rate
+
+opt_type genetic 30 0.95 0.01

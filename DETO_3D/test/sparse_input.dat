@@ -45,15 +45,15 @@ lammps	thermo		200
 lammps	region		1 block INF 0.01 INF 0.1 INF INF units lattice
 lammps	region		2 block $(v_nelx-1) INF INF 0.01 INF INF units lattice
 lammps	region		3 block INF $(v_nelx/6) INF INF INF INF units lattice
-lammps  region      4 cylinder z 60 6 8 INF INF units lattice
+lammps  region      4 cylinder z 3 2 3 INF INF units lattice
 lammps	group		support1 region 1				
 lammps	group		support2 region 2
 lammps	group		non_opt region 3
 lammps	group		disk region 4
 lammps	set 		group support1 type 2				
 lammps	set 		group support2 type 2
-lammps	set 		group non_opt type 6
-lammps	set 		group disk type 6
+lammps	set 		group non_opt type 3
+lammps	set 		group disk type 2
 lammps	fix 		support1 support1 setforce 0 0 0				
 lammps	fix	    	support2 support2 setforce 0 0 0
 
@@ -67,8 +67,8 @@ opt_map_chi chimap_sparse.dat
 
 
 # constraints added with constrain function of type: volume or local_volume
-opt_constraint          1 totchi 0.6
-opt_constraint          1 local_totchi 0.8 5.2
+#opt_constraint          1 avgchi 0.6
+#opt_constraint          1 local_avgchi 0.8 5.2
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======

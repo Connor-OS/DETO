@@ -117,6 +117,15 @@ void* LammpsIO::extract_atom_varaiable(std::string toextract)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
+void* LammpsIO::extract_varaiable(std::string toextract)
+{   
+    void* variable = lammps_extract_variable(lmp,toextract.c_str(),NULL);
+    return variable;
+}
+
+
+// ---------------------------------------------------------------
+// Extract per atom variable of atoms in simulation
 void* LammpsIO::gather_atom_varaiable(char * toextract)
 {   
     int64_t natoms;

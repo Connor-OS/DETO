@@ -67,8 +67,8 @@ opt_map_chi chimap_sparse.dat
 
 
 # constraints added with constrain function of type: volume or local_volume
-#opt_constraint          1 avgchi 0.6
-#opt_constraint          1 local_avgchi 0.8 5.2
+opt_constraint          homo avgchi scale 0.6
+
 
 
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======

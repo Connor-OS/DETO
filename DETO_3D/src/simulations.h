@@ -2,6 +2,7 @@
 #define SIMULATIONS_H
 
 #include "pointers.h"
+#include "universe.h"
 #include <string>
 #include <vector>
 //#include "mpi.h"
@@ -44,7 +45,7 @@ namespace DETO_NS {
         
         std::vector<std::vector<std::string>> sim_attributes; //vector sim attributes
         
-        std::vector<std::vector<std::vector<std::string>>> sim_obj_names; // Unique ID of each attribute
+        std::vector<std::vector<std::vector<std::string>>> sim_obj_names; // Unique ID of each objective
         std::vector<std::vector<std::vector<std::string>>> sim_obj_LMPnames; // LAMMPS varaible names linked to objective
         std::vector<std::vector<std::vector<double>>> sim_obj_val; //one list of objectives names and values for each simulation in a repat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of objectives names and value for that simulation)
 
@@ -60,6 +61,8 @@ namespace DETO_NS {
         void add_constraint(std::string);
 
         void read_repeat(std::string);
+
+        void run();
         
 	private:
         std::string err_msg, read_string, word, read_string2;

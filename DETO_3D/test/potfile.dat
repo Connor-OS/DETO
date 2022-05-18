@@ -65,19 +65,19 @@ pair_coeff	9	11	hertz	0.32	0.064	tangential mindlin	0.0512	0.64	0.032
 pair_coeff	10	10	hertz	0.32805	0.06561	tangential mindlin	0.052488	0.6561	0.032805
 pair_coeff	10	11	hertz	0.405	0.081	tangential mindlin	0.0648	0.81	0.0405
 pair_coeff	11	11	hertz	0.5	0.1	tangential mindlin	0.08	1	0.05
-
-bond_style	harmonic					
-bond_coeff 1 0.0 1
-bond_coeff 2 0.0 1
-bond_coeff 3 0.0 1
-bond_coeff 4 0.0 1
-bond_coeff 5 0.0 1
-bond_coeff 6 0.0 1
-bond_coeff 7 0.0 1
-bond_coeff 8 0.0 1
-bond_coeff 9 0.0 1
-bond_coeff 10 0.0 1
-bond_coeff 11 0.0 1
+					
+bond_style	harmonic	
+bond_coeff	1	0.01	1
+bond_coeff	2	0.01	1
+bond_coeff	3	0.01	1
+bond_coeff	4	0.01	1
+bond_coeff	5	0.01	1
+bond_coeff	6	0.01	1
+bond_coeff	7	0.01	1
+bond_coeff	8	0.01	1
+bond_coeff	9	0.01	1
+bond_coeff	10	0.01	1
+bond_coeff	11	0.01	1
 bond_coeff 12 0.01 1
 bond_coeff 13 0.04 1
 bond_coeff 14 0.09 1
@@ -133,3 +133,82 @@ bond_coeff 63 64.0 1
 bond_coeff 64 65.61 1
 bond_coeff 65 81.0 1
 bond_coeff 66 100.0 1
+
+group 1 type 1
+group 2 type 2
+group 3 type 3
+group 4 type 4
+group 5 type 5
+group 6 type 6
+group 7 type 7
+group 8 type 8
+group 9 type 9
+group 10 type 10
+group 11 type 11
+
+create_bonds	many	1	1	1	0.9	1.1
+create_bonds	many	1	2	2	0.9	1.1
+create_bonds	many	1	3	3	0.9	1.1
+create_bonds	many	1	4	4	0.9	1.1
+create_bonds	many	1	5	5	0.9	1.1
+create_bonds	many	1	6	6	0.9	1.1
+create_bonds	many	1	7	7	0.9	1.1
+create_bonds	many	1	8	8	0.9	1.1
+create_bonds	many	1	9	9	0.9	1.1
+create_bonds	many	1	10	10	0.9	1.1
+create_bonds	many	1	11	11	0.9	1.1
+create_bonds	many	2	2	12	0.9	1.1
+create_bonds	many	2	3	13	0.9	1.1
+create_bonds	many	2	4	14	0.9	1.1
+create_bonds	many	2	5	15	0.9	1.1
+create_bonds	many	2	6	16	0.9	1.1
+create_bonds	many	2	7	17	0.9	1.1
+create_bonds	many	2	8	18	0.9	1.1
+create_bonds	many	2	9	19	0.9	1.1
+create_bonds	many	2	10	20	0.9	1.1
+create_bonds	many	2	11	21	0.9	1.1
+create_bonds	many	3	3	22	0.9	1.1
+create_bonds	many	3	4	23	0.9	1.1
+create_bonds	many	3	5	24	0.9	1.1
+create_bonds	many	3	6	25	0.9	1.1
+create_bonds	many	3	7	26	0.9	1.1
+create_bonds	many	3	8	27	0.9	1.1
+create_bonds	many	3	9	28	0.9	1.1
+create_bonds	many	3	10	29	0.9	1.1
+create_bonds	many	3	11	30	0.9	1.1
+create_bonds	many	4	4	31	0.9	1.1
+create_bonds	many	4	5	32	0.9	1.1
+create_bonds	many	4	6	33	0.9	1.1
+create_bonds	many	4	7	34	0.9	1.1
+create_bonds	many	4	8	35	0.9	1.1
+create_bonds	many	4	9	36	0.9	1.1
+create_bonds	many	4	10	37	0.9	1.1
+create_bonds	many	4	11	38	0.9	1.1
+create_bonds	many	5	5	39	0.9	1.1
+create_bonds	many	5	6	40	0.9	1.1
+create_bonds	many	5	7	41	0.9	1.1
+create_bonds	many	5	8	42	0.9	1.1
+create_bonds	many	5	9	43	0.9	1.1
+create_bonds	many	5	10	44	0.9	1.1
+create_bonds	many	5	11	45	0.9	1.1
+create_bonds	many	6	6	46	0.9	1.1
+create_bonds	many	6	7	47	0.9	1.1
+create_bonds	many	6	8	48	0.9	1.1
+create_bonds	many	6	9	49	0.9	1.1
+create_bonds	many	6	10	50	0.9	1.1
+create_bonds	many	6	11	51	0.9	1.1
+create_bonds	many	7	7	52	0.9	1.1
+create_bonds	many	7	8	53	0.9	1.1
+create_bonds	many	7	9	54	0.9	1.1
+create_bonds	many	7	10	55	0.9	1.1
+create_bonds	many	7	11	56	0.9	1.1
+create_bonds	many	8	8	57	0.9	1.1
+create_bonds	many	8	9	58	0.9	1.1
+create_bonds	many	8	10	59	0.9	1.1
+create_bonds	many	8	11	60	0.9	1.1
+create_bonds	many	9	9	61	0.9	1.1
+create_bonds	many	9	10	62	0.9	1.1
+create_bonds	many	9	11	63	0.9	1.1
+create_bonds	many	10	10	64	0.9	1.1
+create_bonds	many	10	11	65	0.9	1.1
+create_bonds	many	11	11	66	0.9	1.1

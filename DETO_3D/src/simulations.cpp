@@ -1,11 +1,11 @@
 #include "simulations.h"
 #include <sstream>
 #include "error.h"
+#include "lammpsIO.h"
 //#include "universe.h"
 
 //#include "chemistry.h"
 //#include "store.h"
-//#include "lammpsIO.h"
 //#include "error.h"
 /*#include <stdlib.h>
 #include <stdio.h>
@@ -22,7 +22,6 @@ Simulations::Simulations(DETO *deto) : Pointers(deto)
 
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
-
 
 }
 
@@ -287,6 +286,23 @@ void Simulations::read_repeat(std::string repeatfname)
                 }
             }
         }
+    }
+}
+
+// ---------------------------------------------------------------
+// Run simulation of given sim_id
+void Simulations::run()
+{
+    for(int i=0; i<sim_attributes.size(); i++) {
+        for(int j=0; j<n_repeats[i]; j++) {
+            for(int k=0; k<sim_attributes[i].size(); k++) { //TODO: add while loop for cstgs and for loop for repeat
+                lammpsIO->lammpsdo(sim_attributes[i][k]);
+            }
+            for(int k=0; k<sim_obj_names[i][j].size(); k++) {
+                sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);
+            }
+        }
+        if(universe->key == 0) fprintf(screen,"Sim %d COMPLETE\n",i+1);
     }
 }
 

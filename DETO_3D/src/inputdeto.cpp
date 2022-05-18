@@ -146,7 +146,7 @@ void Inputdeto::file()
     
     inFile.close();
 
-    if (me == MASTER) fprintf(screen,"DONE Reading input file\n");
+    if (me == MASTER) fprintf(screen,"DONE Reading input file\n\n");
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -217,10 +217,6 @@ void Inputdeto::execline(std::string read_string)
         }
         else if (strcmp(word.c_str(), "lammps") ==0)  {
             if (lammpsIO->lammps_active) {
-                //fprintf(screen, "In %s LAMMMPS doing: %s\n",(universe->SCnames[universe->color]).c_str(),(lss.str()).c_str());
-                //std::getline (inFile, read_string);
-                //std::istringstream iss(read_string);
-                
                 std::string subs, newstring;
                 lss >> firstWord;
                 // add subcomm name to dump name ----
@@ -262,7 +258,7 @@ void Inputdeto::execline(std::string read_string)
             lss >> mapfname;
             optimize->read_chimap(mapfname);
         }
-        /*else if (strcmp(word.c_str(), "read_potentials") == 0) {
+        else if (strcmp(word.c_str(), "read_potentials") == 0) {
             std::string potfname;
             lss >> potfname;
             
@@ -277,10 +273,11 @@ void Inputdeto::execline(std::string read_string)
                 while (!potFile.eof()) {
                     MPI_Barrier(MPI_COMM_WORLD);
                     std::getline (potFile, read_string2);
-                    lammpsIO->lammpsdo(read_string2);
+                    // lammpsIO->lammpsdo(read_string2);
+                    optimize->potentials.push_back(read_string2);
                 }
             }
-        }*/
+        }
         else if (strcmp(word.c_str(), "simulation") == 0) {
             std::string read_string2;
             std::getline(lss, read_string2);

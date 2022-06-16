@@ -36,6 +36,7 @@ namespace DETO_NS {
         void printall();
         void lammpsdo(std::string); //passes a command to lammps
         double extract_natoms();
+        void* extract_global(std::string);
         void* extract_atom_varaiable(std::string);
         void* extract_varaiable(std::string);
         void* gather_atom_varaiable(char *);

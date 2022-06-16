@@ -126,6 +126,38 @@ void* LammpsIO::extract_varaiable(std::string toextract)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
+void* LammpsIO::extract_global(std::string toextract)
+{   
+    void* variable = lammps_extract_global(lmp,toextract.c_str());
+    return variable;
+}
+
+
+// ---------------------------------------------------------------
+// read and print bond information directly from lammps
+void LammpsIO::print_bonds()
+{   
+    LAMMPS_NS::bigint num_bonds;
+    int** bonds;
+    num_bonds = lmp->atom->nbonds;
+    bonds = lmp->atom->bond_type;
+    fprintf(screen,"%ld\n",num_bonds);
+    for(int i=0; i<num_bonds; i++) {
+        fprintf(screen,"%d\n",*bonds[i]);
+        *lmp->atom->bond_type[i] = 66; //we can modify the bond data directly from here
+    }
+}
+
+
+// ---------------------------------------------------------------
+// read and print bond information directly from lammps
+void LammpsIO::set_type(int id,int type)
+{
+    lmp->atom->type[id] = type; //don't do this unless you are an expert
+}
+
+// ---------------------------------------------------------------
+// Extract per atom variable of atoms in simulation
 void* LammpsIO::gather_atom_varaiable(char * toextract)
 {   
     int64_t natoms;

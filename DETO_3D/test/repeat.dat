@@ -1,6 +1,6 @@
 #number of repeat variables in the table followed by variable names and table of values
 
-num_rep 5
+num_rep 1
 VARS: repeat_force repeat_stiffness
 1	50
 2	55

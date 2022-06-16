@@ -2,6 +2,7 @@
 #define OPTIMIZE_H
 
 #include "pointers.h"
+#include "universe.h"
 // #include "simulations.h"
 #include <string>
 #include <vector>
@@ -33,6 +34,9 @@ namespace DETO_NS {
         void printall();
 
         std::vector<std::string> potentials; // vector containing all information regarding the potentials available for the optimization
+
+        int * pop_sizeps; // pop_size per subcommunicator
+        int * pop_sizeps_cum; // pop_size per subcommunicator
         
 	private:
 
@@ -77,18 +81,22 @@ namespace DETO_NS {
         std::vector<std::vector<std::string>> mat_pop;  // vector of vector of material values for the whole population
         std::vector<std::vector<int>> mat_index_pop;  //vector of vector of material index for the whole population
 
-        std::vector<std::vector<double>> chi_popps;   // vector of vector of chi values for the whole population
-        std::vector<std::vector<std::string>> mat_popps;  // vector of vector of material values for the whole population
-        std::vector<std::vector<int>> mat_index_popps;  //vector of vector of material index for the whole population
+        double ** chi_popps;   // vector of vector of chi values for the whole population
+        // std::vector<std::vector<std::string>> mat_popps;  // vector of vector of material values for the whole population
+        std::string ** mat_popps;
+        int ** mat_index_popps;  //vector of vector of material index for the whole population
+        // std::vector<std::vector<int>> mat_index_popps;  //vector of vector of material index for the whole population
 
         //Optimisation variables
         std::string opt_type; //the type of optimization to be run. i.e genetic, sensitivity etc..
         int pop_size; // size of population of solutions
-        int pop_sizeps; // pop_size per subcommunicator
         double opt_par1, opt_par2, opt_par3; //paramaters specifict to optimisation types
         //if "genetic" then par1 = crossover rate, part2 = mutation rate
         //if "sensitivity" then par1 = move limit
+        std::vector<double> opt_objective_eval;
+        std::vector<double> opt_objective_evalps;
         
+        int init_ts; //timestep after initalisation
         double tol; // optimisation tolerance
         //
     
@@ -114,7 +122,9 @@ namespace DETO_NS {
 
         void initialize_chi();
         void initialize_chipop();
+        void update_chipop();
         void split_pop();
+        void communicate_pop();
         void constrain_avg_chi(int id); 
         std::vector<double> constrain_local_avg_chi(std::vector<double>); //todo: change to void
         void load_chi(int);

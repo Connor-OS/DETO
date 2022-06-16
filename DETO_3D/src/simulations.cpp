@@ -2,7 +2,8 @@
 #include <sstream>
 #include "error.h"
 #include "lammpsIO.h"
-//#include "universe.h"
+#include "universe.h"
+#include "optimize.h"
 
 //#include "chemistry.h"
 //#include "store.h"
@@ -41,6 +42,7 @@ void Simulations::add(std::string read_string)
 {
 // record name in a vector
     std::string sim_name, sim_type, repstr, repYN;
+    n_sims++;
     
     std::istringstream lss(read_string);
     lss >> sim_name >> sim_type;
@@ -295,14 +297,15 @@ void Simulations::run()
 {
     for(int i=0; i<sim_attributes.size(); i++) {
         for(int j=0; j<n_repeats[i]; j++) {
+            lammpsIO->lammpsdo("read_dump dump.init_config 1 x y vx vy trim yes");
             for(int k=0; k<sim_attributes[i].size(); k++) { //TODO: add while loop for cstgs and for loop for repeat
                 lammpsIO->lammpsdo(sim_attributes[i][k]);
             }
             for(int k=0; k<sim_obj_names[i][j].size(); k++) {
                 sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);
+                // if(universe->key == 0) fprintf(screen,"Sim %d COMPLETE Objective %f\n",i,sim_obj_val[i][j][k]);
             }
         }
-        if(universe->key == 0) fprintf(screen,"Sim %d COMPLETE\n",i+1);
     }
 }
 

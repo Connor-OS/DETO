@@ -39,6 +39,7 @@ namespace DETO_NS {
         std::vector<std::string> cstgs_crit; //criterion to escape a cstgs sim
         std::vector<std::vector<std::string>> cstgs_crit_vnms; //name of lammps variables used in the criterion string
         
+        int n_sims; //number of simulations defined in the input script
         std::vector<int> n_repeats; //number of repeats
         std::vector<std::string> sim_repeat_file; //vector holding path to repeat file data
 

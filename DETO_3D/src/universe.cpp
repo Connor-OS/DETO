@@ -72,7 +72,7 @@ void Universe::create()
     // Create vector with IDs of all submasters
     subMS.push_back(0);
     for (int i=1; i<nsc; i++) {
-        subMS.push_back(subMS[i-1]+SCnp[i]);
+        subMS.push_back(subMS[i-1]+SCnp[i-1]);  //Issue: off by one error, check MASKE src
     }
     
     

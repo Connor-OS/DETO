@@ -212,3 +212,15 @@ create_bonds	many	9	11	63	0.9	1.1
 create_bonds	many	10	10	64	0.9	1.1
 create_bonds	many	10	11	65	0.9	1.1
 create_bonds	many	11	11	66	0.9	1.1
+
+group 1 delete
+group 2 delete
+group 3 delete
+group 4 delete
+group 5 delete
+group 6 delete
+group 7 delete
+group 8 delete
+group 9 delete
+group 10 delete
+group 11 delete

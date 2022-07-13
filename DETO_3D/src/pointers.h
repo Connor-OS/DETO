@@ -31,6 +31,7 @@ public:
     lammpsIO(ptr->lammpsIO),
     optimize(ptr->optimize),
     sims(ptr->sims),
+    update(ptr->update),
     /*
      
     chem(ptr->chem),
@@ -71,6 +72,7 @@ protected:
     LammpsIO *&lammpsIO;
     Optimize *&optimize;
     Simulations *&sims;
+    Update *&update;
     /*
      
     Chemistry *&chem;

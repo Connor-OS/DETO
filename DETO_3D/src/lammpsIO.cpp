@@ -132,6 +132,14 @@ void* LammpsIO::extract_global(std::string toextract)
     return variable;
 }
 
+// ---------------------------------------------------------------
+// Extract per atom variable of atoms in simulation
+int LammpsIO::extract_setting(std::string toextract)
+{   
+    int variable = lammps_extract_setting(lmp,toextract.c_str());
+    return variable;
+}
+
 
 // ---------------------------------------------------------------
 // read and print bond information directly from lammps

@@ -23,6 +23,7 @@ Simulations::Simulations(DETO *deto) : Pointers(deto)
 
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
+    n_sims = 0;
 
 }
 
@@ -167,6 +168,8 @@ void Simulations::add(std::string read_string)
 
     //default container for attributes - will be filled out by seperate add_attribute command
     sim_attributes.push_back(std::vector<std::string>());
+
+    ndim = lammpsIO->extract_setting("dimension");
 }
 
 
@@ -297,7 +300,6 @@ void Simulations::run()
 {
     for(int i=0; i<sim_attributes.size(); i++) {
         for(int j=0; j<n_repeats[i]; j++) {
-            lammpsIO->lammpsdo("read_dump dump.init_config 1 x y vx vy trim yes");
             for(int k=0; k<sim_attributes[i].size(); k++) { //TODO: add while loop for cstgs and for loop for repeat
                 lammpsIO->lammpsdo(sim_attributes[i][k]);
             }
@@ -315,7 +317,8 @@ void Simulations::printall()
 {
 	fprintf(screen,"\n---------ALL ABOUT Simulations----------\n");
 	//fprintf(screen,"inputcprs filename =  %s\n",fname.c_str());
-    for(int i=0; i<sim_names.size(); i++) 
+    fprintf(screen,"Number of simulations %d\n",n_sims);
+    for(int i=0; i<n_sims; i++) 
     {
         fprintf(screen,"ID: %s\n  Type: %s\n",sim_names[i].c_str(),sim_types[i].c_str());
         // print cstgs parameters

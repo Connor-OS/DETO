@@ -12,7 +12,7 @@ opt_type genetic 7 0.95 0.01
 # ===== SET UNIVERSE OF SUB-COMMUNICATORS ========
 
 # command structure: subcomm Nsubcomms
-subcomm 2
+subcomm 4
 
 
 # ====== INITIAL SETTINGS FOR ALL LAMMPS INSTANCES =======
@@ -28,10 +28,9 @@ lammps	variable    	nely equal 11
 
 lammps	lattice     	hex 1
 lammps	region		    box block 0 $(v_nelx-1) 0 $((v_nely-1)/2) -0.1 0.1 units lattice
-lammps	create_box	    11 box bond/types 66 extra/bond/per/atom 4
+lammps	create_box	    12 box bond/types 66 extra/bond/per/atom 4
 lammps	create_atoms	4 box
 lammps	mass        	* 1
-lammps	set 		    type 1 diameter 1
 
 lammps	neighbor	    1.2 bin			#include ghost atoms within cutoff		
 lammps	neigh_modify	delay 0					
@@ -41,14 +40,15 @@ lammps	thermo		    200
 
 lammps	region		    support1 block INF 2.1 INF 0.1 INF INF units lattice
 lammps	region		    support2 block $(v_nelx-3.1) INF INF 0.01 INF INF units lattice
+lammps	region		    fource_reg block $(((v_nelx-1)/2)-1) $(((v_nelx-1)/2)+1) $((sqrt(3)*v_nely)/4) INF INF INF units lattice
 lammps	group		    support1 region support1				
 lammps	group		    support2 region support2
+lammps	group		    force_group region fource_reg
 lammps	fix 		    support1 support1 setforce 0 0 0				
 lammps	fix	    	    support2 support2 setforce 0 0 0
-
-
-#lammps  fix             2D all setforce NULL NULL 0.0 
-
+lammps	set 		    group support1 type 12				
+lammps	set	    	    group support2 type 12
+lammps	set 		    group force_group type 12
 
 # ====== LOADING CHI MAP AND POTENTIALS FILE =======
 
@@ -67,9 +67,7 @@ opt_constraint          concrete avgchi shift 0.2
 # ======= SET SIMULATION NUMBER 1 (RUN TYPE, NO REPEAT)=======
 
 simulation Sim1         run repeat no      # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
- 																
-add_attribute Sim1	    group		force_group id 137 138 259								
-			
+ 																							
 add_attribute Sim1	    variable	nrg equal pe     # this will be recorded into an objective later: DO NOT DELETE VIA ADD_ATTRIBUTE!
 add_attribute Sim1	    variable	pressure equal press     # this will be recorded into an objective later: DO NOT DELETE VIA ADD_ATTRIBUTE!
 add_attribute Sim1	    fix	force force_group addforce 0 -1 0
@@ -78,10 +76,6 @@ add_attribute Sim1	    fix_modify force energy yes
 add_attribute Sim1	    minimize	1.0e-10 1.0e-10 1000 2000			
 
 add_attribute Sim1 	    unfix 		force	
-add_attribute Sim1  	group 		force_group delete
-
-#add_attribute Sim1  	variable    	nrg equal 1 # Dummy variables to check if objectives are working
-#add_attribute Sim1  	variable    	nrg equal 2
 
 add_objective Sim1      c1 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
 add_objective Sim1      c2 pressure 
@@ -96,8 +90,6 @@ simulation Sim2         cstgs var_force binary 1 10 100000 0.01 repeat no  crit 
 #simulation Sim2        cstgs var_force increment log "initial_value" "step" "max_value" repeat no
 #simulation Sim2        cstgs var_force binary "initial_value" "max_value" "tol" repeat no
 
-add_attribute Sim2	    group		force_group id 137 138 259		
-
 add_attribute Sim2  	variable    	cstgs_force equal 1
 add_attribute Sim2	    fix	force force_group addforce 0 -$(v_cstgs_force) 0
 add_attribute Sim2	    fix_modify force energy yes	
@@ -105,10 +97,6 @@ add_attribute Sim2	    fix_modify force energy yes
 add_attribute Sim2	    minimize	1.0e-10 1.0e-10 1000 2000			
 
 add_attribute Sim2 	    unfix 		force
-add_attribute Sim2  	group 		force_group delete
-
-#add_attribute Sim2  	variable    	nrg equal 1 # Dummy variables to check if objectives are working
-#add_attribute Sim2  	variable    	nrg equal 2
 
 add_objective Sim2      c3 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
 add_objective Sim2      c4 pressure 
@@ -117,9 +105,7 @@ add_objective Sim2      c4 pressure
 
 simulation Sim3         run repeat yes repeat.dat       # fix of type "simulation", ID , type = "run" or "cstgs", repeat = yes or no (default is no)
 
-#add_attribute Sim3  	bond_coeff	* $(v_repeat_stiffness)	0.7
-
-add_attribute Sim3	    group		force_group id 137 138 259				
+#add_attribute Sim3  	bond_coeff	* $(v_repeat_stiffness)	0.7			
 
 add_attribute Sim3  	variable    	repeat_force equal 1
 add_attribute Sim3	    fix	force force_group addforce 0 -$(v_repeat_force) 0
@@ -128,10 +114,8 @@ add_attribute Sim3	    fix_modify force energy yes
 add_attribute Sim3	    minimize	1.0e-10 1.0e-10 1000 2000			
 
 add_attribute Sim3 	    unfix 		force
-add_attribute Sim3  	group 		force_group delete
-
-#add_attribute Sim3  	variable    	nrg equal 1 # Dummy variables to check if objectives are working
-#add_attribute Sim3  	variable    	nrg equal 2
 
 add_objective Sim3      c5 nrg      # NOW, after recording the nrg value, the code will automatically do  "variable nrg delete"    
 add_objective Sim3      c6 pressure 
+
+#opt_cobj                variable tcobj equal c1+c3+c5

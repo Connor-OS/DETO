@@ -1,7 +1,10 @@
 #pair_style granular									
 #pair_coeff	1	1	hertz	0	0	tangential mindlin	0	0	0
 #pair_coeff	1	2	hertz	0	0	tangential mindlin	0	0	0
+#pair_coeff	1	3	hertz	0	0	tangential mindlin	0	0	0
 #pair_coeff	2	2	hertz	5.00E-05	1.00E-05	tangential mindlin	8.00E-06	0.0001	5.00E-06
+#pair_coeff	2	3	hertz	5.00E-05	1.00E-05	tangential mindlin	8.00E-06	0.0001	5.00E-06
+#pair_coeff	3	3	hertz	5.00E-05	1.00E-05	tangential mindlin	8.00E-06	0.0001	5.00E-06
 
 pair_style zero 1.0
 pair_coeff * *
@@ -10,19 +13,16 @@ bond_style		harmonic
 bond_coeff	1	0.01	1
 bond_coeff	2	100.0	1
 
-
 group 1 type 1
 group 2 type 2
 group 3 type 3
 
-create_bonds    many    1   1   1   0.01    0.1 ## This command is here as a fix for an issue where the first create_atoms is failing??
 create_bonds	many	1	1	1	0.9	1.1
 create_bonds	many	1	2	1	0.9	1.1
 create_bonds	many	2	2	2	0.9	1.1
 create_bonds	many	1	3	1	0.9	1.1
 create_bonds	many	2	3	2	0.9	1.1
 create_bonds	many	3	3	2	0.9	1.1
-
 
 group 1 delete
 group 2 delete

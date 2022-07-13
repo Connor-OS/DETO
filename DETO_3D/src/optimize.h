@@ -34,11 +34,7 @@ namespace DETO_NS {
         void printall();
 
         std::vector<std::string> potentials; // vector containing all information regarding the potentials available for the optimization
-
-        int * pop_sizeps; // pop_size per subcommunicator
-        int * pop_sizeps_cum; // pop_size per subcommunicator
-        
-	private:
+        int pop_size; // size of population of solutions
 
         struct Chi_map // structure containing the information mapping chi to type and other properties
         {
@@ -56,6 +52,9 @@ namespace DETO_NS {
             std::vector<int> nchi;   //vector containing the number of chi values per material in the optimization
         };
         struct Chi_map chi_map; // Instance of chi_map to be used throughout optimization run to convert chi to type
+        int nmat;   //number of materials in the optimization
+
+	private:
 
         std::vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
 
@@ -69,32 +68,24 @@ namespace DETO_NS {
         std::vector<std::string> local_constraint_method; // type of application of local constraint per material, can be either scale or shift
         std::string err_msg, read_string, word;
         int tot_nchi; // total number of chi in chi map all materials
-        int nmat;   //number of materials in the optimization
         int natoms; // number of atoms in LAMMPS
         int nlocal; // number of atoms in current proc from LAMMPS
 
         std::vector<double> chi;   // chi values per atom (those with type not in chi_map will be assigned chi > chi_max
-        std::vector<std::string> mat;   // material values per atom (those with type not in chi_map will be assigned material
-        std::vector<int> mat_index;     // numerical index asociated to the material
+        std::vector<int> mat;   // numerical index asociated to the material
 
         std::vector<std::vector<double>> chi_pop;   // vector of vector of chi values for the whole population
-        std::vector<std::vector<std::string>> mat_pop;  // vector of vector of material values for the whole population
-        std::vector<std::vector<int>> mat_index_pop;  //vector of vector of material index for the whole population
+        std::vector<std::vector<int>> mat_pop;  // vector of vector of material values for the whole population
 
-        double ** chi_popps;   // vector of vector of chi values for the whole population
-        // std::vector<std::vector<std::string>> mat_popps;  // vector of vector of material values for the whole population
-        std::string ** mat_popps;
-        int ** mat_index_popps;  //vector of vector of material index for the whole population
-        // std::vector<std::vector<int>> mat_index_popps;  //vector of vector of material index for the whole population
+        std::vector<int> pop_sizeps; // pop_size per subcommunicator
+        std::vector<int> pop_sizeps_cum; // pop_size per subcommunicator
+
+        double ** chi_popps;   // holds chi values per subcomm
+        int ** mat_popps;  //holds material index per subcomm
 
         //Optimisation variables
-        std::string opt_type; //the type of optimization to be run. i.e genetic, sensitivity etc..
-        int pop_size; // size of population of solutions
-        double opt_par1, opt_par2, opt_par3; //paramaters specifict to optimisation types
-        //if "genetic" then par1 = crossover rate, part2 = mutation rate
-        //if "sensitivity" then par1 = move limit
-        std::vector<double> opt_objective_eval;
-        std::vector<double> opt_objective_evalps;
+        double* opt_objective_eval;
+        double* opt_objective_evalps;
         
         int init_ts; //timestep after initalisation
         double tol; // optimisation tolerance
@@ -105,8 +96,8 @@ namespace DETO_NS {
         int* IDuns; // unsortd IDs of all atoms in LAMMPS
         int* typeuns; //unsorted types of all atoms in LAMMPS
         int* nID_each;  //array with number of IDs in each processor in current subcomm
-        double* chi_each; // array containing chi in each processor
-        int* mat_each; // array containing the material in each processor
+        // double* chi_each; // array containing chi in each processor
+        // int* mat_each; // array containing the material in each processor
         int* ID;
 
         int nploc;  // number of processors in local subcomm
@@ -124,11 +115,10 @@ namespace DETO_NS {
         void initialize_chipop();
         void update_chipop();
         void split_pop();
-        void communicate_pop();
         void constrain_avg_chi(int id); 
         std::vector<double> constrain_local_avg_chi(std::vector<double>); //todo: change to void
         void load_chi(int);
-        void evaluate_objective();
+        void evaluate_objective(int id);
 	};
 	
 }

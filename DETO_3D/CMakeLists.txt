@@ -16,7 +16,8 @@ set(SOURCES
   src/lammpsIO.cpp
   src/optimize.cpp
   src/simulations.cpp
-  src/error.cpp)
+  src/error.cpp
+  src/update.cpp)
   
 find_library(LAMMPS_LIBRARIES lammps PATHS ${CMAKE_SOURCE_DIR}/lammps/build NO_DEFAULT_PATH)
 

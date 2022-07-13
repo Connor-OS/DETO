@@ -10,6 +10,7 @@
 #include "lammpsIO.h"
 #include "optimize.h"
 #include "simulations.h"
+#include "update.h"
  /*
 
 #include "chemistry.h"
@@ -81,6 +82,7 @@ DETO::DETO(int narg, char **arg)
     lammpsIO = new LammpsIO(this);
     optimize = new Optimize(this);
     sims = new Simulations(this);
+    update = new Update(this);
      /*
     
     chem = new Chemistry(this);
@@ -143,12 +145,19 @@ DETO::~DETO()
     MPI_Barrier(MPI_COMM_WORLD);
     delete optimize;
     
-    // if (me==MASTER) {
-    //     fprintf(screen,"Deleting simulations class\n");
-    //     sims->printall();
-    // }
+    if (me==MASTER) {
+        fprintf(screen,"Deleting simulations class\n");
+        sims->printall();
+    }
     MPI_Barrier(MPI_COMM_WORLD);
     delete sims;
+    
+    if (me==MASTER) {
+        fprintf(screen,"Deleting update class\n");
+        update->printall();
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    delete update;
     
     /*
     if (me==MASTER) {

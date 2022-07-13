@@ -3,6 +3,7 @@
 #include "universe.h"
 #include "lammpsIO.h"
 #include "optimize.h"
+#include "update.h"
 #include "simulations.h"
 /*
 
@@ -301,7 +302,7 @@ void Inputdeto::execline(std::string read_string)
         else if (strcmp(word.c_str(), "opt_type") == 0) {
             std::string read_string2;
             std::getline(lss, read_string2);
-            optimize->set_opt_type(read_string2);
+            update->set_opt_type(read_string2);
         }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {

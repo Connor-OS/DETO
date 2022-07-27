@@ -5,15 +5,6 @@
 #include "universe.h"
 #include "optimize.h"
 
-//#include "chemistry.h"
-//#include "store.h"
-//#include "error.h"
-/*#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-*/
-
 #include <string.h>
 
 using namespace DETO_NS;
@@ -39,10 +30,10 @@ Simulations::~Simulations()
 
 
 // ---------------------------------------------------------------
-void Simulations::add(std::string read_string)
+void Simulations::add(string read_string)
 {
 // record name in a vector
-    std::string sim_name, sim_type, repstr, repYN;
+    string sim_name, sim_type, repstr, repYN;
     n_sims++;
     
     std::istringstream lss(read_string);
@@ -61,7 +52,7 @@ void Simulations::add(std::string read_string)
     
     if (strcmp(sim_type.c_str(), "cstgs") == 0) {
         int pos = cstgs_varname.size()-1;
-        std::string varname, ttype, incty;
+        string varname, ttype, incty;
         double par1, par2, par3, par4;
         lss >> varname >> ttype;
         cstgs_varname[pos] = varname;
@@ -96,8 +87,8 @@ void Simulations::add(std::string read_string)
    
 
     // default values for repeat inputs - will be overwritten if sim is repeat
-    sim_rep_vars.push_back(std::vector<std::string>());
-    sim_rep_val.push_back(std::vector<std::vector<double>>());
+    sim_rep_vars.push_back(vector<string>());
+    sim_rep_val.push_back(vector<vector<double>>());
     n_repeats.push_back(1);
 
     lss >> repstr >> repYN;
@@ -109,7 +100,7 @@ void Simulations::add(std::string read_string)
     }
     if (strcmp(repYN.c_str(), "yes") == 0)
     {
-        std::string repfname;
+        string repfname;
         lss >> repfname;
         sim_repeat_file.push_back(repfname);
         read_repeat(repfname);
@@ -125,17 +116,17 @@ void Simulations::add(std::string read_string)
     }
     
     
-    cstgs_crit_vnms.push_back(std::vector<std::string>());
+    cstgs_crit_vnms.push_back(vector<string>());
     if (strcmp(sim_type.c_str(), "cstgs") == 0)  {
         int pos = cstgs_varname.size()-1;
-        std::string kcrit;
+        string kcrit;
         lss >> kcrit;
         if (strcmp(kcrit.c_str(), "crit") == 0){
             std::getline(lss, read_string2);
             //fprintf(screen,"DEBUG: getline records this \"%s\"\n",read_string2.c_str());
-            std::string delimiter = "'";
+            string delimiter = "'";
             size_t spos = 0;
-            std::string critStr;
+            string critStr;
             spos = read_string2.find(delimiter);
             read_string2.erase(0, spos + delimiter.length());
             spos = read_string2.find(delimiter);
@@ -144,7 +135,7 @@ void Simulations::add(std::string read_string)
             read_string2.erase(0, spos + delimiter.length());
         
             std::istringstream lss2(read_string2);
-            std::string vnam;
+            string vnam;
             while (lss2 >> vnam){
                 if  (strncmp(vnam.c_str(), "#", 1) == 0) break;
                 else cstgs_crit_vnms[pos].push_back(vnam);
@@ -156,34 +147,34 @@ void Simulations::add(std::string read_string)
     }
 
     // default containers for objectives - will be filled out by seperate add_objective command
-    sim_obj_names.push_back(std::vector<std::vector<std::string>>());
-    sim_obj_LMPnames.push_back(std::vector<std::vector<std::string>>()); // Should these be initialised here or right at the begining of this function?
-    sim_obj_val.push_back(std::vector<std::vector<double>>());
+    sim_obj_names.push_back(vector<vector<string>>());
+    sim_obj_LMPnames.push_back(vector<vector<string>>()); // Should these be initialised here or right at the begining of this function?
+    sim_obj_val.push_back(vector<vector<double>>());
     for (int i=0;i<n_repeats[n_repeats.size()-1];i++) 
     {  
-        sim_obj_names[sim_obj_names.size()-1].push_back(std::vector<std::string>());
-        sim_obj_LMPnames[sim_obj_LMPnames.size()-1].push_back(std::vector<std::string>());
-        sim_obj_val[sim_obj_val.size()-1].push_back(std::vector<double>());
+        sim_obj_names[sim_obj_names.size()-1].push_back(vector<string>());
+        sim_obj_LMPnames[sim_obj_LMPnames.size()-1].push_back(vector<string>());
+        sim_obj_val[sim_obj_val.size()-1].push_back(vector<double>());
     }
 
     //default container for attributes - will be filled out by seperate add_attribute command
-    sim_attributes.push_back(std::vector<std::string>());
+    sim_attributes.push_back(vector<string>());
 
     ndim = lammpsIO->extract_setting("dimension");
 }
 
 
 // ---------------------------------------------------------------
-void Simulations::add_attribute(std::string read_string)
+void Simulations::add_attribute(string read_string)
 {
 // find simulation id matching specified name
     // add string to a vector of vectors of string (one list of attributes per simulation) at the mathcing simulation ID
-    std::string sim_ID;
+    string sim_ID;
     std::istringstream lss(read_string);
     lss >> sim_ID;
     for(int i = 0; i < sim_names.size(); i++){
         if(strcmp(sim_ID.c_str(),sim_names[i].c_str()) == 0){
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             sim_attributes[i].push_back(read_string2);
             if (me==MASTER){
@@ -199,9 +190,9 @@ void Simulations::add_attribute(std::string read_string)
 
 
 // ---------------------------------------------------------------
-void Simulations::add_objective(std::string read_string)
+void Simulations::add_objective(string read_string)
 {
-    std::string sim_ID, obj_name, obj_LMPname;
+    string sim_ID, obj_name, obj_LMPname;
     std::istringstream lss(read_string);
     lss >> sim_ID >> obj_name >> obj_LMPname;
     for(int i = 0; i < sim_names.size(); i++){
@@ -220,10 +211,10 @@ void Simulations::add_objective(std::string read_string)
 
 
 // ---------------------------------------------------------------
-void Simulations::read_repeat(std::string repeatfname)
+void Simulations::read_repeat(string repeatfname)
 {
     std::ifstream repeatFile(repeatfname.c_str());
-    // std::vector<double>
+    // vector<double>
     bool found_nrep = false;
     int simpos;
     simpos = sim_names.size()-1;
@@ -260,7 +251,7 @@ void Simulations::read_repeat(std::string repeatfname)
                             while (lss >> word)
                             {
                                 sim_rep_vars[simpos].push_back(word);
-                                sim_rep_val[simpos].push_back(std::vector<double>());
+                                sim_rep_val[simpos].push_back(vector<double>());
                             }
                             for(int i=0; i < n_repeats[simpos]; i++)
                             {

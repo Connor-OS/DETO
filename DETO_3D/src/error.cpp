@@ -26,7 +26,7 @@ Error::~Error()
 
 // ---------------------------------------------------------------
 // This produces a simple error taking care of turning off all the parallel processes
-void Error::errsimple(std::string msg)
+void Error::errsimple(string msg)
 {
    // fprintf(screen,"\nOK here\n");
    //     fflush(screen);

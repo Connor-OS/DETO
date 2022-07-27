@@ -5,7 +5,7 @@
 
 # ===== SET OPTIMIZATION STYLE AND PARAMS ========
 #opt_type genetic tour var pop_size cross_rate mut_rate
-opt_type genetic 15 0.95 0.01
+opt_type genetic 200 0.95 0.01
 
 
 
@@ -52,6 +52,9 @@ lammps	set	    	    group support2 type 3
 lammps	set 		    group force_group type 3
 
 
+dump    all custom 10 dump.fitest id type x y fitest 10
+#dump    all custom 5 dump.all id type x y
+#write_plog yes use this to create processor specific logs for de-bugging
 
 # ====== LOADING CHI MAP AND POTENTIALS FILE =======
 

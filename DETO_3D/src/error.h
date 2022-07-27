@@ -10,6 +10,7 @@
 #define MASTER 0
 
 namespace DETO_NS {
+    using std::string;
     class Error : protected Pointers {
 		
 	public:

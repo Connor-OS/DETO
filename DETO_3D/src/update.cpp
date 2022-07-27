@@ -35,7 +35,7 @@ void Update::set_opt_type(std::string read_string)
         lss >> opt_par1 >> opt_par2;
     }
     else if(strcmp(opt_type.c_str(),"genetic") == 0) {
-        lss >> pop_size >> opt_par1 >> opt_par2;
+        lss >> pop_size >> opt_style >> opt_par1 >> opt_par2;
     }
     else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
         lss >> pop_size >> opt_par1 >> opt_par2;
@@ -64,14 +64,14 @@ void Update::evaluate_objective(int id)
 // genetic algorythm for update
 void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval)
 {
-    fprintf(screen,"obj_eval\n");
-    for(int j=0; j<pop_size; j++) {
-        fprintf(screen,"%.3f ",opt_obj_eval[j]);
-    }
+    // fprintf(screen,"obj_eval\n");
+    // for(int j=0; j<pop_size; j++) {
+    //     fprintf(screen,"%.3f ",opt_obj_eval[j]);
+    // }
     fprintf(screen,"\n");
-    fprintf(screen,"Starting tournement selection\n" );
+    // fprintf(screen,"Starting tournement selection\n" );
     chi_next.clear();
-    //selection
+    //tournement selection
     std::vector<int> selection;
     selection.clear();
     int best;
@@ -86,9 +86,9 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
         }
         selection.push_back(best);
     }
-    fprintf(screen,"Winning selection: " );
-    for(int i=0; i<2*pop_size; i++) fprintf(screen,"%d ",selection[i]);
-    fprintf(screen,"\n" );
+    // fprintf(screen,"Winning selection: " );
+    // for(int i=0; i<2*pop_size; i++) fprintf(screen,"%d ",selection[i]);
+    // fprintf(screen,"\n" );
 
     //crossover
     std::vector<double> chi;
@@ -103,10 +103,10 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
         mat_next.push_back(mat);
         chi.clear();
         mat.clear();
-        for(int k=0; k<100; k++) {
-            fprintf(screen,"p1:%.0f p2:%.0f ch:%.0f\n",chi_pop[selection[2*i]][k],chi_pop[selection[2*i+1]][k],chi_next[i][k]);
-        }
-        fprintf(screen,"next crossover:\n");
+        // for(int k=0; k<100; k++) {
+        //     fprintf(screen,"p1:%.0f p2:%.0f ch:%.0f\n",chi_pop[selection[2*i]][k],chi_pop[selection[2*i+1]][k],chi_next[i][k]);
+        // }
+        // fprintf(screen,"next crossover:\n");
     }
 
     // fprintf(screen,"Chi_next_pop\n");

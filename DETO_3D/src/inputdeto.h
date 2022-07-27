@@ -14,6 +14,7 @@
 #define MASTER 0
 
 namespace DETO_NS {
+	using std::string;
 	
 	class Inputdeto : protected Pointers {
 	public:
@@ -25,15 +26,15 @@ namespace DETO_NS {
 		
 		void file();       // process the input script
 		void printall();
-        void execline(std::string);
+        void execline(string);
 
 	
         bool isrestart; // a flag to let the code know whether it is running a restart or not
         
 	private:
-		std::string fname;              // open input file
+		string fname;              // open input file
         int me;     // id of the current processor (rank)
-		std::string inconfig,totrash,err_msg,read_string2,firstWord,word;              // input config file (data or xyz type)
+		string inconfig,totrash,err_msg,read_string2,firstWord,word;              // input config file (data or xyz type)
         int tstep;  // lammps timestep read from xyz file
         bool time_strict, time_loose, time_first, time_last;    //flags to know how to read time from XYZ file
         bool foundSubcomm, foundstep,foundtempo;

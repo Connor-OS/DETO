@@ -5,14 +5,6 @@
 #include "universe.h"
 #include <string>
 #include <vector>
-//#include "mpi.h"
-//#include <string>
-//#include <vector>
-/*#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-*/
 
 #define MASTER 0
 

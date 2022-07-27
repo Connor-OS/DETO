@@ -1,13 +1,8 @@
 #include "universe.h"
-/*
- #include "error.h"
-#include "randm.h"
- */
 #include "output.h"
 #include <string.h>
 
 using namespace DETO_NS;
-
 
 
 Universe::Universe(DETO *deto) : Pointers(deto)
@@ -54,7 +49,7 @@ void Universe::create()
     if (me == MASTER) fprintf(screen,"\nCreating the universe of sub-communicators as defined by the user in the input file (or in the restart file)...\n");
     
     // Create cumulative number of processors vector
-    std::vector<int> cumnp;
+    vector<int> cumnp;
     cumnp.push_back(SCnp[0]);
     for (int i=1; i<nsc; i++) cumnp.push_back(cumnp[i-1]+SCnp[i]);
     
@@ -79,7 +74,7 @@ void Universe::create()
     
     //create log file for each processor, with subcom and rank in subcom specified
     if (dto->wplog) {
-        std::string fname;
+        string fname;
         std::ostringstream ss;
         ss << me;
         fname = "p"+ss.str()+"_S";
@@ -98,7 +93,7 @@ void Universe::create()
     
     /*
      if (msk->nulog_flag) {
-      std::stringstream ss;
+      stringstream ss;
       ss << "p" << me << ".nulog";
       msk->nulog.open(ss.str());
     }

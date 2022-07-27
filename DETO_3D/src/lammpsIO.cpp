@@ -1,21 +1,5 @@
 #include "lammpsIO.h"
 #include "universe.h"
-//#include "error.h"
-/*#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-
-#include "clinker.h"
-#include "pyramids.h"
-#include "hydration.h"
-#include "memory.h"
-#include "csh.h"
-#include "c2s.h"
-#include "c3s.h"
-#include "water.h"
-#include <string.h>
-*/
 
 using namespace DETO_NS;
 
@@ -77,8 +61,9 @@ void LammpsIO::create()
         fprintf(screen,"Proc[%d]: Lammps instance created, as part of subcomm %s\n",me,universe->SCnames[universe->color].c_str());
         
         // creates subcomm-specific lammps logfile (and temporary dumpfile name, currently turned off)
-        std::string todo;
-        todo = "log log."+universe->SCnames[universe->color]+".lammps";
+        string todo;
+        // todo = "log log."+universe->SCnames[universe->color]+".lammps";
+        todo = "log none";
         lammpsIO->lammpsdo(todo);
         
         
@@ -90,7 +75,7 @@ void LammpsIO::create()
 
 // ---------------------------------------------------------------
 // Printing info about the inputcprs class (possibly useful for debugging)
-void LammpsIO::lammpsdo(std::string todo)
+void LammpsIO::lammpsdo(string todo)
 {
    lmp->input->one(todo.c_str());
     
@@ -108,7 +93,7 @@ double LammpsIO::extract_natoms()
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
-void* LammpsIO::extract_atom_varaiable(std::string toextract)
+void* LammpsIO::extract_atom_varaiable(string toextract)
 {   
     void* atom_properties = lammps_extract_atom(lmp,toextract.c_str());
     return atom_properties;
@@ -117,7 +102,7 @@ void* LammpsIO::extract_atom_varaiable(std::string toextract)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
-void* LammpsIO::extract_varaiable(std::string toextract)
+void* LammpsIO::extract_varaiable(string toextract)
 {   
     void* variable = lammps_extract_variable(lmp,toextract.c_str(),NULL);
     return variable;
@@ -126,7 +111,7 @@ void* LammpsIO::extract_varaiable(std::string toextract)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
-void* LammpsIO::extract_global(std::string toextract)
+void* LammpsIO::extract_global(string toextract)
 {   
     void* variable = lammps_extract_global(lmp,toextract.c_str());
     return variable;
@@ -134,7 +119,7 @@ void* LammpsIO::extract_global(std::string toextract)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
-int LammpsIO::extract_setting(std::string toextract)
+int LammpsIO::extract_setting(string toextract)
 {   
     int variable = lammps_extract_setting(lmp,toextract.c_str());
     return variable;

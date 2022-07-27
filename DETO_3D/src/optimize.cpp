@@ -7,14 +7,7 @@
 #include "simulations.h"
 #include "update.h"
 #include <iostream>
-
-//#include "chemistry.h"
-//#include "store.h"
-//#include "error.h"
-/*#include <stdlib.h>
-#include <stdio.h>
-#include <fstream>
-*/
+#include <algorithm>
 
 #include <string.h>
 
@@ -36,7 +29,7 @@ Optimize::~Optimize()
 
 // ---------------------------------------------------------------
 // Printing info about the inputcprs class (possibly useful for debugging)
-void Optimize::read_chimap(std::string mapfname)
+void Optimize::read_chimap(string mapfname)
 {
     std::ifstream mapFile(mapfname.c_str());
     bool found_nmat = false;
@@ -54,7 +47,7 @@ void Optimize::read_chimap(std::string mapfname)
         // READ chi_map file
         while (!mapFile.eof()) {
             MPI_Barrier(MPI_COMM_WORLD);
-            std::getline(mapFile, read_string);
+            getline(mapFile, read_string);
             if (!read_string.empty()) {
                 std::istringstream lss(read_string);
                 while (lss >> word) {
@@ -68,7 +61,7 @@ void Optimize::read_chimap(std::string mapfname)
                     else if (strcmp(word.c_str(), "PROPERTIES:") == 0) {
                         if (found_nmat == true) {
                             // Check and insert properties
-                            std::vector<std::string> check{"chi","material","type"};
+                            vector<string> check{"chi","material","type"};
                             for(int i=0; i<3; i++) {
                                 lss >> word;
                                 if(word != check[i]) {
@@ -81,18 +74,18 @@ void Optimize::read_chimap(std::string mapfname)
                             }
                             // Populate chi_map
                             while (!mapFile.eof()) {
-                                std::getline(mapFile, read_string);
+                                getline(mapFile, read_string);
                                 read_string = read_string.substr(0, read_string.find("#"));
                                 if (!read_string.empty()) {
                                     std::istringstream lss(read_string);
                                     double tempchi,temp;
-                                    std::string tempmat;
+                                    string tempmat;
                                     int temptype;
                                     tot_nchi = 0;
                                     lss >> tempchi >> tempmat >> temptype;
                                     bool mat_found =false;
                                     for(int i=0; i<chi_map.material.size(); i++) {
-                                        if(std::strcmp(chi_map.material[i].c_str(),tempmat.c_str()) == 0) {
+                                        if(strcmp(chi_map.material[i].c_str(),tempmat.c_str()) == 0) {
                                             mat_found = true;
                                             tot_nchi += 1;
                                             chi_map.nchi[i] += 1;
@@ -108,12 +101,12 @@ void Optimize::read_chimap(std::string mapfname)
                                         tot_nchi += 1;
                                         chi_map.nchi.push_back(1);
                                         chi_map.material.push_back(tempmat);
-                                        chi_map.chis.push_back(std::vector<double>{tempchi});
-                                        chi_map.types.push_back(std::vector<int>{temptype});
-                                        chi_map.values.push_back(std::vector<std::vector<double>>());
+                                        chi_map.chis.push_back(vector<double>{tempchi});
+                                        chi_map.types.push_back(vector<int>{temptype});
+                                        chi_map.values.push_back(vector<vector<double>>());
                                         for(int prop=0; prop < chi_map.properties.size(); prop++) {
                                             lss >> temp;
-                                            chi_map.values[chi_map.values.size()-1].push_back(std::vector<double>{temp});
+                                            chi_map.values[chi_map.values.size()-1].push_back(vector<double>{temp});
                                         }    
                                     }
                                 }
@@ -178,9 +171,9 @@ void Optimize::read_chimap(std::string mapfname)
 
 // ---------------------------------------------------------------
 // add a constraint per material that can later be enforced on the design
-void Optimize::add_constraint(std::string read_string)
+void Optimize::add_constraint(string read_string)
 {   
-    std::string material,constraint_type,method;
+    string material,constraint_type,method;
     double constraint, radius;
     std::istringstream lss(read_string);
     lss >> material >> constraint_type >> method >> constraint;
@@ -213,7 +206,7 @@ void Optimize::add_constraint(std::string read_string)
 
 // // ---------------------------------------------------------------
 // // function setting the properties of the optimization
-// void Optimize::set_opt_type(std::string read_string)
+// void Optimize::set_opt_type(string read_string)
 // {
 //     std::istringstream lss(read_string);
 //     lss >> opt_type;
@@ -234,7 +227,7 @@ void Optimize::add_constraint(std::string read_string)
 // function initializing values of chi from chi_map
 void Optimize::initialize_chi()
 {
-    std::string tolmp;
+    string tolmp;
     tolmp = "compute tempID all property/atom id"; // temp compute to get id of all atoms
     lammpsIO->lammpsdo(tolmp);
     
@@ -340,14 +333,16 @@ void Optimize::initialize_chi()
     delete[] IDpos;
     delete[] nID_each;
     delete[] typeuns;
-    // output->toplog("\n------------------\nInitial chi\n-------------------\n\n");
-    // for (int i=0; i<natoms; i++) {
-    //     std::string logmsg = "";
-    //     std::ostringstream ss;
-    //     ss << IDuns[i] << " " << chi[i] << " " << mat[i]; 
-    //     logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-    //     output->toplog(logmsg);
-    // }
+    if(me == MASTER && dto->wplog == true) {
+        output->toplog("\n------------------\nInitial chi\n-------------------\n\n");
+        for (int i=0; i<natoms; i++) {
+            string logmsg = "";
+            std::ostringstream ss;
+            ss << IDuns[i] << " " << chi[i] << " " << mat[i]; 
+            logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+            output->toplog(logmsg);
+        }
+    }
 }
 
 
@@ -381,16 +376,18 @@ void Optimize::initialize_chipop()
             constrain_local_avg_chi(chi_pop[i]);
         }
         if(me == MASTER) fprintf(screen,"DONE Generating chi population\n\n");
-        // output->toplog("\n------------------\nChi Population\n-------------------\n\n");
-        // for (int i=0; i<natoms; i++) {
-        //     std::string logmsg = "";
-        //     for(int j=0; j<pop_size; j++) {
-        //         std::ostringstream ss;
-        //         ss << "\t" << chi_pop[j][i] << " " << mat_pop[j][i] << "\t|"; 
-        //         logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-        //     }
-        //     output->toplog(logmsg);
-        // }
+        if(me == MASTER && dto->wplog) {
+            output->toplog("\n------------------\nChi Population\n-------------------\n\n");
+            for (int i=0; i<natoms; i++) {
+                string logmsg = "";
+                for(int j=0; j<pop_size; j++) {
+                    std::ostringstream ss;
+                    ss << "\t" << chi_pop[j][i] << " " << mat_pop[j][i] << "\t|"; 
+                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+                }
+                output->toplog(logmsg);
+            }
+        }
     }
 }
 
@@ -470,23 +467,25 @@ void Optimize::split_pop()
         }
     }
     if(me == MASTER) fprintf(screen,"DONE Spliting chi population\n\n");
-    // output->toplog("\n------------------\nChi sub-population\n-------------------\n\n");
-    // for (int i=0; i<natoms; i++) {
-    //     std::string logmsg = "";
-    //     std::ostringstream ss;
-    //     ss << IDuns[i];
-    //     for(int j=0; j<pop_sizeps[universe->color]; j++) {
-    //         if(mat_popps[j][i] != -1) {
-    //             ss << "\t" << chi_popps[j][i] << " " << chi_map.material[mat_popps[j][i]] << "\t|"; 
-    //             logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-    //         }
-    //         else{
-    //             ss << "\tnon-opt\t|"; 
-    //             logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-    //         }
-    //     }
-    //     output->toplog(logmsg);
-    // }
+    if(dto->wplog == true) {
+        output->toplog("\n------------------\nChi sub-population\n-------------------\n\n");
+        for (int i=0; i<natoms; i++) {
+            string logmsg = "";
+            std::ostringstream ss;
+            ss << IDuns[i];
+            for(int j=0; j<pop_sizeps[universe->color]; j++) {
+                if(mat_popps[j][i] != -1) {
+                    ss << "\t" << chi_popps[j][i] << " " << chi_map.material[mat_popps[j][i]] << "\t|"; 
+                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+                }
+                else{
+                    ss << "\tnon-opt\t|"; 
+                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+                }
+            }
+            output->toplog(logmsg);
+        }
+    }
 
     /// If wplog write to logfiles
 }
@@ -506,7 +505,7 @@ void Optimize::constrain_avg_chi(int id)
         double chi_sum = 0.;
         int natoms_mat = 0;
         if(vol_constraintYN[i] == true){
-            if(std::strcmp(constraint_method[i].c_str(),"scale") == 0) {
+            if(strcmp(constraint_method[i].c_str(),"scale") == 0) {
                 double l1 = 0.;  // chi_min - chi_map.chi_avg/10
                 double l2 = 1000; //chi_map.chi_max[i]*(1/chi_map.chi_min[i]);   // chi_map.chi_max //maybe this constraint only works for positive chi
                 double lmid; //different constraint types can allow us to accomidate more
@@ -527,7 +526,7 @@ void Optimize::constrain_avg_chi(int id)
                     else l1 = lmid;
                 }
             }
-            else if(std::strcmp(constraint_method[i].c_str(),"shift") == 0) {
+            else if(strcmp(constraint_method[i].c_str(),"shift") == 0) {
                 double l1 = -chi_map.chi_max[i];
                 double l2 = chi_map.chi_max[i];
                 double lmid;
@@ -567,7 +566,7 @@ void Optimize::constrain_avg_chi(int id)
 
 // ---------------------------------------------------------------
 // Applying the local volume constraint from (Aage et all 2017)
-std::vector<double> Optimize::constrain_local_avg_chi(std::vector<double> chi)
+vector<double> Optimize::constrain_local_avg_chi(vector<double> chi)
 {
     return chi;
 }
@@ -594,7 +593,7 @@ void Optimize::load_chi(int id)
                 }
                 if((chi_map.chis[j][l1]+chi_map.chis[j][l2])/2 > chi_popps[id][i]) k = l1;
                 else k = l2;
-                std::string set_type = "set atom " + std::to_string(IDuns[i]) + " type " + std::to_string(chi_map.types[j][k]);
+                string set_type = "set atom " + std::to_string(IDuns[i]) + " type " + std::to_string(chi_map.types[j][k]);
                 lammpsIO->lammpsdo(set_type);
             }
         }
@@ -621,7 +620,7 @@ void Optimize::evaluate_objective(int id)
             vol_frac += optimize->chi_popps[id][i];
         }
         vol_frac = vol_frac/natoms; //Need to think of a straightforward way to ignore non-opt
-        if(vol_frac < 0.75) vol_frac =1;
+        if(vol_frac < 0.5) vol_frac =1;
         else vol_frac = (vol_frac+0.25);
         
         // fprintf(screen,"%f\n",vol_frac);
@@ -660,10 +659,9 @@ void Optimize::optrun()
 
     if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.init_config id x y z diameter type vx vy vz");  // what about z in 3D
 
-    if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.per_itt id x y z type modify append no");
     int step = 0;
     initialize_chipop();
-    while(step < 5000) {
+    while(step < 500) {
         // for certain optimization types, e.g. GA, we may have to create a first set of chi_vectors to then initite the while loop
         split_pop();
 
@@ -681,13 +679,10 @@ void Optimize::optrun()
         MPI_Barrier(MPI_COMM_WORLD);
         
         for(int i=0; i<pop_sizeps[universe->color]; i++) {
-            if(key == 0) fprintf(screen,"Starting sim %d.%d\n",universe->color,i+1);
+            // if(key == 0) fprintf(screen,"Starting sim %d.%d\n",universe->color,i+1);
             load_chi(i);
             // lammpsIO->lammpsdo("write_data data.init."+std::to_string(universe->color)+std::to_string(i));
             sims->run();
-            if(universe->color == 0 && i == 0 && step%1 == 0) {
-                lammpsIO->lammpsdo("write_dump all custom dump.per_itt id x y z type modify append yes"); 
-            }
             evaluate_objective(i); // each chi configuration should have a filled out obj_val vector by this point as all simulations will have been run
         }
 
@@ -707,8 +702,24 @@ void Optimize::optrun()
                 }
             }
         }
-        if(me == MASTER) for(int i=0; i<pop_size; i++) fprintf(screen,"eval %d = %f\n",i,opt_objective_eval[i]); 
+        // if(me == MASTER) for(int i=0; i<pop_size; i++) fprintf(screen,"eval %d = %f\n",i,opt_objective_eval[i]); 
         
+        int fitness[pop_size];
+        if(me == MASTER) {
+            vector<double> opt_objective_eval_sorted (opt_objective_eval,opt_objective_eval+pop_size);
+            sort(opt_objective_eval_sorted.begin(), opt_objective_eval_sorted.end());
+            for(int i=0; i<pop_size; i++) {
+                int j=0;
+                while(opt_objective_eval_sorted[i] != opt_objective_eval[j]) j++;
+                fitness[i] = j;
+            }
+            // if(me == MASTER) for(int i=0; i<pop_size; i++) fprintf(screen,"ID %i unsrt %f srt %f fit %i\n",i,opt_objective_eval[i],opt_objective_eval_sorted[i],fitness[i]);
+        }
+        MPI_Bcast(&fitness[0],pop_size,MPI_INT,0,MPI_COMM_WORLD);
+        output->writedump(step,fitness,pop_size);
+        // MPI_Barrier(MPI_COMM_WORLD);
+        
+
         //update to next chi_pop
         if(me == MASTER) chi_pop = update->update_chipop(chi_pop,mat_pop,opt_objective_eval);
         if(me == MASTER) fprintf(screen,"Done Step:%d\n",step);
@@ -799,7 +810,5 @@ void Optimize::printall()
         fprintf(screen,"%s  f=%f radius=%f ",chi_map.material[i].c_str(),local_vol_constraint[i],local_vol_radius[i]);
     }
 
-
-    
     fprintf(screen, "\n---------------------------------------\n\n");
 }

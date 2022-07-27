@@ -1,30 +1,15 @@
 #include "inputdeto.h"
 #include "error.h"
+#include "deto.h"
 #include "universe.h"
 #include "lammpsIO.h"
 #include "optimize.h"
 #include "update.h"
 #include "simulations.h"
-/*
-
-#include "chemistry.h"
-#include "solution.h"
-#include "fix.h"
-#include "krun.h"
 #include "output.h"
-#include "relax.h"
-#include "setconc.h"
-#include "store.h"
-#ifdef MASKE_WITH_SPECIATION
-#include "spec.h"
-#endif
-*/
-
 #include <unistd.h>   //just for the sleep() function
-
 //needed to convert strings to lower case
 #include <algorithm>
-
 //for cluster Rocket...
 #include <string.h>
 
@@ -38,7 +23,7 @@ Inputdeto::Inputdeto(DETO *deto, int argc, char **argv) : Pointers(deto)
     if (me == MASTER) fprintf(screen,"Generating inputdeto object\n");
     
     if (argc <2) {
-        std::string msg = "ERROR: no inputdeto file specified\n";
+        string msg = "ERROR: no inputdeto file specified\n";
         error->errsimple(msg);
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -78,7 +63,7 @@ void Inputdeto::file()
 	
     if (me == MASTER) fprintf(screen, "\nLooking for \"DETOrestart.dat\" file in current folder...\n");
     
-    std::string read_string;
+    string read_string;
     
     std::ifstream inFile("DETOrestart.dat");
     
@@ -156,7 +141,7 @@ void Inputdeto::file()
 
 // ---------------------------------------------------------------
 // reading initial configuration from xyz lammps-dump-like file
-void Inputdeto::execline(std::string read_string)
+void Inputdeto::execline(string read_string)
 {
     
     bool getout = false;
@@ -184,7 +169,7 @@ void Inputdeto::execline(std::string read_string)
             for (int i=0; i<universe->nsc; i++) {
                 std::stringstream ss;
                 ss << i;
-                std::string str = ss.str();
+                string str = ss.str();
                 universe->SCnames.push_back(str);
                 universe->SCnp.push_back(0);
             }
@@ -199,7 +184,7 @@ void Inputdeto::execline(std::string read_string)
             
             if (me == MASTER){
                 for (int i=0; i<nsubs; i++){
-                    std::string temp_string;
+                    string temp_string;
                     temp_string = universe->SCnames[i];
                     fprintf(screen, "\nSubcommunicator \"%s\" added (with %d processors)",temp_string.c_str(),universe->SCnp[i]);
                 }
@@ -218,7 +203,7 @@ void Inputdeto::execline(std::string read_string)
         }
         else if (strcmp(word.c_str(), "lammps") ==0)  {
             if (lammpsIO->lammps_active) {
-                std::string subs, newstring;
+                string subs, newstring;
                 lss >> firstWord;
                 // add subcomm name to dump name ----
                 if (strcmp(firstWord.c_str(),"dump")==0) {
@@ -249,18 +234,18 @@ void Inputdeto::execline(std::string read_string)
                 lammpsIO->lammpsdo(newstring);
             }
             else {
-                std::string err_msg;
+                string err_msg;
                 err_msg = "ERROR: lammps not active on a processor";
                 error->errsimple(err_msg);
             }
         }
         else if (strcmp(word.c_str(), "opt_map_chi") == 0) {
-            std::string mapfname;
+            string mapfname;
             lss >> mapfname;
             optimize->read_chimap(mapfname);
         }
         else if (strcmp(word.c_str(), "read_potentials") == 0) {
-            std::string potfname;
+            string potfname;
             lss >> potfname;
             
             std::ifstream potFile(potfname.c_str());
@@ -279,30 +264,69 @@ void Inputdeto::execline(std::string read_string)
                 }
             }
         }
+        else if (strcmp(word.c_str(), "dump") == 0){
+            if (lammpsIO->lammps_active) {
+                bool comment_found = false;
+                string read_string,dump_string;
+                int dump_every,fitest;
+                fitest = 0;
+                for(int i=0; i<2; i++) {
+                    lss >> read_string;
+                    dump_string = dump_string+" "+read_string;
+                }
+                lss >> dump_every;
+                lss >> read_string;
+                while (lss && !comment_found){
+                    if(strcmp(read_string.c_str(), "fitest") == 0){
+                        lss >> fitest;
+                    }
+                    else if (strncmp(read_string.c_str(), "#", 1) != 0){
+                        dump_string = dump_string+" "+read_string;
+                    }
+                    else  {
+                        comment_found = true;
+                        getout=true;
+                    }
+                    lss >> read_string;
+                }
+                // fprintf(screen,"%s \n",dump_string.c_str());
+                output->add_dump(dump_every,dump_string,fitest);
+            }
+        }
         else if (strcmp(word.c_str(), "simulation") == 0) {
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             sims->add(read_string2);
         }
         else if (strcmp(word.c_str(), "add_attribute") == 0) {
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             sims->add_attribute(read_string2);
         }
         else if (strcmp(word.c_str(), "add_objective") == 0) {
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             sims->add_objective(read_string2);
         }
         else if (strcmp(word.c_str(), "opt_constraint") == 0) {
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             optimize->add_constraint(read_string2);
         }
         else if (strcmp(word.c_str(), "opt_type") == 0) {
-            std::string read_string2;
+            string read_string2;
             std::getline(lss, read_string2);
             update->set_opt_type(read_string2);
+        }
+        else if (strcmp(word.c_str(), "write_plog") == 0) {
+            string read_string2;
+            lss >> read_string2;
+            if (strcmp(read_string2.c_str(),"yes") == 0) {
+                dto->wplog = true;
+            }
+            else {
+                dto->wplog = false;
+            }
         }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
@@ -366,14 +390,14 @@ void Inputdeto::execline(std::string read_string)
                         getout=true;
                     }
                     else {
-                        std::string msg = "ERROR: keyword in sol_start  not valid: \""+read_string+"\" \n";
+                        string msg = "ERROR: keyword in sol_start  not valid: \""+read_string+"\" \n";
                         error->errsimple(msg);
                     }
                 }
                 solution->computeNmol();
             }
             else {
-                std::string msg = "ERROR: start_sol type not valid. \""+read_string+"\" was found, but only uniform is allowed \n";
+                string msg = "ERROR: start_sol type not valid. \""+read_string+"\" was found, but only uniform is allowed \n";
                 error->errsimple(msg);
             }
             if (me == MASTER) {
@@ -384,7 +408,7 @@ void Inputdeto::execline(std::string read_string)
             }
         }
         else if (strcmp(word.c_str(), "fix") == 0){
-            std::string read_string3;
+            string read_string3;
             std::getline(lss, read_string3);
             if (me==MASTER) {
                 fprintf(screen,"\n inputmsk -- Adding fix:  %s \n",read_string3.c_str());
@@ -394,7 +418,7 @@ void Inputdeto::execline(std::string read_string)
             fprintf(screen,"\n inputmsk -- I am processor %d , part of subcomm %s , and I have %d KMC-free fixes and %d Cont fixes defined now \n",me,(universe->SCnames[universe->color]).c_str(),(int)(fix->fKMCtype.size()),(int)(fix->Ctype.size()));
         }
         else if (strcmp(word.c_str(), "store") == 0){
-            std::string read_string3;
+            string read_string3;
             std::getline(lss, read_string3);
             if (me==MASTER) {
                 fprintf(screen,"\n inputmsk -- Storing this quantity:  %s \n",read_string3.c_str());
@@ -425,50 +449,14 @@ void Inputdeto::execline(std::string read_string)
             }
             if (me==MASTER) output->createthermo(msk->th_fname);
         }
-        else if (strcmp(word.c_str(), "dump") == 0){
-            if (lammpsIO->lammps_active) {
-                bool comment_found = false;
-                std::string subcname;
-                lss >> subcname;
-                if (strcmp(subcname.c_str(),(universe->SCnames[universe->color]).c_str())==0 || strcasecmp(subcname.c_str(),"all")==0 ) {
-                    std::string read_string,dumpID,dump_group,dump_style,dump_fname,dump_string,tdumpID;
-                    int dump_every;
-                    lss >> dumpID >> dump_every >> dump_group >> dump_style >> dump_fname;
-                
-                    // add subcomm name to dump name ----
-                    dump_fname = dump_fname+"."+universe->SCnames[universe->color];
-                    
-                    dump_string = dump_group+" "+dump_style+" 1 "+dump_fname;
-                    
-                    lss >> read_string;
-                    while (lss && !comment_found){
-                        if (strncmp(read_string.c_str(), "#", 1) != 0){
-                            dump_string = dump_string+" "+read_string;
-                        }
-                        else  {
-                            comment_found = true;
-                            getout=true;
-                        }
-                        lss >> read_string;
-                    }
-                    output->add_dump(dumpID,dump_every,dump_string);
-                }
-                else {
-                    break;
-                }
-            }
-            else {
-                getout=true;
-            }
-        }
         else if (strcmp(word.c_str(), "setconc") == 0) {
-            std::string sname,molname;
+            string sname,molname;
             double molconc;
             int every;
             lss >> sname >> every >> molname >> molconc;
             
             bool flag_ctr = false;
-            std::string counter,ctr_mol,boxdV;
+            string counter,ctr_mol,boxdV;
             ctr_mol = "none";
             lss >> counter;
             if (strcmp(counter.c_str(),"counter")==0) {
@@ -479,7 +467,7 @@ void Inputdeto::execline(std::string read_string)
             else boxdV = counter;
             
             if (strcmp(boxdV.c_str(),"box")!=0 && strcmp(boxdV.c_str(),"box+dV")!=0) {
-                std::string msg = "ERROR: setconc command must end with either \"box\" or \"box+dV\", instead \""+boxdV+"\" was found\n";
+                string msg = "ERROR: setconc command must end with either \"box\" or \"box+dV\", instead \""+boxdV+"\" was found\n";
                 error->errsimple(msg);
             }
             setconc->add_conc(sname,every,molname,molconc,flag_ctr,ctr_mol,boxdV);
@@ -488,7 +476,7 @@ void Inputdeto::execline(std::string read_string)
             if (lammpsIO->lammps_active) {
                 bool comment_found = false;
                 int every;
-                std::string rid,relaxer,rlx_string,rlx_style,rlx_modify,read_string;
+                string rid,relaxer,rlx_string,rlx_style,rlx_modify,read_string;
                 lss >> rid;
                 lss >> every;
                 lss >> relaxer;
@@ -513,7 +501,7 @@ void Inputdeto::execline(std::string read_string)
                     }
                 }
                 else {
-                    std::string msg = "ERROR: only minimize implemented as a relax mode thus far. No nvt, npt, or anything else yet...";
+                    string msg = "ERROR: only minimize implemented as a relax mode thus far. No nvt, npt, or anything else yet...";
                     error->errsimple(msg);
                 }
                 
@@ -522,10 +510,10 @@ void Inputdeto::execline(std::string read_string)
         }
         else if (strcmp(word.c_str(), "spec") == 0) {
             #ifdef MASKE_WITH_SPECIATION
-                std::string msg = "ERROR: MASKE must be installed with the WITH_SPECIATION option to use this command";
+                string msg = "ERROR: MASKE must be installed with the WITH_SPECIATION option to use this command";
                 error->errsimple(msg);
             #endif
-            std::string id, type, database, solvent;
+            string id, type, database, solvent;
             int every, nsolvents;
             double molar_mass;
             lss >> id;
@@ -533,12 +521,12 @@ void Inputdeto::execline(std::string read_string)
             lss >> every;
             lss >> database;
             lss >> nsolvents;
-            std::vector<std::string> solvent_names;
+            vector<string> solvent_names;
             for (int i = 0; i < nsolvents; i++) {
                 lss >> solvent;
                 solvent_names.push_back(solvent);
             }
-            std::vector<double> solvent_molar_masses;
+            vector<double> solvent_molar_masses;
             for (int i = 0; i < nsolvents; i++) {
                 lss >> molar_mass; // in g/mol
                 solvent_molar_masses.push_back(molar_mass);
@@ -554,7 +542,7 @@ void Inputdeto::execline(std::string read_string)
         }
          */
         else{
-            std::string msg = "ERROR: command unknown in input or restart file: "+word;
+            string msg = "ERROR: command unknown in input or restart file: "+word;
             error->errsimple(msg);
 
         }

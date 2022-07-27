@@ -1,8 +1,4 @@
 #include "deto.h"
-
-/*
-#include "memory.h"
- */
 #include "error.h"
 #include "inputdeto.h"
 #include "universe.h"
@@ -11,20 +7,8 @@
 #include "optimize.h"
 #include "simulations.h"
 #include "update.h"
- /*
 
-#include "chemistry.h"
-#include "solution.h"
-#include "fix.h"
-#include "fix_delete.h"
-#include "fix_Cfoo.h"
-#include "relax.h"
-#include "setconc.h"
-#include "krun.h"
-#include "randm.h"
-#include "fix_nucleate.h"
-#include "store.h"
-
+/*
 #ifdef MASKE_WITH_NUFEB
 #include "fix_nufeb.h"
 #endif
@@ -61,7 +45,6 @@ DETO::DETO(int narg, char **arg)
     }
     MPI_Barrier(MPI_COMM_WORLD);
     
-
     
     /*
     step = 0;
@@ -125,7 +108,10 @@ DETO::~DETO()
     MPI_Barrier(MPI_COMM_WORLD);
     delete error;
     
-    if (me==MASTER) fprintf(screen,"Deleting output class\n");
+    if (me==MASTER) {
+        fprintf(screen,"Deleting output class\n");
+        output->printall();
+    }
     MPI_Barrier(MPI_COMM_WORLD);
     delete output;
     
@@ -158,78 +144,7 @@ DETO::~DETO()
     }
     MPI_Barrier(MPI_COMM_WORLD);
     delete update;
-    
-    /*
-    if (me==MASTER) {
-        fprintf(screen,"Deleting chemistry class\n");
-        chem->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete chem;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting solution class\n");
-        solution->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete solution;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting fix class\n");
-        fix->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete fix;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting krun class\n");
-        krun->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete krun;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting fix_delete class\n");
-        fix_del->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete fix_del;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting randm class\n");
-        randm->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete randm;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting Cfoo class\n");
-        fix_cfoo->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete fix_cfoo;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting relax class\n");
-        relax->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete relax;
-#ifdef MASKE_WITH_NUFEB
-    delete fix_nufeb;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting fix_nufeb class\n");
-        //relax->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-    if (me==MASTER) {
-        fprintf(screen,"Deleting fix_nucleate class\n");
-        fix_nucl->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete fix_nucl;
-    if (me==MASTER) {
-        fprintf(screen,"Deleting store class\n");
-        store->printall();
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-    delete store;
-    
-     */
+
     if (me==MASTER) {
         fprintf(screen,"Deleting universe class\n");
         universe->printall();

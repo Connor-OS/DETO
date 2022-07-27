@@ -16,6 +16,8 @@
 #define MASTER 0
 
 namespace DETO_NS {
+    using std::vector;
+    using std::string;
 	
 	class Universe : protected Pointers {
 	public:
@@ -34,10 +36,10 @@ namespace DETO_NS {
        
         MPI_Status status;
         
-        std::vector<std::string> SCnames;    //vector containing the names of the subcommunicators
-        std::vector<int> SCnp;    //vector containing the number of processors in each subcommunicator
-        //std::vector<int> SCseme; //vector containing random seeds for each subcomm
-         std::vector<int> subMS;    //vector containing the IDs of the submasters of each subcommunicator
+        vector<string> SCnames;    //vector containing the names of the subcommunicators
+        vector<int> SCnp;    //vector containing the number of processors in each subcommunicator
+
+        vector<int> subMS;    //vector containing the IDs of the submasters of each subcommunicator
         
         int *color_each; //vector containing the color, viz the subcomm id, of each processor
         //int *subcID;    // array containing the proc id of the masters of each subcomm
@@ -48,7 +50,7 @@ namespace DETO_NS {
 
 		
 	private:
-		//std::string fname;              // open inputcprs file
+		//string fname;              // open inputcprs file
 
 	};
 	

@@ -1,2 +1,0 @@
--   [4.1 simply supported beam](app://obsidian.md/4.1_simply_supported.md)
--   [4.2 granular mixer](app://obsidian.md/4.2_granular.md)

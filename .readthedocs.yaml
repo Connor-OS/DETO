@@ -1,11 +1,15 @@
 version: 2
 
-python:
-  version: "3.8"
-  install:
-    - methond: pip
-      extra_requirements:
-        - myst-parser
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+
+dependencies:
+  - sphinx
+  - nbsphinx
+  - pip:
+    - myst-parser
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

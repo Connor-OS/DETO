@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="English" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opt_type genetic &mdash; DETO 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> DETO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">opt_type genetic</a><ul>
+<li><a class="reference internal" href="#syntax">Syntax</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#description">Description</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DETO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>opt_type genetic</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/3_commands/3.x.1_opt_type_genetic.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="opt-type-genetic">
+<h1>opt_type genetic<a class="headerlink" href="#opt-type-genetic" title="Permalink to this heading"></a></h1>
+<p>this command will select a genetic algorithm for optimisation</p>
+<section id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opt_type</span> <span class="n">genetic</span> <span class="n">pop_size</span> <span class="n">select</span> <span class="n">cross_rate</span> <span class="n">mutation_rate</span> <span class="n">keyword</span> <span class="n">value</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>genetic: style name of this optimisation type</p></li>
+<li><p>pop_size: number of individuals in a single generation of the optimisation</p></li>
+<li><p>select: selection method, can be tournement or roulette</p></li>
+<li><p>cross_rate: probability of crossover between paretn solutions</p></li>
+<li><p>mutation_rate: probability of mutation in a given bit/element</p></li>
+<li><p>zero or more keyword/value pairs may be appended to args</p></li>
+<li><p>keyword: elitism</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">eletism</span> <span class="n">value</span> <span class="o">=</span> <span class="n">fitest</span>
+	<span class="n">fitest</span> <span class="o">=</span> <span class="n">number</span> <span class="n">of</span> <span class="n">fitest</span> <span class="n">solutions</span> <span class="n">to</span> <span class="n">maintain</span> <span class="n">across</span> <span class="n">generations</span>
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opt_type</span> <span class="n">genetic</span> <span class="n">tournement</span> <span class="mi">50</span> <span class="mf">0.95</span> <span class="mf">0.01</span>
+<span class="n">opt_type</span> <span class="n">genetic</span> <span class="n">roulette</span> <span class="mi">200</span> <span class="mf">0.95</span> <span class="mf">0.01</span> <span class="n">elitism</span>
+</pre></div>
+</div>
+</section>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
+<p>This optimisation type will use a genetic algorithm, the algorithm uses a technique inspired by natural selection to perform an efficent exploration of the search space. utilising a technique of selection, cross over, and mutation</p>
+<p>pop_size</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Connor O&#39;Shaughnessy.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

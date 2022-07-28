@@ -4,8 +4,6 @@ DETO_3D is a multiscale topology optimisation code using the discrete element me
 
 ### Getting started
 
-The DETO_3D sorce code can be cloned from our [Github](https://github.com/Connor-OS/DETO/tree/master/DETO_3D)
-
 The code makes extensive use of LAMMPS objects and syntax therefore the user is directed towards the LAMMPS offical [documentation](https://docs.lammps.org/Manual.html#) to for a deeper understanding of some of the essential concepts in the operation of DETO_3D however this Manual is intended to provide all the necessary information for operation of the code.
 
 ### User Manual
@@ -33,3 +31,4 @@ The user manual is layed out as follows
 ### Contact
 
 If you have any questions about the code or how to use it. Feel free to email it's creator at: c.o'shaughnessy1@ncl.ac.uk
+

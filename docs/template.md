@@ -1,0 +1,16 @@
+# Title
+One line explanation 
+### Syntax
+```
+command
+```
+- arguments
+ 
+### Examples
+````
+example    1
+example    2
+````
+
+### Description
+full description

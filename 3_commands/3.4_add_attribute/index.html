@@ -140,13 +140,17 @@
                 <h1 id="add_attribute-command">add_attribute command</h1>
 <p>add an attribute to a previously specified simulation writen in LAMMPS syntax</p>
 <h3 id="syntax">Syntax</h3>
-<p><code>add_attribute sim_ID command</code>
-- sim_ID = ID of the simulation to add the attribute to
-- command = any syntactically correct command that can be run by LAMMPS.</p>
+<pre><code>add_attribute sim_ID command
+</code></pre>
+<ul>
+<li>sim_ID = ID of the simulation to add the attribute to</li>
+<li>command = any syntactically correct command that can be run by LAMMPS.</li>
+</ul>
 <h3 id="examples">Examples</h3>
-<p><code>add_attribute Sim1      fix force force_group addforce 0 -1 0
+<pre><code>add_attribute Sim1      fix force force_group addforce 0 -1 0
 add_attribute Sim2      minimize    1.0e-10 1.0e-10 1000 2000
-add_attribute Sim3      run 1000</code></p>
+add_attribute Sim3      run 1000
+</code></pre>
 <h3 id="description">Description</h3>
 <p>Similar to the [[lammps]] command this command takes as an argument any string that is a correct <a href="https://docs.lammps.org/Manual.html#">LAMMPS</a> command. These commands are associated with a specific simulation, they make up the body of that simulation. They should be used to set the boundry conditions of the simulation as well as run the simulation.</p>
 <p>You should think of these commands as defining the conditions you are intending to optimize for</p>

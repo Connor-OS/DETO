@@ -140,14 +140,18 @@
                 <h1 id="simulation-command">simulation command</h1>
 <p>adds a new simulation to the optimization, specifying its properties</p>
 <h3 id="syntax">Syntax</h3>
-<p><code>siulation ID type repeat yes/no repeat_file</code>
-- ID = identifier for specific simulation
-- type = <em>run</em> or <em>cstgs</em>
-- repeat = keyword followed by <em>yes</em> or <em>no</em> 
-- repeat_file = (optional) supply file name to read from if repeat is specified </p>
+<pre><code>siulation ID type repeat yes/no repeat_file
+</code></pre>
+<ul>
+<li>ID = identifier for specific simulation</li>
+<li>type = <em>run</em> or <em>cstgs</em></li>
+<li>repeat = keyword followed by <em>yes</em> or <em>no</em> </li>
+<li>repeat_file = (optional) supply file name to read from if repeat is specified </li>
+</ul>
 <h3 id="examples">Examples</h3>
-<p><code>simulation Sim1         run repeat no
-simulation Sim2         run repeat yes repeat.dat</code></p>
+<pre><code>simulation Sim1         run repeat no
+simulation Sim2         run repeat yes repeat.dat  
+</code></pre>
 <h3 id="description">Description</h3>
 <p>TODO</p>
               

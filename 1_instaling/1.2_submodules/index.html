@@ -133,18 +133,22 @@
               
                 <h1 id="submodules">Submodules</h1>
 <p>DETO uses the open source molecular dynamics code LAMMPS as a submodule. To complete the DETO build process you first need to initialise and build the LAMMPS submodule. To do this, from inside the DETO directory to clone the sorce code from the lammps repository</p>
-<p><code>$ git submodule init
-$ git submodule update</code></p>
+<pre><code>$ git submodule init
+$ git submodule update
+</code></pre>
 <p>Make a build directory inside the lammps directory</p>
-<p><code>$ cd DETO_3D/lammps
+<pre><code>$ cd DETO_3D/lammps
 $ mkdir build
-$ cd build</code></p>
+$ cd build
+</code></pre>
 <p>Then build the lammps executable</p>
-<p><code>$ cmake -D BUILD_SHARED_LIBS=on -D PKG_GRANULAR=on -D PKG_BPM -D PKG_MOLECULE=on -D PKG_MC=on -D LAMMPS_EXCEPTIONS=on -D PKG_PYTHON=on ../cmake
+<pre><code>$ cmake -D BUILD_SHARED_LIBS=on -D PKG_GRANULAR=on -D PKG_BPM -D PKG_MOLECULE=on -D PKG_MC=on -D LAMMPS_EXCEPTIONS=on -D PKG_PYTHON=on ../cmake
 $ cmake --build .
-$ cmake --install .</code></p>
+$ cmake --install .
+</code></pre>
 <p>You can now navigate out of the lammps directory and back to DETO_3D</p>
-<p><code>cd ../..</code></p>
+<pre><code>cd ../..
+</code></pre>
               
             </div>
           </div><footer>

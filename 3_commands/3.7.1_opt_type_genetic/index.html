@@ -140,19 +140,24 @@
                 <h1 id="opt_type-genetic">opt_type genetic</h1>
 <p>this command will select a genetic algorithm for optimisation</p>
 <h3 id="syntax">Syntax</h3>
-<p><code>opt_type genetic pop_size select cross_rate mutation_rate keyword value</code>
-- genetic: style name of this optimisation type
-- pop_size: number of individuals in a single generation of the optimisation
-- select: selection method, can be tournement or roulette
-- cross_rate: probability of crossover between paretn solutions
-- mutation_rate: probability of mutation in a given bit/element
-- zero or more keyword/value pairs may be appended to args
-- keyword: elitism
-<code>eletism value = fitest
-    fitest = number of fitest solutions to maintain across generations</code></p>
+<pre><code>opt_type genetic pop_size select cross_rate mutation_rate keyword value
+</code></pre>
+<ul>
+<li>genetic: style name of this optimisation type</li>
+<li>pop_size: number of individuals in a single generation of the optimisation</li>
+<li>select: selection method, can be tournement or roulette</li>
+<li>cross_rate: probability of crossover between paretn solutions</li>
+<li>mutation_rate: probability of mutation in a given bit/element</li>
+<li>zero or more keyword/value pairs may be appended to args</li>
+<li>keyword: elitism</li>
+</ul>
+<pre><code>eletism value = fitest
+    fitest = number of fitest solutions to maintain across generations
+</code></pre>
 <h3 id="examples">Examples</h3>
-<p><code>opt_type genetic tournement 50 0.95 0.01
-opt_type genetic roulette 200 0.95 0.01 elitism</code></p>
+<pre><code>opt_type genetic tournement 50 0.95 0.01
+opt_type genetic roulette 200 0.95 0.01 elitism
+</code></pre>
 <h3 id="description">Description</h3>
 <p>This optimisation type will use a genetic algorithm, the algorithm uses a technique inspired by natural selection to perform an efficent exploration of the search space. utilising a technique of selection, cross over, and mutation </p>
 <p>pop_size</p>

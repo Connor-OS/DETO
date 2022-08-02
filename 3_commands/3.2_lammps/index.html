@@ -44,10 +44,6 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../0_introduction/">0. Introduction</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">1. Instalation</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.1_cloning/">1.1. cloning</a>
@@ -86,17 +82,21 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../3.5_opt_map_chi/">3.5. opt_map_chi</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_opt_type.md">3.6. opt_type</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.6_read_potentials/">3.6. read_potentials</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_add_constraint.md">3.7. add_constraint</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.7_opt_type/">3.7. opt_type</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_add_objective.md">3.8. add_objective</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.8_objective_function/">3.8. objective_function</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_dump.md">3.9. dump</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.9_add_objective/">3.9. add_objective</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_read_potentials.md">3.10. read_potentials</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.10_add_constraint/">3.10. add_constraint</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_write_plog.md">3.11. write_plog</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.11_dump/">3.11. dump</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.12_write_plog/">3.12. write_plog</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.13_write_lmp_log/">3.13. write_lmp_log</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">4. examples</span></p>
@@ -108,7 +108,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="" href="../3.x.1_opt_type_genetic.md">opt_type_genetic</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.7.1_opt_type_genetic/">opt_type_genetic</a>
                   </li>
               </ul>
       </div>
@@ -140,17 +140,13 @@
                 <h1 id="lammps-command">lammps command</h1>
 <p>Directs a command to be run in lammps. For setting the inital conditions for an optimization.</p>
 <h3 id="syntax">Syntax</h3>
-<pre><code>lammps  command
-</code></pre>
-<ul>
-<li>command = any syntactically correct command that can be run by LAMMPS</li>
-</ul>
+<p><code>lammps  command</code>
+- command = any syntactically correct command that can be run by LAMMPS</p>
 <h3 id="examples">Examples</h3>
-<pre><code>lammps  units           si
+<p><code>lammps  units           si
 lammps  create_box      12 box bond/types 68 extra/bond/per/atom 12
 lammps  create_atoms    1 box
-lammps  fix             support support1 setforce 0 0 0
-</code></pre>
+lammps  fix             support support1 setforce 0 0 0</code></p>
 <h3 id="description">Description</h3>
 <p>The lammps command directs a command to be run in lammps at the start of the optimization to set the initial conditions for the system. It can be anny correct [LAMMPS]<a href="https://docs.lammps.org/Manual.html#">LAMMPS</a> command. This command sets the conditions that are common between all simulations, you can think of it as being used to set the starting conditions for your optimization. The current state of the simulation enviroment will be stored after all <a href="3.2_lammps">lammps</a> commands have been run. This state will be reverted back to before each new <a href="3.3_simulation">simulation</a></p>
 <p>It can be used, for example to set the units and dimensions, create the simulation box and apply fixes. It may be usefull to use run or minimize with this command, but the user should be aware that these operations will not be part of each optimization itteration and will only set the inital configuration. All particles that are intended to be optimized should be defined with this command.</p>

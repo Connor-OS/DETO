@@ -44,10 +44,6 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../0_introduction/">0. Introduction</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">1. Instalation</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../1.1_cloning/">1.1. cloning</a>
@@ -80,17 +76,21 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.5_opt_map_chi/">3.5. opt_map_chi</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_opt_type.md">3.6. opt_type</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.6_read_potentials/">3.6. read_potentials</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_add_constraint.md">3.7. add_constraint</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.7_opt_type/">3.7. opt_type</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_add_objective.md">3.8. add_objective</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.8_objective_function/">3.8. objective_function</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_dump.md">3.9. dump</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.9_add_objective/">3.9. add_objective</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_read_potentials.md">3.10. read_potentials</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.10_add_constraint/">3.10. add_constraint</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x_write_plog.md">3.11. write_plog</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.11_dump/">3.11. dump</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.12_write_plog/">3.12. write_plog</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.13_write_lmp_log/">3.13. write_lmp_log</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">4. examples</span></p>
@@ -102,7 +102,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="" href="../../3_commands/3.x.1_opt_type_genetic.md">opt_type_genetic</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.7.1_opt_type_genetic/">opt_type_genetic</a>
                   </li>
               </ul>
       </div>
@@ -133,22 +133,18 @@
               
                 <h1 id="submodules">Submodules</h1>
 <p>DETO uses the open source molecular dynamics code LAMMPS as a submodule. To complete the DETO build process you first need to initialise and build the LAMMPS submodule. To do this, from inside the DETO directory to clone the sorce code from the lammps repository</p>
-<pre><code>$ git submodule init
-$ git submodule update
-</code></pre>
+<p><code>$ git submodule init
+$ git submodule update</code></p>
 <p>Make a build directory inside the lammps directory</p>
-<pre><code>$ cd DETO_3D/lammps
+<p><code>$ cd DETO_3D/lammps
 $ mkdir build
-$ cd build
-</code></pre>
+$ cd build</code></p>
 <p>Then build the lammps executable</p>
-<pre><code>$ cmake -D BUILD_SHARED_LIBS=on -D PKG_GRANULAR=on -D PKG_BPM -D PKG_MOLECULE=on -D PKG_MC=on -D LAMMPS_EXCEPTIONS=on -D PKG_PYTHON=on ../cmake
+<p><code>$ cmake -D BUILD_SHARED_LIBS=on -D PKG_GRANULAR=on -D PKG_BPM -D PKG_MOLECULE=on -D PKG_MC=on -D LAMMPS_EXCEPTIONS=on -D PKG_PYTHON=on ../cmake
 $ cmake --build .
-$ cmake --install .
-</code></pre>
+$ cmake --install .</code></p>
 <p>You can now navigate out of the lammps directory and back to DETO_3D</p>
-<pre><code>cd ../..
-</code></pre>
+<p><code>cd ../..</code></p>
               
             </div>
           </div><footer>

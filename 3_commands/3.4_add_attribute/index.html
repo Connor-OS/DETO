@@ -44,10 +44,6 @@
                 <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../0_introduction/">0. Introduction</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">1. Instalation</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.1_cloning/">1.1. cloning</a>
@@ -86,17 +82,21 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../3.5_opt_map_chi/">3.5. opt_map_chi</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_opt_type.md">3.6. opt_type</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.6_read_potentials/">3.6. read_potentials</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_add_constraint.md">3.7. add_constraint</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.7_opt_type/">3.7. opt_type</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_add_objective.md">3.8. add_objective</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.8_objective_function/">3.8. objective_function</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_dump.md">3.9. dump</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.9_add_objective/">3.9. add_objective</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_read_potentials.md">3.10. read_potentials</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.10_add_constraint/">3.10. add_constraint</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.x_write_plog.md">3.11. write_plog</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.11_dump/">3.11. dump</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.12_write_plog/">3.12. write_plog</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.13_write_lmp_log/">3.13. write_lmp_log</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">4. examples</span></p>
@@ -108,7 +108,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="" href="../3.x.1_opt_type_genetic.md">opt_type_genetic</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.7.1_opt_type_genetic/">opt_type_genetic</a>
                   </li>
               </ul>
       </div>
@@ -140,22 +140,20 @@
                 <h1 id="add_attribute-command">add_attribute command</h1>
 <p>add an attribute to a previously specified simulation writen in LAMMPS syntax</p>
 <h3 id="syntax">Syntax</h3>
-<pre><code>add_attribute sim_ID command
-</code></pre>
-<ul>
-<li>sim_ID = ID of the simulation to add the attribute to</li>
-<li>command = any syntactically correct command that can be run by LAMMPS.</li>
-</ul>
+<p><code>add_attribute sim_ID command</code>
+- sim_ID = ID of the simulation to add the attribute to
+- command = any syntactically correct command that can be run by LAMMPS.</p>
 <h3 id="examples">Examples</h3>
-<pre><code>add_attribute Sim1      fix force force_group addforce 0 -1 0
+<p><code>add_attribute Sim1      fix force force_group addforce 0 -1 0
 add_attribute Sim2      minimize    1.0e-10 1.0e-10 1000 2000
-add_attribute Sim3      run 1000
-</code></pre>
+add_attribute Sim3      run 1000</code></p>
 <h3 id="description">Description</h3>
 <p>Similar to the [[lammps]] command this command takes as an argument any string that is a correct <a href="https://docs.lammps.org/Manual.html#">LAMMPS</a> command. These commands are associated with a specific simulation, they make up the body of that simulation. They should be used to set the boundry conditions of the simulation as well as run the simulation.</p>
 <p>You should think of these commands as defining the conditions you are intending to optimize for</p>
-<pre><code>you must avoid using "set type" commands here these commands as the optimization process uses types in a special way described in [chi_map](2.2_chimap)
-</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>you must avoid using "set type" commands here these commands as the optimization process uses types in a special way described in <a href="2.2_chimap">chi_map</a></p>
+</div>
               
             </div>
           </div><footer>

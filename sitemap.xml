@@ -56,17 +56,22 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.10_dump/</loc>
+         <loc>https://DETO.com/3_commands/3.10_add_constraint/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.11_write_plog/</loc>
+         <loc>https://DETO.com/3_commands/3.11_dump/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.12_write_lmp_log/</loc>
+         <loc>https://DETO.com/3_commands/3.12_write_plog/</loc>
+         <lastmod>2022-08-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://DETO.com/3_commands/3.13_write_lmp_log/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -91,37 +96,32 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.4_opt_map_chi/</loc>
+         <loc>https://DETO.com/3_commands/3.5_opt_map_chi/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.5_read_potentials/</loc>
+         <loc>https://DETO.com/3_commands/3.6_read_potentials/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.6.1_opt_type_genetic/</loc>
+         <loc>https://DETO.com/3_commands/3.7.1_opt_type_genetic/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.6_opt_type/</loc>
+         <loc>https://DETO.com/3_commands/3.7_opt_type/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.7_objective_function/</loc>
+         <loc>https://DETO.com/3_commands/3.8_objective_function/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://DETO.com/3_commands/3.8_add_objective/</loc>
-         <lastmod>2022-08-02</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://DETO.com/3_commands/3.9_add_constraint/</loc>
+         <loc>https://DETO.com/3_commands/3.9_add_objective/</loc>
          <lastmod>2022-08-02</lastmod>
          <changefreq>daily</changefreq>
     </url>

@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://DETO.com/3_commands/3.6.1_opt_type_genetic/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://DETO.com/3_commands/3.6_read_potentials/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>opt_type genetic - DETO_3D</title>
+    <title>Read_potentials command - DETO_3D</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "opt_type genetic";
-        var mkdocs_page_input_path = "3_commands/3.6.1_opt_type_genetic.md";
-        var mkdocs_page_url = "/3_commands/3.6.1_opt_type_genetic/";
+        var mkdocs_page_name = "Read_potentials command";
+        var mkdocs_page_input_path = "3_commands/3.6_read_potentials.md";
+        var mkdocs_page_url = "/3_commands/3.6_read_potentials/";
       </script>
     
     <script src="../../js/jquery-3.6.0.min.js" defer></script>
@@ -76,7 +76,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../3.4_add_attribute/">3.4. add_attribute</a>
                   </li>
-                  <li class="toctree-l1"><a class="" href="../3.5_opt_map_chi.md">3.5. opt_map_chi</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../3.5_opt_map_chi/">3.5. opt_map_chi</a>
                   </li>
                   <li class="toctree-l1"><a class="" href="../3.x_opt_type.md">3.6. opt_type</a>
                   </li>
@@ -117,9 +117,9 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-      <li>opt_type genetic</li>
+      <li>Read_potentials command</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/Connor-OS/DETO/edit/master/docs/3_commands/3.6.1_opt_type_genetic.md"
+        <a href="https://github.com/Connor-OS/DETO/edit/master/docs/3_commands/3.6_read_potentials.md"
           class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
@@ -128,30 +128,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="opt_type-genetic">opt_type genetic</h1>
-<p>this command will select a genetic algorithm for optimisation</p>
-<h3 id="syntax">Syntax</h3>
-<pre><code>opt_type genetic pop_size select cross_rate mutation_rate keyword value
-</code></pre>
-<ul>
-<li>genetic: style name of this optimisation type</li>
-<li>pop_size: number of individuals in a single generation of the optimisation</li>
-<li>select: selection method, can be tournement or roulette</li>
-<li>cross_rate: probability of crossover between paretn solutions</li>
-<li>mutation_rate: probability of mutation in a given bit/element</li>
-<li>zero or more keyword/value pairs may be appended to args</li>
-<li>keyword: elitism</li>
-</ul>
-<pre><code>eletism value = fitest
-    fitest = number of fitest solutions to maintain across generations
-</code></pre>
-<h3 id="examples">Examples</h3>
-<pre><code>opt_type genetic tournement 50 0.95 0.01
-opt_type genetic roulette 200 0.95 0.01 elitism
-</code></pre>
-<h3 id="description">Description</h3>
-<p>This optimisation type will use a genetic algorithm, the algorithm uses a technique inspired by natural selection to perform an efficent exploration of the search space. utilising a technique of selection, cross over, and mutation </p>
-<p>pop_size</p>
+                <h1 id="read_potentials-command">Read_potentials command</h1>
               
             </div>
           </div><footer>

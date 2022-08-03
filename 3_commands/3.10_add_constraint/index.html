@@ -83,6 +83,14 @@
                   <li class="toctree-l1"><a class="reference internal" href="../3.9_add_objective/">3.9. add_objective</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">3.10. add_constraint</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#syntax">Syntax</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#description">Description</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../3.11_dump/">3.11. dump</a>
                   </li>
@@ -129,7 +137,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="add_constraint-function">add_constraint function</h1>
+<p>Impose a constraint on permisable solutions</p>
+<h3 id="syntax">Syntax</h3>
+<pre><code>add_constraint    mat_ID constraint_type style args
+</code></pre>
+<ul>
+<li>mat_ID = ID of material to apply constraint to</li>
+<li>constraint_type = <em>avgchi</em> or <em>local_avgchi</em> </li>
+<li>style = <em>scale</em> or <em>shift</em>
+   <code>avgchi args = volfrac
+     volfrac = fraction of total design space permisable to be filled with material
+   local_avgchi args = volfrac radius
+     volfrac = fraction of local area permisable to be filled with material
+     radius = radius defining the boundries of local area around each element</code></li>
+</ul>
+<h3 id="examples">Examples</h3>
+<pre><code>add_constraint    steel avgchi scale 0.6
+add_constraint    concrete avgchi shift 0.2
+add_constraint    glass local_avgchi shift 0.45
+</code></pre>
+<h3 id="description">Description</h3>
+<p>full description</p>
               
             </div>
           </div><footer>

@@ -138,15 +138,18 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="add_objective-command">add_objective command</h1>
+<p>Track a varaible from one of your simulations to be used in the objective function.</p>
 <h3 id="syntax">Syntax</h3>
-<pre><code>add_objective 
+<pre><code>add_objective    sim_ID objective_name objective_lammps_name
 </code></pre>
 <ul>
-<li>num_subcomms = integer value for the number of subcommunicators to use</li>
+<li>sim_ID = ID of the simulation to add the attribute to</li>
+<li>objective_name = unique identifier for this objective</li>
+<li>objective_lammps_name = name of corresponding variable in simulation this objective is tracking</li>
 </ul>
 <h3 id="examples">Examples</h3>
-<pre><code>subcomm 2
-subcomm 6
+<pre><code>add_objective Sim1 c1 comp
+add_objective udl_beam c2 volfrac
 </code></pre>
 <h3 id="description">Description</h3>
               

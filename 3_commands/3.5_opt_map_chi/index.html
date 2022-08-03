@@ -73,6 +73,14 @@
                   <li class="toctree-l1"><a class="reference internal" href="../3.4_add_attribute/">3.4. add_attribute</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">3.5. opt_map_chi</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#syntax">Syntax</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#description">Description</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../3.6_read_potentials/">3.6. read_potentials</a>
                   </li>
@@ -129,7 +137,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <p>TODO</p>
+                <h1 id="opt_map_chi-command">opt_map_chi command</h1>
+<p>loads <a href="2.2_chimap.md">chi map</a> from file</p>
+<h3 id="syntax">Syntax</h3>
+<pre><code>opt_map_chi    filename
+</code></pre>
+<ul>
+<li>filename = path to file containing chi map</li>
+</ul>
+<h3 id="examples">Examples</h3>
+<pre><code>opt_map_chi    chimap.dat
+opt_map_chi    ./inputs/chimap_multi_mat.dat
+</code></pre>
+<h3 id="description">Description</h3>
+<p>This command imports a chi map from the file path specified into your optimization. A chi map is required to run any optimisation in DETO as it is a core part of this implementation determining the way 'per atom' properties are allocated by the optimization process. See the <a href="2.2_chimap.md">chimap</a> page for details of the formating and syntax of the chi map file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>you must include one and only one opt_map_chi command in your simulation.</p>
+</div>
               
             </div>
           </div><footer>

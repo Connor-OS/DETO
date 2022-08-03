@@ -148,8 +148,8 @@
 </ul>
 <h3 id="examples">Examples</h3>
 <pre><code>add_attribute Sim1      fix force force_group addforce 0 -1 0
-add_attribute Sim2      minimize    1.0e-10 1.0e-10 1000 2000
-add_attribute Sim3      run 1000
+add_attribute VertF     minimize    1.0e-10 1.0e-10 1000 2000
+add_attribute tourq     run 1000
 </code></pre>
 <h3 id="description">Description</h3>
 <p>Similar to the [[lammps]] command this command takes as an argument any string that is a correct <a href="https://docs.lammps.org/Manual.html#">LAMMPS</a> command. These commands are associated with a specific simulation, they make up the body of that simulation. They should be used to set the boundry conditions of the simulation as well as run the simulation.</p>

@@ -50,6 +50,9 @@ namespace DETO_NS {
         vector<int> pop_sizeps; // pop_size per subcommunicator
         vector<int> pop_sizeps_cum; // pop_size per subcommunicator
 
+        string obj_function; //string to hold the objective function to later be evaluated in LAMMPS
+        double obj_value; //value of the objective function
+
 	private:
 
         vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
@@ -111,6 +114,7 @@ namespace DETO_NS {
         void constrain_avg_chi(int id); 
         vector<double> constrain_local_avg_chi(vector<double>); //todo: change to void
         void evaluate_objective(int id);
+        void communicate_objective(int*);
 	};
 	
 }

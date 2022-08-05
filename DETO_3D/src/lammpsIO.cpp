@@ -13,6 +13,7 @@ LammpsIO::LammpsIO(DETO *deto) : Pointers(deto)
 
     lammps_active=false;
     lmpThSt = "thermo_style custom step atoms";
+    wllog = true;
     /*
     units = "real";
     atomstyle = "ellipsoid";
@@ -62,8 +63,11 @@ void LammpsIO::create()
         
         // creates subcomm-specific lammps logfile (and temporary dumpfile name, currently turned off)
         string todo;
-        // todo = "log log."+universe->SCnames[universe->color]+".lammps";
-        todo = "log none";
+        if(wllog) {
+            todo = "log log."+universe->SCnames[universe->color]+".lammps";
+        } else {
+            todo = "log none";
+        }
         lammpsIO->lammpsdo(todo);
         
         

@@ -51,6 +51,7 @@ namespace DETO_NS {
         /*
         //string tdump_fname;  // temporary dump file name, used by maske to evaluate computes etc for output
         */
+       bool wllog;
 	private:
 		//string fname;              // open inputcprs file
         int me;     // id of the current processor (rank)

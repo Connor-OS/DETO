@@ -188,12 +188,12 @@ void Output::writethermo(void)
 
 // ---------------------------------------------------------------
 // record new dump
-void Output::add_dump(int devery,string dstring,int fitest)
+void Output::add_dump(int devery,string dstring,int n_fitest)
 {
     dump_every.push_back(devery);
     dstring = "write_dump " + dstring;
     dump_string.push_back(dstring);
-    dump_fitest.push_back(fitest);
+    dump_fitest.push_back(n_fitest);
     dump_first.push_back(true);
 }
 
@@ -203,9 +203,6 @@ void Output::add_dump(int devery,string dstring,int fitest)
 void Output::writedump(int step, int* fitness, int pop_size)
 {
     fprintf(screen,"Writing dumps\n");
-    for(int i=0; i<dump_every.size(); i++) {
-        fprintf(screen,"Every %i dump: %s for fitest: %i\n",dump_every[i],dump_string[i].c_str(),dump_fitest[i]);
-    }
     if(step == 0 && universe->color == 0) {
         optimize->load_chi(0);
         for(int i=0; i<dump_every.size(); i++) {

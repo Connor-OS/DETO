@@ -25,7 +25,7 @@ DETO::DETO(int narg, char **arg)
 {
     screen = NULL;
     screen=stdout;
-    wplog = true;
+    wplog = false;
     
     plog = NULL;
     /*

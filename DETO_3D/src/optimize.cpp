@@ -8,6 +8,7 @@
 #include "update.h"
 #include <iostream>
 #include <algorithm>
+// #include <memory>
 
 #include <string.h>
 
@@ -15,10 +16,8 @@ using namespace DETO_NS;
 
 Optimize::Optimize(DETO *deto) : Pointers(deto)
 {
-
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
-    
 }
 
 // ---------------------------------------------------------------
@@ -333,15 +332,14 @@ void Optimize::initialize_chi()
     delete[] IDpos;
     delete[] nID_each;
     delete[] typeuns;
-    if(me == MASTER && dto->wplog == true) {
-        output->toplog("\n------------------\nInitial chi\n-------------------\n\n");
-        for (int i=0; i<natoms; i++) {
-            string logmsg = "";
-            std::ostringstream ss;
-            ss << IDuns[i] << " " << chi[i] << " " << mat[i]; 
-            logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-            output->toplog(logmsg);
-        }
+    if(me != MASTER || dto->wplog == false) return;
+    output->toplog("\n------------------\nInitial chi\n-------------------\n\n");
+    for (int i=0; i<natoms; i++) {
+        string logmsg = "";
+        std::ostringstream ss;
+        ss << IDuns[i] << " " << chi[i] << " " << mat[i]; 
+        logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+        output->toplog(logmsg);
     }
 }
 
@@ -376,17 +374,16 @@ void Optimize::initialize_chipop()
             constrain_local_avg_chi(chi_pop[i]);
         }
         if(me == MASTER) fprintf(screen,"DONE Generating chi population\n\n");
-        if(me == MASTER && dto->wplog) {
-            output->toplog("\n------------------\nChi Population\n-------------------\n\n");
-            for (int i=0; i<natoms; i++) {
-                string logmsg = "";
-                for(int j=0; j<pop_size; j++) {
-                    std::ostringstream ss;
-                    ss << "\t" << chi_pop[j][i] << " " << mat_pop[j][i] << "\t|"; 
-                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-                }
-                output->toplog(logmsg);
+        if(me != MASTER || !dto->wplog) return;
+        output->toplog("\n------------------\nChi Population\n-------------------\n\n");
+        for (int i=0; i<natoms; i++) {
+            string logmsg = "";
+            for(int j=0; j<pop_size; j++) {
+                std::ostringstream ss;
+                ss << "\t" << chi_pop[j][i] << " " << mat_pop[j][i] << "\t|"; 
+                logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
             }
+            output->toplog(logmsg);
         }
     }
 }
@@ -428,17 +425,6 @@ void Optimize::split_pop()
         mat_popps[i] = new int[n2];
     }
 
-    // int nbytes_db = ((int) sizeof(double)) * n1*n2;
-    // double *data_db = (double *) malloc(nbytes_db);
-    // nbytes_db = ((int) sizeof(double *)) * n1;
-    // chi_popps = (double **) malloc(nbytes_db);
-
-    // int n = 0;
-    // for (int i = 0; i < n1; i++) {
-    //     chi_popps[i] = &data_db[n];
-    //     n += n2;
-    // }
-
     //split chi population and send to submasters
     for(int i=0; i<universe->nsc; i++) {
         for(int j=0; j<pop_sizeps[i]; j++) {
@@ -467,27 +453,24 @@ void Optimize::split_pop()
         }
     }
     if(me == MASTER) fprintf(screen,"DONE Spliting chi population\n\n");
-    if(dto->wplog == true) {
-        output->toplog("\n------------------\nChi sub-population\n-------------------\n\n");
-        for (int i=0; i<natoms; i++) {
-            string logmsg = "";
-            std::ostringstream ss;
-            ss << IDuns[i];
-            for(int j=0; j<pop_sizeps[universe->color]; j++) {
-                if(mat_popps[j][i] != -1) {
-                    ss << "\t" << chi_popps[j][i] << " " << chi_map.material[mat_popps[j][i]] << "\t|"; 
-                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-                }
-                else{
-                    ss << "\tnon-opt\t|"; 
-                    logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-                }
+    if(!dto->wplog) return;
+    output->toplog("\n------------------\nChi sub-population\n-------------------\n\n");
+    for (int i=0; i<natoms; i++) {
+        string logmsg = "";
+        std::ostringstream ss;
+        ss << IDuns[i];
+        for(int j=0; j<pop_sizeps[universe->color]; j++) {
+            if(mat_popps[j][i] != -1) {
+                ss << "\t" << chi_popps[j][i] << " " << chi_map.material[mat_popps[j][i]] << "\t|"; 
+                logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
             }
-            output->toplog(logmsg);
+            else{
+                ss << "\tnon-opt\t|"; 
+                logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+            }
         }
+        output->toplog(logmsg);
     }
-
-    /// If wplog write to logfiles
 }
 
 // ---------------------------------------------------------------
@@ -613,38 +596,49 @@ void Optimize::load_chi(int id)
 // evaluate the objective function for the current chi 
 void Optimize::evaluate_objective(int id)
 {
-    if(key == 0) {
-        //compute vol_frac will be usefull in the future if users want to apply soft constraints
-        double vol_frac = 0;
-        for(int i=0; i<natoms; i++) {
-            vol_frac += optimize->chi_popps[id][i];
-        }
-        vol_frac = vol_frac/natoms; //Need to think of a straightforward way to ignore non-opt
-        if(vol_frac < 0.5) vol_frac =1;
-        else vol_frac = (vol_frac+0.25);
-        
-        // fprintf(screen,"%f\n",vol_frac);
-
-        for(int i=0; i<sims->n_sims; i++) {
-            for(int j=0; j<sims->n_repeats[i]; j++) {
-                for(int k=0; k<sims->sim_obj_names[i][j].size(); k++) {
-                    // fprintf(screen,"Objective %s population: %d simulation: %d repeat: %d value: %f\n",sims->sim_obj_LMPnames[i][j][k].c_str(),id,i,j,sims->sim_obj_val[i][j][k]);
-                    // pass obj_val back to lammps lammpsdo("variable "+c1name.str()+" equal "+c1value.str())
-                    opt_objective_evalps[id] = 1/(sims->sim_obj_val[i][j][k])*vol_frac;
-                }
+    if(key != 0) return;
+    for(int i=0; i<sims->n_sims; i++) {
+        for(int j=0; j<sims->n_repeats[i]; j++) {
+            for(int k=0; k<sims->sim_obj_names[i][j].size(); k++) {
+                fprintf(screen,"evaluating %s equal %s\n",sims->sim_obj_names[i][j][k].c_str(),std::to_string(sims->sim_obj_val[i][j][k]).c_str());
+                lammpsIO->lammpsdo("variable " + sims->sim_obj_names[i][j][k] + " equal " + std::to_string(sims->sim_obj_val[i][j][k])); //need to ad repeats probably by removing a layer here
             }
         }
     }
+    lammpsIO->lammpsdo("variable obj equal " + obj_function);
+    opt_objective_evalps[id] = *(double *)lammpsIO->extract_varaiable("obj");
+    fprintf(screen,"---------------\nObjective function = %f\n----------------\n",opt_objective_evalps[id]);
+}
 
-
-    //for each chi vector
-    // lammpsdo("varible OTOT equal "+string_in_input.str());
-    // if variable is not evaluated, create a temporary thermo in lammps (via lammpsdo) which contains the variable of interest (v_OTOT)
-    // lammpsdo("run 0")
-
-    // Need to create a new vector opt_obj_eval to be filled in by submasters then comunicated back to MASTER for design update
-
-    // use a run 0 to evaluate in LAMMPS through all subprocessors
+// ---------------------------------------------------------------
+// communicate the objective function evaluations back to the master and rank fitness 
+void Optimize::communicate_objective(int* fitness)
+{
+    if(me == MASTER) {
+        for(int i=0; i<pop_sizeps[0]; i++) {
+            opt_objective_eval[i] = opt_objective_evalps[i];
+        }
+    }
+    if(key == 0) {
+        for(int i=1; i<universe->nsc; i++) {
+            if(universe->color == i) {
+                MPI_Send(&opt_objective_evalps[0], pop_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
+            }
+            if(me == MASTER) {
+                MPI_Recv(&opt_objective_eval[pop_sizeps_cum[i]], pop_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
+            }
+        }
+    }
+    if(me == MASTER) {
+        vector<double> opt_objective_eval_sorted (opt_objective_eval,opt_objective_eval+pop_size);
+        sort(opt_objective_eval_sorted.begin(), opt_objective_eval_sorted.end());
+        for(int i=0; i<pop_size; i++) {
+            int j=0;
+            while(opt_objective_eval_sorted[i] != opt_objective_eval[j]) j++;
+            fitness[i] = j;
+        }
+    }
+    MPI_Bcast(&fitness[0],pop_size,MPI_INT,0,MPI_COMM_WORLD);
 }
 
 
@@ -652,23 +646,25 @@ void Optimize::evaluate_objective(int id)
 // running the optimization
 void Optimize::optrun()
 {
-    // initialize chi values from types and set other type-related quantities in the chi_map file too
-    // if(me == MASTER) lammpsIO->lammpsdo("write_dump dump.init_config");
-
-    initialize_chi();  // what if we want to run a second 
-
-    if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.init_config id x y z diameter type vx vy vz");  // what about z in 3D
-
-    int step = 0;
+    // initialize chi values from types and set other type-related quantities in the chi_map, then initalize a population of chi's based on sim_type
+    initialize_chi();
     initialize_chipop();
-    while(step < 500) {
-        // for certain optimization types, e.g. GA, we may have to create a first set of chi_vectors to then initite the while loop
+
+    // store inital configuration to be reset back to
+    if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.init_config id x y z diameter type vx vy vz");
+
+    // begin optimization loop
+    int step = 0;
+    while(step < 100) {
+
+        // split population among avilable subcomms
         split_pop();
 
-
+        //initalise container to hold individual evaluations of the objective function
+        //remove previous instance
         if(opt_objective_eval) delete[] opt_objective_eval;
         if(opt_objective_evalps) delete[] opt_objective_evalps;
-        //Assign space in memory to hold objective function evaluations
+        //assign space in memory to hold objective function evaluations
         if(key == 0) {
             opt_objective_evalps = new double[pop_sizeps[universe->color]];
             if(me == MASTER) {
@@ -676,71 +672,33 @@ void Optimize::optrun()
             }
         }
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        
-        for(int i=0; i<pop_sizeps[universe->color]; i++) {
-            // if(key == 0) fprintf(screen,"Starting sim %d.%d\n",universe->color,i+1);
-            load_chi(i);
-            // lammpsIO->lammpsdo("write_data data.init."+std::to_string(universe->color)+std::to_string(i));
+        //run simulations on all population members
+        for(int id=0; id<pop_sizeps[universe->color]; id++) {
+            //reset simulation and load configuration
+            load_chi(id);
+            //run simulations and extract objectives
             sims->run();
-            evaluate_objective(i); // each chi configuration should have a filled out obj_val vector by this point as all simulations will have been run
+            //evaluate combined objective function
+            evaluate_objective(id);
         }
-
-        //communicate all objective function evaluations to the master
-        if(me == MASTER) {
-            for(int i=0; i<pop_sizeps[0]; i++) {
-                opt_objective_eval[i] = opt_objective_evalps[i];
-            }
-        }
-        if(key == 0) {
-            for(int i=1; i<universe->nsc; i++) {
-                if(universe->color == i) {
-                    MPI_Send(&opt_objective_evalps[0], pop_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
-                }
-                if(me == MASTER) {
-                    MPI_Recv(&opt_objective_eval[pop_sizeps_cum[i]], pop_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
-                }
-            }
-        }
-        // if(me == MASTER) for(int i=0; i<pop_size; i++) fprintf(screen,"eval %d = %f\n",i,opt_objective_eval[i]); 
-        
+        //communicate all objective function evaluations back to the master and rank fitness
         int fitness[pop_size];
-        if(me == MASTER) {
-            vector<double> opt_objective_eval_sorted (opt_objective_eval,opt_objective_eval+pop_size);
-            sort(opt_objective_eval_sorted.begin(), opt_objective_eval_sorted.end());
-            for(int i=0; i<pop_size; i++) {
-                int j=0;
-                while(opt_objective_eval_sorted[i] != opt_objective_eval[j]) j++;
-                fitness[i] = j;
-            }
-            // if(me == MASTER) for(int i=0; i<pop_size; i++) fprintf(screen,"ID %i unsrt %f srt %f fit %i\n",i,opt_objective_eval[i],opt_objective_eval_sorted[i],fitness[i]);
-        }
-        MPI_Bcast(&fitness[0],pop_size,MPI_INT,0,MPI_COMM_WORLD);
-        output->writedump(step,fitness,pop_size);
-        // MPI_Barrier(MPI_COMM_WORLD);
+        communicate_objective(fitness);
         
+        //write dumps
+        output->writedump(step,fitness,pop_size);
 
         //update to next chi_pop
         if(me == MASTER) chi_pop = update->update_chipop(chi_pop,mat_pop,opt_objective_eval);
         if(me == MASTER) fprintf(screen,"Done Step:%d\n",step);
         step++;
     }
-    // need a higher level dump/themo call here write_dump() which output do we want dumped? we can rerun the best simulation again
-    // look in inputmsk.cpp to find out how to input 
 
+    //optimisation finished
+    if(me == MASTER) fprintf(screen,"\nCOMMPLETED OPTIMIZATION RUN\n");
 
-    //next_chipop()
-
-    // for(int i=0; i<sims->sim_obj_val.size(); i++) {
-    //     for(int k=0; k<sims->sim_obj_val[i][0].size()) {
-    //         fprintf(screen,"")
-    //     }
-    // }
-    
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    if(me == MASTER) fprintf(screen,"\nCOMMPLETED SIM RUN\n");
-
+    if(opt_objective_eval) delete[] opt_objective_eval;
+    if(opt_objective_evalps) delete[] opt_objective_evalps;
     if(chi_popps) {
         for(int i=0; i<pop_sizeps[universe->color]; i++) {
             delete[] chi_popps[i]; 
@@ -751,22 +709,6 @@ void Optimize::optrun()
         delete[] mat_popps;
     }
     delete[] IDuns;
-    
-    // start the while loop (exit conditions may be a tolerance on chi changes or a number of steps)
-    // while (optimization not converged) {
-    
-        // create a population of M chi_vectors (e.g. take the current chi_vector and randomly move particle to chi category above or below, or use sensitivies, or cross-breed and mutate for GA, etc...).  In doing this, we must respect constraints on chi_vectors (e.g. total chi for each material or else)
-    
-        // for each individual chi_vector in the population, run all the simulations and evaluate its objectives (this is to be done in parallel, so each subcomm takes care of a fracion of the M individuals
-    
-        // compute the overall objective associated to each individual chi vector (i.e. a combination of the single objectives coming from all the simulations for that chi vector)
-    
-        // pick one or more chi_vectors to generate the next population
-    
-    // end of while loop
-    // }
-    // some criterion to pick the winner chi_vector (e.g. the one with lowest objective value)
-    
 }
 
 
@@ -802,13 +744,15 @@ void Optimize::printall()
     //Print constraints
     fprintf(screen,"\nGloal volume constraints: \n");
     for(int i=0; i<nmat; i++) {
-        fprintf(screen,"%s  f=%f ",chi_map.material[i].c_str(),vol_constraint[i]);
+        fprintf(screen,"%s  f=%f \n",chi_map.material[i].c_str(),vol_constraint[i]);
     }
     fprintf(screen,"\n");
     fprintf(screen,"Local volume constraints: \n");
     for(int i=0; i<nmat; i++) {
-        fprintf(screen,"%s  f=%f radius=%f ",chi_map.material[i].c_str(),local_vol_constraint[i],local_vol_radius[i]);
+        fprintf(screen,"%s  f=%f radius=%f \n",chi_map.material[i].c_str(),local_vol_constraint[i],local_vol_radius[i]);
     }
+
+    fprintf(screen,"Objective function is %s\n",obj_function.c_str());
 
     fprintf(screen, "\n---------------------------------------\n\n");
 }

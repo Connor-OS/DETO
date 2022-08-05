@@ -295,8 +295,7 @@ void Simulations::run()
                 lammpsIO->lammpsdo(sim_attributes[i][k]);
             }
             for(int k=0; k<sim_obj_names[i][j].size(); k++) {
-                sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);
-                // if(universe->key == 0) fprintf(screen,"Sim %d COMPLETE Objective %f\n",i,sim_obj_val[i][j][k]);
+                sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);            
             }
         }
     }

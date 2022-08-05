@@ -82,7 +82,7 @@ void Inputdeto::file()
             inFile >> read_string;
             std::transform(read_string.begin(), read_string.end(), read_string.begin(), ::tolower);  //convert string lower case
             if (strncmp(read_string.c_str(), "#", 1) == 0) {
-                std::getline (inFile, totrash); // lines starting with # are comments, which are disregarded here
+                getline (inFile, totrash); // lines starting with # are comments, which are disregarded here
             }
             else if (strcmp(read_string.c_str(), "status") == 0) {
                 inFile >> read_string;
@@ -122,7 +122,7 @@ void Inputdeto::file()
    // READ FILE (all processors need to know this)
     while (!inFile.eof()) {
         MPI_Barrier(MPI_COMM_WORLD);
-        std::getline (inFile, read_string);
+        getline (inFile, read_string);
         if (!read_string.empty()){
             //std::istringstream ss(read_string);
             //ss >> firstWord;
@@ -247,7 +247,6 @@ void Inputdeto::execline(string read_string)
         else if (strcmp(word.c_str(), "read_potentials") == 0) {
             string potfname;
             lss >> potfname;
-            
             std::ifstream potFile(potfname.c_str());
             if (!potFile.is_open()) {
                 err_msg = "ERROR: cannot read file \""+potfname+"\"";
@@ -258,74 +257,94 @@ void Inputdeto::execline(string read_string)
                // READ FILE (all processors need to know this)
                 while (!potFile.eof()) {
                     MPI_Barrier(MPI_COMM_WORLD);
-                    std::getline (potFile, read_string2);
-                    // lammpsIO->lammpsdo(read_string2);
-                    optimize->potentials.push_back(read_string2);
+                    getline (potFile, read_in);
+                    // lammpsIO->lammpsdo(read_in);
+                    optimize->potentials.push_back(read_in);
                 }
             }
         }
         else if (strcmp(word.c_str(), "dump") == 0){
             if (lammpsIO->lammps_active) {
                 bool comment_found = false;
-                string read_string,dump_string;
-                int dump_every,fitest;
-                fitest = 0;
+                string dump_string;
+                int dump_every,n_fitest;
+                n_fitest = 0;
                 for(int i=0; i<2; i++) {
-                    lss >> read_string;
-                    dump_string = dump_string+" "+read_string;
+                    lss >> read_in;
+                    dump_string = dump_string+" "+read_in;
                 }
                 lss >> dump_every;
-                lss >> read_string;
-                while (lss && !comment_found){
-                    if(strcmp(read_string.c_str(), "fitest") == 0){
-                        lss >> fitest;
+                while (lss >> read_in && !comment_found){
+                    if(strcmp(read_in.c_str(), "n_fitest") == 0){
+                        lss >> n_fitest;
                     }
-                    else if (strncmp(read_string.c_str(), "#", 1) != 0){
-                        dump_string = dump_string+" "+read_string;
+                    else if (strncmp(read_in.c_str(), "#", 1) != 0){
+                        dump_string = dump_string+" "+read_in;
                     }
                     else  {
                         comment_found = true;
                         getout=true;
                     }
-                    lss >> read_string;
+                    // lss >> read_string;
                 }
-                // fprintf(screen,"%s \n",dump_string.c_str());
-                output->add_dump(dump_every,dump_string,fitest);
+                fprintf(screen,"%s \n",dump_string.c_str());
+                output->add_dump(dump_every,dump_string,n_fitest);
             }
+        }
+        else if (strcmp(word.c_str(), "objective_function") == 0) {
+            getline(lss, read_in);
+            optimize->obj_function = read_in;
         }
         else if (strcmp(word.c_str(), "simulation") == 0) {
-            string read_string2;
-            std::getline(lss, read_string2);
-            sims->add(read_string2);
+            getline(lss, read_in);
+            sims->add(read_in);
         }
         else if (strcmp(word.c_str(), "add_attribute") == 0) {
-            string read_string2;
-            std::getline(lss, read_string2);
-            sims->add_attribute(read_string2);
+            getline(lss, read_in);
+            sims->add_attribute(read_in);
         }
         else if (strcmp(word.c_str(), "add_objective") == 0) {
-            string read_string2;
-            std::getline(lss, read_string2);
-            sims->add_objective(read_string2);
+            getline(lss, read_in);
+            sims->add_objective(read_in);
         }
-        else if (strcmp(word.c_str(), "opt_constraint") == 0) {
-            string read_string2;
-            std::getline(lss, read_string2);
-            optimize->add_constraint(read_string2);
+        else if (strcmp(word.c_str(), "add_constraint") == 0) {
+            getline(lss, read_in);
+            optimize->add_constraint(read_in);
         }
         else if (strcmp(word.c_str(), "opt_type") == 0) {
-            string read_string2;
-            std::getline(lss, read_string2);
-            update->set_opt_type(read_string2);
+            getline(lss, read_in);
+            update->set_opt_type(read_in);
         }
         else if (strcmp(word.c_str(), "write_plog") == 0) {
-            string read_string2;
-            lss >> read_string2;
-            if (strcmp(read_string2.c_str(),"yes") == 0) {
+            lss >> read_in;
+            if (strcmp(read_in.c_str(),"yes") == 0) {
                 dto->wplog = true;
+                string fname;
+                fname = "p" + to_string(me) + "_S";
+                fname = fname + to_string(universe->color) + "_k";
+                fname = fname + to_string(universe->key) + ".plog";
+                dto->plogfname=fname;
+                output->createplog(fname);
+            }
+            else if (strcmp(read_in.c_str(),"no") == 0) {
+                dto->wplog = false;
             }
             else {
-                dto->wplog = false;
+                err_msg = "ERROR: Illegal write_plog command (yes or no not \""+read_in+"\")";
+                error->errsimple(err_msg);
+            }
+        }
+        else if (strcmp(word.c_str(), "write_lmp_log") == 0) {
+            lss >> read_in;
+            if (strcmp(read_in.c_str(),"yes") == 0) {
+                lammpsIO->wllog = true;
+            }
+            else if (strcmp(read_in.c_str(),"no") == 0) {
+                lammpsIO->wllog = false;
+            }
+            else {
+                err_msg = "ERROR: Illegal write_lmp_log command (yes or no not \""+read_in+"\")";
+                error->errsimple(err_msg);
             }
         }
         /*
@@ -409,7 +428,7 @@ void Inputdeto::execline(string read_string)
         }
         else if (strcmp(word.c_str(), "fix") == 0){
             string read_string3;
-            std::getline(lss, read_string3);
+            getline(lss, read_string3);
             if (me==MASTER) {
                 fprintf(screen,"\n inputmsk -- Adding fix:  %s \n",read_string3.c_str());
             }
@@ -419,7 +438,7 @@ void Inputdeto::execline(string read_string)
         }
         else if (strcmp(word.c_str(), "store") == 0){
             string read_string3;
-            std::getline(lss, read_string3);
+            getline(lss, read_string3);
             if (me==MASTER) {
                 fprintf(screen,"\n inputmsk -- Storing this quantity:  %s \n",read_string3.c_str());
             }

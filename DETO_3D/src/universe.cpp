@@ -24,7 +24,6 @@ Universe::Universe(DETO *deto) : Pointers(deto)
 }
 
 
-
 // ---------------------------------------------------------------
 // Class destructor
 Universe::~Universe()
@@ -35,17 +34,10 @@ Universe::~Universe()
 }
 
 
-
-
-
-
-
 // ---------------------------------------------------------------
 // Creates the universe of sub-communicators
 void Universe::create()
-{
-    
-    
+{   
     if (me == MASTER) fprintf(screen,"\nCreating the universe of sub-communicators as defined by the user in the input file (or in the restart file)...\n");
     
     // Create cumulative number of processors vector
@@ -57,7 +49,6 @@ void Universe::create()
     for (int i=0; i<nsc; i++){
         if (me >= cumnp[i]) color++;
     }
-    
     if (me<cumnp[0]) key = me;
     else key = me - cumnp[color-1];
     
@@ -69,53 +60,12 @@ void Universe::create()
     for (int i=1; i<nsc; i++) {
         subMS.push_back(subMS[i-1]+SCnp[i-1]);  //Issue: off by one error, check MASKE src
     }
-    
-    
-    
-    //create log file for each processor, with subcom and rank in subcom specified
-    if (dto->wplog) {
-        string fname;
-        std::ostringstream ss;
-        ss << me;
-        fname = "p"+ss.str()+"_S";
-        ss.str("");
-        ss.clear();
-        ss << color;
-        fname = fname + ss.str()+"_k";
-        ss.str("");
-        ss.clear();
-        ss << key;
-        fname = fname + ss.str()+".plog";
-        dto->plogfname=fname;
-        output->createplog(fname);
-    }
-
-    
-    /*
-     if (msk->nulog_flag) {
-      stringstream ss;
-      ss << "p" << me << ".nulog";
-      msk->nulog.open(ss.str());
-    }
-*/
-    
+           
     // All processors tell every other processor their color (subcomm id) for later use (when sending subcomm-specific stuff, e.g. random number seed)
     color_each = new int[nprocs];
     color_each[me] = color;
-    MPI_Allgather(MPI_IN_PLACE,1,MPI_INT,color_each,1,MPI_INT,MPI_COMM_WORLD);
-    
-    // Seeding random generator for each processor
-    /*
-     randm->seedit(SCseme[color]);
-     */
-    
+    MPI_Allgather(MPI_IN_PLACE,1,MPI_INT,color_each,1,MPI_INT,MPI_COMM_WORLD);    
 }
-
-
-
-
-
-
 
     
 // ---------------------------------------------------------------

@@ -1,0 +1,26 @@
+#chimap generated with input_gen.py
+
+num_mat 1
+
+PROPERTIES: chi material type
+0.0 homo 1
+0.05 homo 2
+0.1 homo 3
+0.15 homo 4
+0.2 homo 5
+0.25 homo 6
+0.3 homo 7
+0.35 homo 8
+0.4 homo 9
+0.45 homo 10
+0.5 homo 11
+0.55 homo 12
+0.6 homo 13
+0.65 homo 14
+0.7 homo 15
+0.75 homo 16
+0.8 homo 17
+0.85 homo 18
+0.9 homo 19
+0.95 homo 20
+1.0 homo 21

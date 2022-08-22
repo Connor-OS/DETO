@@ -5,7 +5,6 @@
 #include "universe.h"
 #include <string>
 #include <vector>
-#include <map>
 
 #define MASTER 0
 
@@ -23,9 +22,11 @@ namespace DETO_NS {
         void read_chimap(string);
         void add_constraint(string);
         void set_opt_type(string);
+        void initialize_chi(vector<double>& chi,vector<int>& mat);
         void load_chi(int);
         void optrun();
         void printall();
+        double evaluate_objective();
 
         vector<string> potentials; // vector containing all information regarding the potentials available for the optimization
         int pop_size; // size of population of solutions
@@ -44,6 +45,21 @@ namespace DETO_NS {
             vector<double> chi_min; // min value of chi specified in chi_map for each material
             vector<double> chi_avg; // average value of chi specified in chi_map for each material
             vector<int> nchi;   //vector containing the number of chi values per material in the optimization
+            int lookup(double chi, int mat) //Method to query any value of chi and material to it's nearest chi value and return the index to that chi
+            {
+                if(chi > 1) return -1;
+                int k;
+                int l1 = 0;
+                int l2 = nchi[mat]-1;
+                while(l2-l1 > 1) {
+                    k = int((l1+l2)/2);
+                    if(chi < chis[mat][k]) l2 = k;
+                    else l1 = k;
+                }
+                if((chis[mat][l1]+chis[mat][l2])/2 > chi) k = l1;
+                else k = l2;
+                return k;
+            }
         };
         struct Chi_map chi_map; // Instance of chi_map to be used throughout optimization run to convert chi to type
         int nmat;   //number of materials in the optimization
@@ -52,6 +68,8 @@ namespace DETO_NS {
 
         string obj_function; //string to hold the objective function to later be evaluated in LAMMPS
         double obj_value; //value of the objective function
+        int* IDuns; // unsortd IDs of all atoms in LAMMPS
+        int* typeuns; //unsorted types of all atoms in LAMMPS
 
 	private:
 
@@ -70,7 +88,7 @@ namespace DETO_NS {
         int natoms; // number of atoms in LAMMPS
         int nlocal; // number of atoms in current proc from LAMMPS
 
-        vector<double> chi;   // chi values per atom (those with type not in chi_map will be assigned chi > chi_max
+        vector<double> chi;   // chi values per atom (those with type not in chi_map will be assigned chi > chi_max)
         vector<int> mat;   // numerical index asociated to the material
 
         vector<vector<double>> chi_pop;   // vector of vector of chi values for the whole population
@@ -89,8 +107,6 @@ namespace DETO_NS {
     
         double* aID;  // ID of all atoms in LAMMPS in current proc
         double* atype;  // type of all atoms in LAMMPS in current proc
-        int* IDuns; // unsortd IDs of all atoms in LAMMPS
-        int* typeuns; //unsorted types of all atoms in LAMMPS
         int* nID_each;  //array with number of IDs in each processor in current subcomm
         // double* chi_each; // array containing chi in each processor
         // int* mat_each; // array containing the material in each processor
@@ -107,13 +123,11 @@ namespace DETO_NS {
 		
         MPI_Status status;
 
-        void initialize_chi();
         void initialize_chipop();
         void update_chipop();
         void split_pop();
         void constrain_avg_chi(int id); 
         vector<double> constrain_local_avg_chi(vector<double>); //todo: change to void
-        void evaluate_objective(int id);
         void communicate_objective(int*);
 	};
 	

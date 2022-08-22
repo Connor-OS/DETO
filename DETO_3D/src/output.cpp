@@ -4,6 +4,8 @@
 #include "lammpsIO.h"
 #include "optimize.h"
 #include <string.h>
+#include <iostream>
+#include <fstream>
 
 using namespace DETO_NS;
 
@@ -188,11 +190,12 @@ void Output::writethermo(void)
 
 // ---------------------------------------------------------------
 // record new dump
-void Output::add_dump(int devery,string dstring,int n_fitest)
+void Output::add_dump(int devery, string dfile, string dstring, int n_fitest)
 {
     dump_every.push_back(devery);
     dstring = "write_dump " + dstring;
     dump_string.push_back(dstring);
+    dump_file.push_back(dfile);
     dump_fitest.push_back(n_fitest);
     dump_first.push_back(true);
 }
@@ -200,35 +203,24 @@ void Output::add_dump(int devery,string dstring,int n_fitest)
 
 // ---------------------------------------------------------------
 // write new entry in dump file
-void Output::writedump(int step, int* fitness, int pop_size)
+void Output::writedump(int step, int pop_size, int* fitness)
 {
-    fprintf(screen,"Writing dumps\n");
-    if(step == 0 && universe->color == 0) {
-        optimize->load_chi(0);
-        for(int i=0; i<dump_every.size(); i++) {
-            lammpsIO->lammpsdo(dump_string[i]);
-        }
-    }
     for(int i=0; i<dump_every.size(); i++) {
+        if(step == 0 && me==MASTER) {
+            std::ofstream dump;
+            dump.open(dump_file[i]);
+            dump.close();
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
         if(step%dump_every[i] == 0) {
             if(dump_fitest[i] > 0) { //dump a proportion of the fitest solutions
+                if(me == MASTER) fprintf(screen,"Dumping %d fittest to file %s\n",dump_fitest[i],dump_file[i].c_str());
+                MPI_Barrier(MPI_COMM_WORLD);
                 for(int j=0; j<dump_fitest[i]; j++) {
                     int k=0;
                     while(fitness[j] >= optimize->pop_sizeps_cum[k+1] && k < universe->nsc-1) k++;
                     if(universe->color == k) {
-                        if(universe->key == 0)fprintf(screen,"Dumping chi %i to file %i on step %i\n",fitness[j],i,step);
-                        optimize->load_chi(fitness[j]-optimize->pop_sizeps_cum[k]);
-                        lammpsIO->lammpsdo(dump_string[i] + " modify append yes");
-                    }
-                    MPI_Barrier(MPI_COMM_WORLD);
-                }
-            }
-            else { //dump all soultions
-                for(int j=0; j<pop_size; j++) {
-                    int k=0;
-                    while(fitness[j] >= optimize->pop_sizeps_cum[k+1] && k < universe->nsc-1) k++;
-                    if(universe->color == k) {
-                        if(universe->key == 0)fprintf(screen,"Dumping chi %i to file %i on step %i\n",fitness[j],i,step);
+                        if(universe->key == 0)fprintf(screen,"Dumping chi_ID %d Obj:\n",fitness[j]);
                         optimize->load_chi(fitness[j]-optimize->pop_sizeps_cum[k]);
                         lammpsIO->lammpsdo(dump_string[i] + " modify append yes");
                     }
@@ -267,7 +259,7 @@ void Output::writedump(int step, int* fitness, int pop_size)
 void Output::printall()
 {
     fprintf(screen, "\n---------ALL ABOUT OUTPUT----------\n");
-    fprintf(screen,"Dumps %i\n",dump_every.size());
+    fprintf(screen,"Dumps %li\n",dump_every.size());
     for(int i=0; i<dump_every.size(); i++) {
         fprintf(screen,"Every %i dump: %s for fitest: %i\n",dump_every[i],dump_string[i].c_str(),dump_fitest[i]);
     }

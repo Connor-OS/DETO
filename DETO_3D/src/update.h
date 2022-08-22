@@ -5,12 +5,17 @@
 #include "universe.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 #define MASTER 0
 
 namespace DETO_NS {
 	using std::vector;
 	using std::string;
+	using std::make_unique;
+	using std::make_shared;
+	using std::unique_ptr;
+	using std::shared_ptr;
 	
 	class Update : protected Pointers {
 	public:
@@ -21,10 +26,10 @@ namespace DETO_NS {
 		void evaluate_objective(int id);
 		void set_opt_type(string read_string);
 
-		void genetic(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
+		void genetic(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 		void monte_carlo(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
-		void sensitivity();
-		vector<vector<double>> update_chipop(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
+		void pertibation(const double* opt_obj_eval);
+		void update_chipop(vector<vector<double>>& chi_pop,vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 
         void printall();
 
@@ -41,6 +46,7 @@ namespace DETO_NS {
         string opt_style; //the style for the optimisation type to be run. i.e genetic style = tornement or roulette 
 		int pop_size; // size of population of solutions
         double opt_par1, opt_par2, opt_par3; //paramaters specifict to optimisation types
+		double gen_elitism;
         //if "genetic" then par1 = crossover rate, part2 = mutation rate
         //if "sensitivity" then par1 = move limit
 		const vector<vector<double>> chi_pop;
@@ -48,6 +54,13 @@ namespace DETO_NS {
 		vector<vector<double>> chi_next; // vector containing the next chi_pop
 		vector<vector<int>> mat_next; // vector containing the next mat_pop
 
+		vector<double> chi;
+		vector<int> mat;
+
+		MPI_Status status;
+
+		double* update_objective_evalps;
+		double* update_objective_eval;
 	};
 	
 }

@@ -266,7 +266,7 @@ void Inputdeto::execline(string read_string)
         else if (strcmp(word.c_str(), "dump") == 0){
             if (lammpsIO->lammps_active) {
                 bool comment_found = false;
-                string dump_string;
+                string dump_string,dump_file;
                 int dump_every,n_fitest;
                 n_fitest = 0;
                 for(int i=0; i<2; i++) {
@@ -274,6 +274,8 @@ void Inputdeto::execline(string read_string)
                     dump_string = dump_string+" "+read_in;
                 }
                 lss >> dump_every;
+                lss >> dump_file;
+                dump_string = dump_string+" "+dump_file;
                 while (lss >> read_in && !comment_found){
                     if(strcmp(read_in.c_str(), "n_fitest") == 0){
                         lss >> n_fitest;
@@ -287,8 +289,7 @@ void Inputdeto::execline(string read_string)
                     }
                     // lss >> read_string;
                 }
-                fprintf(screen,"%s \n",dump_string.c_str());
-                output->add_dump(dump_every,dump_string,n_fitest);
+                output->add_dump(dump_every,dump_file,dump_string,n_fitest);
             }
         }
         else if (strcmp(word.c_str(), "objective_function") == 0) {
@@ -341,6 +342,7 @@ void Inputdeto::execline(string read_string)
             }
             else if (strcmp(read_in.c_str(),"no") == 0) {
                 lammpsIO->wllog = false;
+                lammpsIO->lammpsdo("log none");
             }
             else {
                 err_msg = "ERROR: Illegal write_lmp_log command (yes or no not \""+read_in+"\")";

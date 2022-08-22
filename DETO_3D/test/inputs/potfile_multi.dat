@@ -1,0 +1,39 @@
+pair_style zero 1.0
+pair_coeff * *
+
+bond_style		harmonic
+bond_coeff	1	0.01	1
+bond_coeff	2	100.0	1
+bond_coeff	3	50  	1
+bond_coeff	4	75  	1
+
+
+group a type 1 # mat 1
+group b type 2 # mat 1
+group c type 3 # mat 2
+group d type 4 # mat 2
+group e type 5 # non-opt
+
+
+
+create_bonds	many    a a	1	0.9	1.1
+create_bonds	many	a b	1	0.9	1.1
+create_bonds	many	a c	1	0.9	1.1
+create_bonds	many	a d	1	0.9	1.1
+create_bonds	many	a e	1	0.9	1.1
+create_bonds	many	b b	2	0.9	1.1
+create_bonds	many	b c	1	0.9	1.1
+create_bonds	many	b d	4	0.9	1.1
+create_bonds	many	b e	2	0.9	1.1
+create_bonds	many	c c	1	0.9	1.1
+create_bonds	many	c d	1	0.9	1.1
+create_bonds	many	c e	1	0.9	1.1
+create_bonds	many	d d	3	0.9	1.1
+create_bonds	many	d e	4	0.9	1.1
+create_bonds	many	e e	2	0.9	1.1
+
+group a delete
+group b delete
+group c delete
+group d delete
+group e delete

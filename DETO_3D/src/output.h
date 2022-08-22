@@ -26,14 +26,15 @@ namespace DETO_NS {
 
         std::vector<std::string> dumpID; // IDs of dumps in current subcomm
         std::vector<int> dump_every; //frequency of each dump in current subcomm
-        std::vector<std::string> dump_string; // string called by dump  "wrtie_dump group custom filename id type..."
+        std::vector<std::string> dump_string; // string called by dump  "write_dump group custom filename id type..."
+        std::vector<std::string> dump_file; // string containing dump_file path
         std::vector<bool> dump_first;  //recognises if dump was called already or this is first call
         std::vector<int> dump_fitest; //dump number of fitest solutions in population
 
         void createplog(std::string);
         void toplog(std::string);
-        void add_dump(int,std::string,int);
-        void writedump(int,int*,int pop_size);
+        void add_dump(int,std::string,std::string,int);
+        void writedump(int,int,int*);
         void printall();
         /*
         

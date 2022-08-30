@@ -39,15 +39,20 @@ void Update::set_opt_type(std::string read_string)
     }
     else if(strcmp(opt_type.c_str(),"genetic") == 0) {
         gen_elitism = 0;
-        lss >> pop_size >> opt_style >> opt_par1 >> opt_par2;
+        lss >> pop_size >> opt_par1 >> opt_par2;
         while(lss >> keyword) {
             if(std::strcmp(keyword.c_str(),"elitism") == 0) {
                 lss >> gen_elitism;
             }
         }
+        if(pop_size%2 == 1 || gen_elitism%2 == 1) {
+            err_msg = "ERROR: please use even numbers only for population size and elitism";
+            error->errsimple(err_msg);
+        }
     }
     else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
-        lss >> pop_size >> opt_par1 >> opt_par2;
+        lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
+        // opt_par1 = cross over rate, opt_par2 = Mutation rate, opt_par3 = tournement size
     }
     else {
         err_msg = "ERROR: opt_type\"" + opt_type + "\" not recognised";
@@ -65,68 +70,51 @@ void Update::set_opt_type(std::string read_string)
 // genetic algorythm for update
 void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
 {
-    // fprintf(screen,"obj_eval\n");
-    // for(int j=0; j<pop_size; j++) {
-    //     fprintf(screen,"%.3f ",opt_obj_eval[j]);
-    // }
     fprintf(screen,"\n");
-    // fprintf(screen,"Starting tournement selection\n" );
     chi_next.clear();
-    //tournement selection
+    mat_next.clear();
+    //Selection
     int selection_size = pop_size-gen_elitism;
     std::vector<int> selection;
     selection.clear();
-    int best;
-    int tour_size = 3;    
-    for(int i=0; i<2*selection_size; i++) {
+    int best;   
+    for(int i=0; i<selection_size; i++) {
         best = rand() % pop_size;
-        for(int j=0; j<tour_size-1; j++) {
+        for(int j=0; j<opt_par3-1; j++) {
             int eval = rand() % pop_size;
             if(opt_obj_eval[eval] < opt_obj_eval[best]) {
                 best = eval;
             }
         }
-        selection.push_back(best);
+        chi_next.push_back(chi_pop[best]);
+        mat_next.push_back(mat_pop[best]);
     }
-    // fprintf(screen,"Winning selection: " );
-    // for(int i=0; i<2*pop_size; i++) fprintf(screen,"%d ",selection[i]);
-    // fprintf(screen,"\n" );
-
-    //crossover
-    std::vector<double> chi;
-    std::vector<int> mat;
-    for(int i=0; i<selection_size; i++) {
-        for(int j=0; j<natoms; j++) {
-            int inherit = 2*i+rand()%2;
-            chi.push_back(chi_pop[selection[inherit]][j]);
-            mat.push_back(mat_pop[selection[inherit]][j]);
+    //Crossover
+    for(int i=0; i<selection_size; i+=2) {
+        int j = i+1;
+        double temp = 0;
+        int tempint = 0;
+        // attempt to crossover at each gene individually
+        double cross_chance = ((double) rand() / (RAND_MAX));
+        if(cross_chance < 0.95) {
+            for(int k=0; k<natoms; k++) {
+                if(rand()%2 == 1) {
+                    temp = chi_next[i][k];
+                    chi_next[i][k] = chi_next[j][k];
+                    chi_next[j][k] = temp;
+                    tempint = mat_next[i][k];
+                    mat_next[i][k] = mat_next[j][k];
+                    mat_next[j][k] = tempint;
+                }
+            }
         }
-        chi_next.push_back(chi);
-        mat_next.push_back(mat);
-        chi.clear();
-        mat.clear();
-        // for(int k=0; k<100; k++) {
-        //     fprintf(screen,"p1:%.0f p2:%.0f ch:%.0f\n",chi_pop[selection[2*i]][k],chi_pop[selection[2*i+1]][k],chi_next[i][k]);
-        // }
-        // fprintf(screen,"next crossover:\n");
     }
-
-    // fprintf(screen,"Chi_next_pop\n");
-    // for(int i=0; i<natoms; i++) {
-    //     for(int j=0; j<pop_size; j++) {
-    //         fprintf(screen,"%.2f ",chi_next[j][i]);
-    //     }
-    //     fprintf(screen,"\n");
-    // }
-
-    //mutation
-    double mutation_rate = 0.01;
+    //Mutation
     for(int i=0; i<selection_size; i++) {
         for(int j=0; j<natoms; j++) {
             if(mat_pop[i][j] != -1) {
                 double mutation_chance = ((double) rand() / (RAND_MAX));
-                //(mat_index[j] + rand()%(nmat-1))%nmat  // is it typical to select the same material
-                if(mutation_chance < mutation_rate) {
+                if(mutation_chance < opt_par2) {
                     int mat_mut = (int)(rand() %optimize->nmat);
                     int chi_mut = (int)(rand() %optimize->chi_map.nchi[mat_mut]);
                     mat_next[i][j] = mat_mut;
@@ -135,9 +123,9 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
             }
         }
     }
-
     //add the elite solutions back in
     for(int i=0; i<gen_elitism; i++) {
+        fprintf(screen,"retaining %d\n",fitness[i]);
         chi_next.push_back(chi_pop[fitness[i]]);
         mat_next.push_back(mat_pop[fitness[i]]);
     }
@@ -363,6 +351,7 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
         chi_pop = chi_next;
         mat_pop = mat_next;
     }
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 

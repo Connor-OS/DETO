@@ -72,7 +72,6 @@ namespace DETO_NS {
         int* typeuns; //unsorted types of all atoms in LAMMPS
 
 	private:
-
         vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
 
         //Constraint and design variables

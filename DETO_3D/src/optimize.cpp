@@ -319,11 +319,6 @@ void Optimize::initialize_chi(vector<double>& chi,vector<int>& mat)
     // chi = constrain_avg_chi(chi);
     // chi = constrain_local_avg_chi(chi);    //todo: to be implemented... not in a rush though
 
-    if(me==MASTER) {
-        for(int  i=0; i<natoms; i++) {
-            fprintf(screen,"index: %d ID %d chi: %f\n",i,IDuns[i],chi[i]);
-        }
-    }
     MPI_Barrier(MPI_COMM_WORLD);
     delete[] IDpos;
     delete[] nID_each;
@@ -348,7 +343,7 @@ void Optimize::initialize_chipop()
 {
     if(me == MASTER) {
         // To generate inital population mutate a population at a special inital rate
-        double initial_mutation_rate = 0.1;
+        double initial_mutation_rate = 0.5;
         for(int i=0; i<pop_size; i++) {
             chi_pop.push_back(chi);
             mat_pop.push_back(mat);
@@ -576,14 +571,11 @@ void Optimize::load_chi(int id)
             }
         }
     }
-
     // Create pairs and bonds    
     lammpsIO->lammpsdo("delete_bonds all multi remove");
     for(int i=0; i<potentials.size(); i++) {
         lammpsIO->lammpsdo(potentials[i].c_str());
     }
-
-    // if(universe->color == 0 && id == 0) lammpsIO->lammpsdo("write_dump all custom dump.per_itt id x y z type modify append yes");
 }
 
 
@@ -645,9 +637,19 @@ void Optimize::optrun()
     // initialize chi values from types and set other type-related quantities in the chi_map, then initalize a population of chi's based on sim_type
     initialize_chi(chi,mat);
     initialize_chipop();
+    // split_pop();
 
     // store inital configuration to be reset back to
     if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.init_config id x y z diameter type vx vy vz");
+
+    // //initalise container to hold individual evaluations of the objective function
+    // if(key == 0) {
+    //     opt_objective_evalps = new double[pop_sizeps[universe->color]];
+    //     if(me == MASTER) {
+    //         opt_objective_eval = new double[pop_size];
+    //     }
+    // }
+
 
     // begin optimization loop
     if(me == MASTER) fprintf(screen,"Starting Optimization\n");
@@ -676,15 +678,21 @@ void Optimize::optrun()
             //evaluate combined objective function
             if(key == 0) {
                 opt_objective_evalps[id] = evaluate_objective();
-                fprintf(screen,"chi_ID: %d Obj: %f\n",id,opt_objective_evalps[id]);
+                fprintf(screen,"chi_ID: %d Obj: %f\n",pop_sizeps_cum[universe->color]+id,opt_objective_evalps[id]);
             }
         }
         //communicate all objective function evaluations back to the master and rank fitness
         int fitness[pop_size];
         communicate_objective(fitness);
+        if(me==MASTER) {
+            fprintf(screen,"Fittnesses\n");
+            for(int i=0; i<pop_size; i++) {
+                fprintf(screen,"rank: %d chi: %d obj: %f\n",i,fitness[i],opt_objective_eval[fitness[i]]);
+            }
+        }
         //write dumps
+        if(me == MASTER) output->writethermo(step,opt_objective_eval[fitness[0]]);
         output->writedump(step,pop_size,fitness);
-        if(universe->color == 0) fprintf(screen,"about to update chi\n");
         //update to next chi_pop
         update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);
         step++;

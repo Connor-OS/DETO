@@ -232,27 +232,19 @@ void Output::writedump(int step, int pop_size, int* fitness)
 }
 
 
+// ---------------------------------------------------------------
+// write new entry in thermo file, currently a place holder function that allows to get a basic function
+//TODO: add user defined thermo properties
+void Output::writethermo(int step, double objective_eval)
+{
+    fprintf(screen,"writing %d %f to thermo file",step,objective_eval);
+    if(step == 0) thermo.open("thermo.objective");
+    else thermo.open("thermo.objective",std::ios_base::app);
+    thermo << step << "," << objective_eval << std::endl;
+    thermo.close();
+}
 
-    // // create dump (for just one step)
-    // lammpsIO->lammpsdo(dump_string[i]);
-    
-    // // make it run immediately and append if not first
-    // string tolmp;
-    // if (dump_first[i]) {
-    //     tolmp = "dump_modify "+dumpID[i]+" every 1 first yes";
-    //     lammpsIO->lammpsdo(tolmp);
-    // }
-    // else {
-    //     tolmp = "dump_modify "+dumpID[i]+" every 1 first yes append yes";
-    //     lammpsIO->lammpsdo(tolmp);
-    // }
-    
-    // // write enrty
-    // lammpsIO->lammpsdo("run 0");
-    
-    // // close dump
-    // tolmp = "undump "+dumpID[i];
-    // lammpsIO->lammpsdo(tolmp);
+
 
 // ---------------------------------------------------------------
 // Printing info about the inputcprs class (possibly useful for debugging)

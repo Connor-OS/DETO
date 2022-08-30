@@ -46,7 +46,7 @@ namespace DETO_NS {
         string opt_style; //the style for the optimisation type to be run. i.e genetic style = tornement or roulette 
 		int pop_size; // size of population of solutions
         double opt_par1, opt_par2, opt_par3; //paramaters specifict to optimisation types
-		double gen_elitism;
+		int gen_elitism; // number of best solutions retained during each step of a genetic optimization
         //if "genetic" then par1 = crossover rate, part2 = mutation rate
         //if "sensitivity" then par1 = move limit
 		const vector<vector<double>> chi_pop;

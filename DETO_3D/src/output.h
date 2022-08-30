@@ -31,10 +31,13 @@ namespace DETO_NS {
         std::vector<bool> dump_first;  //recognises if dump was called already or this is first call
         std::vector<int> dump_fitest; //dump number of fitest solutions in population
 
+        std::ofstream thermo;
+
         void createplog(std::string);
         void toplog(std::string);
         void add_dump(int,std::string,std::string,int);
         void writedump(int,int,int*);
+        void writethermo(int,double);
         void printall();
         /*
         

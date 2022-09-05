@@ -214,13 +214,11 @@ void Output::writedump(int step, int pop_size, int* fitness)
         MPI_Barrier(MPI_COMM_WORLD);
         if(step%dump_every[i] == 0) {
             if(dump_fitest[i] > 0) { //dump a proportion of the fitest solutions
-                if(me == MASTER) fprintf(screen,"Dumping %d fittest to file %s\n",dump_fitest[i],dump_file[i].c_str());
                 MPI_Barrier(MPI_COMM_WORLD);
                 for(int j=0; j<dump_fitest[i]; j++) {
                     int k=0;
                     while(fitness[j] >= optimize->pop_sizeps_cum[k+1] && k < universe->nsc-1) k++;
                     if(universe->color == k) {
-                        if(universe->key == 0)fprintf(screen,"Dumping chi_ID %d Obj:\n",fitness[j]);
                         optimize->load_chi(fitness[j]-optimize->pop_sizeps_cum[k]);
                         lammpsIO->lammpsdo(dump_string[i] + " modify append yes");
                     }
@@ -235,12 +233,27 @@ void Output::writedump(int step, int pop_size, int* fitness)
 // ---------------------------------------------------------------
 // write new entry in thermo file, currently a place holder function that allows to get a basic function
 //TODO: add user defined thermo properties
-void Output::writethermo(int step, double objective_eval)
+void Output::writethermo(int step, double* objective_eval, int* fitness)
 {
-    fprintf(screen,"writing %d %f to thermo file",step,objective_eval);
-    if(step == 0) thermo.open("thermo.objective");
+    // fprintf(screen,"writing %d %f to thermo file",step,objective_eval);
+    if(step == 0) {
+        thermo.open("thermo.objective");
+        thermo << "step,best,mean,worst" << std::endl;
+    }
     else thermo.open("thermo.objective",std::ios_base::app);
-    thermo << step << "," << objective_eval << std::endl;
+    int pop_size = optimize->pop_size;
+    double mean = 0;
+    for(int i=0; i<pop_size; i++) {
+        mean += objective_eval[i];
+    }
+    mean = mean/pop_size;
+
+    thermo << step << "," << objective_eval[fitness[0]] << "," << mean << "," << objective_eval[fitness[optimize->pop_size-1]] << std::endl;
+
+
+    fprintf(screen,"best\tmean\tworst\n");
+    fprintf(screen,"%.3f\t%.3f\t%.3f\n",objective_eval[fitness[0]],mean,objective_eval[fitness[optimize->pop_size-1]]);
+
     thermo.close();
 }
 

@@ -37,7 +37,7 @@ namespace DETO_NS {
         void toplog(std::string);
         void add_dump(int,std::string,std::string,int);
         void writedump(int,int,int*);
-        void writethermo(int,double);
+        void writethermo(int,double*,int*);
         void printall();
         /*
         

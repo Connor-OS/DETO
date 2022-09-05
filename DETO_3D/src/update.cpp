@@ -39,7 +39,8 @@ void Update::set_opt_type(std::string read_string)
     }
     else if(strcmp(opt_type.c_str(),"genetic") == 0) {
         gen_elitism = 0;
-        lss >> pop_size >> opt_par1 >> opt_par2;
+        lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
+        // opt_par1 = tournement size cross, opt_par2 = crossover rate, opt_par3 = Mutation rate
         while(lss >> keyword) {
             if(std::strcmp(keyword.c_str(),"elitism") == 0) {
                 lss >> gen_elitism;
@@ -51,8 +52,7 @@ void Update::set_opt_type(std::string read_string)
         }
     }
     else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
-        lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
-        // opt_par1 = cross over rate, opt_par2 = Mutation rate, opt_par3 = tournement size
+        lss >> pop_size >> opt_par1 >> opt_par2;
     }
     else {
         err_msg = "ERROR: opt_type\"" + opt_type + "\" not recognised";
@@ -80,7 +80,7 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
     int best;   
     for(int i=0; i<selection_size; i++) {
         best = rand() % pop_size;
-        for(int j=0; j<opt_par3-1; j++) {
+        for(int j=0; j<opt_par1-1; j++) {
             int eval = rand() % pop_size;
             if(opt_obj_eval[eval] < opt_obj_eval[best]) {
                 best = eval;
@@ -96,7 +96,7 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
         int tempint = 0;
         // attempt to crossover at each gene individually
         double cross_chance = ((double) rand() / (RAND_MAX));
-        if(cross_chance < 0.95) {
+        if(cross_chance < opt_par2) {
             for(int k=0; k<natoms; k++) {
                 if(rand()%2 == 1) {
                     temp = chi_next[i][k];
@@ -114,7 +114,7 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
         for(int j=0; j<natoms; j++) {
             if(mat_pop[i][j] != -1) {
                 double mutation_chance = ((double) rand() / (RAND_MAX));
-                if(mutation_chance < opt_par2) {
+                if(mutation_chance < opt_par3) {
                     int mat_mut = (int)(rand() %optimize->nmat);
                     int chi_mut = (int)(rand() %optimize->chi_map.nchi[mat_mut]);
                     mat_next[i][j] = mat_mut;
@@ -125,7 +125,6 @@ void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::
     }
     //add the elite solutions back in
     for(int i=0; i<gen_elitism; i++) {
-        fprintf(screen,"retaining %d\n",fitness[i]);
         chi_next.push_back(chi_pop[fitness[i]]);
         mat_next.push_back(mat_pop[fitness[i]]);
     }
@@ -166,7 +165,6 @@ void Update::pertibation(const double* opt_obj_eval)
         update_objective_evalps = new double[pert_sizeps[universe->color]];
         if(me==MASTER) update_objective_eval = new double[natoms];
     }
-    fprintf(screen,"'bout to fuck shit up\n");
     //  save config
     lammpsIO ->lammpsdo("reset_timestep 1");
     if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.save_config id x y z diameter type vx vy vz");

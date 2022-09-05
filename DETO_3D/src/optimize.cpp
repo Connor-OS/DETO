@@ -343,7 +343,6 @@ void Optimize::initialize_chipop()
 {
     if(me == MASTER) {
         // To generate inital population mutate a population at a special inital rate
-        double initial_mutation_rate = 0.5;
         for(int i=0; i<pop_size; i++) {
             chi_pop.push_back(chi);
             mat_pop.push_back(mat);
@@ -351,19 +350,66 @@ void Optimize::initialize_chipop()
                 if(mat[j] != -1 && i > 0) {
                     double mutation_chance = ((double) rand() / (RAND_MAX));
                     //(mat_index[j] + rand()%(nmat-1))%nmat  // is it typical to select the same material
-                    if(mutation_chance < initial_mutation_rate) {
-                        int mat_mut = (int)(rand() %nmat);
-                        int chi_mut = (int)(rand() %chi_map.nchi[mat_mut]);
-                        mat_pop[i][j] = mat_mut;
-                        chi_pop[i][j] = chi_map.chis[mat_mut][chi_mut];
-                    }
+                    int mat_mut = (int)(rand() %nmat);
+                    int chi_mut = (int)(rand() %chi_map.nchi[mat_mut]);
+                    mat_pop[i][j] = mat_mut;
+                    chi_pop[i][j] = chi_map.chis[mat_mut][chi_mut];
                 }
             }
         }
-        for(int i=0; i<pop_size; i++) {
-            constrain_avg_chi(i);
-            constrain_local_avg_chi(chi_pop[i]);
-        }
+        // for(int i=0; i<pop_size; i++) {
+        //     constrain_avg_chi(i);
+        //     constrain_local_avg_chi(chi_pop[i]);
+        // }
+
+        //generate a population using a Latin Hypercube
+        //vector of possible chi values
+        // vector<double> values;
+        // for(int i=0; i<chi_map.material.size(); i++) {
+        //     for(int j=0; j<chi_map.chis[i].size(); j++) {
+        //         values.push_back(chi_map.chis[i][j]);
+        //     }
+        // }
+        // vector<vector<double>> sample_space;
+        // int c = 0;
+        // while(chi_pop.size() < pop_size) {
+        //     sample_space.clear();
+        //     for(int i=0; i<natoms; i++) {
+        //         sample_space.push_back(values);
+        //     }
+        //     for(int i=0; i<values.size(); i++) {
+        //         chi_pop.push_back(vector<double>());
+        //         mat_pop.push_back(vector<int>());
+        //         for(int j=0; j<natoms; j++) {
+        //             if(mat[j] == -1) {
+        //                 chi_pop[c].push_back(2);
+        //                 mat_pop[c].push_back(-1);
+        //             }
+        //             else {
+        //                 int sample = (int) rand() % (values.size()-i);
+        //                 chi_pop[c].push_back(sample_space[j][sample]);
+        //                 sample_space[j].erase(sample_space[j].begin()+sample);
+        //                 mat_pop[c].push_back(0);
+        //             }
+        //         }
+        //         c++;
+        //     }
+        // }
+        
+        // while(chi_pop.size() < pop_size) {
+        //     chi_pop.erase(chi_pop.end());
+        //     mat_pop.erase(mat_pop.end());
+        // }
+        
+        // // for(int i=0; i<pop_size; i++) {
+        // //     for(int j=0; j<natoms; j++) {
+        // //         fprintf(screen,"%f ",chi_pop[i][j]);
+        // //     }
+        // //     fprintf(screen,"\n");
+        // // }
+
+
+
         if(me == MASTER) fprintf(screen,"DONE Generating chi population\n\n");
         if(me != MASTER || !dto->wplog) return;
         output->toplog("\n------------------\nChi Population\n-------------------\n\n");
@@ -655,7 +701,7 @@ void Optimize::optrun()
     if(me == MASTER) fprintf(screen,"Starting Optimization\n");
     int step = 0;
     while(step < 500) {
-        if(me == MASTER) fprintf(screen,"Step %d\n",step);
+        if(me == MASTER) fprintf(screen,"Step %d\n\n",step);
         // split population among avilable subcomms
         split_pop();
         //initalise container to hold individual evaluations of the objective function
@@ -678,20 +724,21 @@ void Optimize::optrun()
             //evaluate combined objective function
             if(key == 0) {
                 opt_objective_evalps[id] = evaluate_objective();
-                fprintf(screen,"chi_ID: %d Obj: %f\n",pop_sizeps_cum[universe->color]+id,opt_objective_evalps[id]);
+                // fprintf(screen,"\x1b[A");
+                // fprintf(screen,"chi_ID: %d Obj: %f\n",pop_sizeps_cum[universe->color]+id,opt_objective_evalps[id]);
+                if(me==universe->nsc) {
+                    fprintf(screen,"Completed: %d/%d population members\n",(id+1)*universe->nsc,pop_size);
+                    fprintf(screen,"\x1b[A");
+                }
             }
         }
+
         //communicate all objective function evaluations back to the master and rank fitness
         int fitness[pop_size];
         communicate_objective(fitness);
-        if(me==MASTER) {
-            fprintf(screen,"Fittnesses\n");
-            for(int i=0; i<pop_size; i++) {
-                fprintf(screen,"rank: %d chi: %d obj: %f\n",i,fitness[i],opt_objective_eval[fitness[i]]);
-            }
-        }
+
         //write dumps
-        if(me == MASTER) output->writethermo(step,opt_objective_eval[fitness[0]]);
+        if(me == MASTER) output->writethermo(step,opt_objective_eval,fitness);
         output->writedump(step,pop_size,fitness);
         //update to next chi_pop
         update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);

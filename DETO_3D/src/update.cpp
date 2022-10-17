@@ -35,7 +35,8 @@ void Update::set_opt_type(std::string read_string)
     string keyword;
     if(strcmp(opt_type.c_str(),"pertibation") == 0) {
         pop_size = 1;
-        lss >> opt_par1;
+        lss >> opt_par1 >> opt_par2;
+        //opt_par1 = move_limit
     }
     else if(strcmp(opt_type.c_str(),"genetic") == 0) {
         gen_elitism = 0;
@@ -150,10 +151,13 @@ void Update::monte_carlo(const std::vector<std::vector<double>>& chi_pop,const s
 
 // ---------------------------------------------------------------
 // update using the pertibation method
-void Update::pertibation(const double* opt_obj_eval)
+void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval)
 {   
     vector<int> pert_sizeps;
     vector<int> pert_sizeps_cum;
+    double* chi = optimize->chi_popps[0];
+    int* mat = optimize->mat_popps[0];
+
     pert_sizeps.clear();
     pert_sizeps_cum.clear();
     for(int i=0; i<universe->nsc; i++) pert_sizeps.push_back(int(natoms/universe->nsc));
@@ -162,71 +166,66 @@ void Update::pertibation(const double* opt_obj_eval)
     for(int i=0; i<universe->nsc-1; i++) pert_sizeps_cum.push_back(pert_sizeps_cum[i]+pert_sizeps[i]);
 
     if(key==0) {
-        update_objective_evalps = new double[pert_sizeps[universe->color]];
-        if(me==MASTER) update_objective_eval = new double[natoms];
+        update_obj_evalps = new double[pert_sizeps[universe->color]];
+        if(me==MASTER) update_obj_eval = new double[natoms];
     }
     //  save config
-    lammpsIO ->lammpsdo("reset_timestep 1");
-    if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.save_config id x y z diameter type vx vy vz");
-    MPI_Barrier(MPI_COMM_WORLD);
-    chi = vector<double>();
-    mat = vector<int>();
-    if(sims->ndim == 2) lammpsIO->lammpsdo("read_dump dump.save_config 1 x y vx vy add keep box yes trim yes replace yes"); // we can't do this these ID's know very likely have changed order since we first generated chi we maybe need to recheck the ID's
-    else lammpsIO->lammpsdo("read_dump dump.save_config 1 x y z vx vy vz add keep box yes trim yes replace yes");
-    optimize->initialize_chi(chi,mat); // read chi's from current state of simulation
-    for(int i=0; i<natoms; i++) {
-        fprintf(screen,"found chi %f mat: %d\n",chi[i],mat[i]);
-    }
+
     for(int i=0; i<pert_sizeps[universe->color]; i++) {
         int pert_ID = pert_sizeps_cum[universe->color]+i;
-    //  load config
+        //  load config
         //load save state at previous equilibrium
-        if(sims->ndim == 2) lammpsIO->lammpsdo("read_dump dump.save_config 1 x y vx vy add keep box yes trim yes replace yes"); // we can't do this these ID's know very likely have changed order since we first generated chi we maybe need to recheck the ID's
-        else lammpsIO->lammpsdo("read_dump dump.save_config 1 x y z vx vy vz add keep box yes trim yes replace yes");
-        //run pertibations
-        // revert back to previose
-        // upate chi
+        optimize->load_chi(0);
+
+        // upate single chi and revaluate objective
         int index = optimize->chi_map.lookup(chi[pert_ID],mat[pert_ID]);
         if(index < optimize->chi_map.nchi[mat[pert_ID]]-1 && index != -1) {
             std::string set_type = "set atom " + std::to_string(optimize->IDuns[pert_ID]) + " type " + std::to_string(optimize->chi_map.types[mat[pert_ID]][index+1]);
             lammpsIO->lammpsdo(set_type);
-                // Create pairs and bonds    // could this be done more efficently by only removing the bonds around the atom in question??
             lammpsIO->lammpsdo("delete_bonds all multi remove");
             for(int i=0; i<optimize->potentials.size(); i++) {
                 lammpsIO->lammpsdo(optimize->potentials[i].c_str());
             }
-            fprintf(screen,"%s\n",set_type.c_str());
             sims->run();
-            if(key == 0) update_objective_evalps[i] = optimize->evaluate_objective();
+            if(key == 0) update_obj_evalps[i] = optimize->evaluate_objective();
+        } else if(key == 0) update_obj_evalps[i] = 0;
 
-            set_type = "set atom " + std::to_string(pert_ID) + " type " + std::to_string(optimize->chi_map.types[mat[pert_ID]][index]);
-            lammpsIO->lammpsdo(set_type);
+        if(me==universe->nsc) {
+            fprintf(screen,"Completed: %d/%d perturbations\n",(i+1)*universe->nsc,natoms);
+            fprintf(screen,"\x1b[A");
         }
-
     }
     //move evals on MASTER
     if(me == MASTER) {
         for(int i=0; i<pert_sizeps[0]; i++) {
-            update_objective_eval[i] = update_objective_evalps[i];
+            update_obj_eval[i] = update_obj_evalps[i];
         }
     }
     //communicate evals from submasters
     if(key == 0) {
         for(int i=1; i<universe->nsc; i++) {
             if(universe->color == i) {
-                MPI_Send(&update_objective_evalps[0], pert_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
+                MPI_Send(&update_obj_evalps[0], pert_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
             }
             if(me == MASTER) {
-                MPI_Recv(&update_objective_eval[pert_sizeps_cum[i]], pert_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
+                MPI_Recv(&update_obj_eval[pert_sizeps_cum[i]], pert_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
             }
         }
     }
+    if(me == MASTER) {
+        for(int i=0; i<natoms; i++) {
+            if(update_obj_eval[i] == 0) {
+                update_obj_eval[i] = opt_obj_eval[0];
+            }
+        }
+    }
+
     //dchi.push_back(-(Utot-Ueq)/brDchi;)
     if(me==MASTER) {
         vector<double> dchi;
         dchi.clear();
         for(int i=0; i<natoms; i++) {
-            dchi.push_back(-(opt_obj_eval[0]-update_objective_eval[i])/0.05);
+            dchi.push_back(-std::max(((opt_obj_eval[0]-update_obj_eval[i])/0.05),0.0)); //brDchi needs to be repalced with dist to nearest chi
         }
         if(me==MASTER) {
             chi_next.push_back(vector<double>());
@@ -240,7 +239,7 @@ void Update::pertibation(const double* opt_obj_eval)
         double l1 = 0.;
         double l2 = 100000.;
         double lmid;
-        double move = 0.2;
+        double move = opt_par1;
         double chi_sum;
         while (l2-l1 > 1e-8){
             chi_sum = 0.;
@@ -253,65 +252,15 @@ void Update::pertibation(const double* opt_obj_eval)
                 if (chi_next[0][i] < 0) chi_next[0][i] = 0;
                 chi_sum += chi_next[0][i];
             }
-            if ( ( chi_sum - 0.6*(double)natoms) > 0 ) l1 = lmid;
+            if ((chi_sum - opt_par2*(double)natoms) > 0) l1 = lmid;
             else l2 = lmid;
         }
     }
 
     if(key==0) {
-        delete [] update_objective_evalps;
-        if(me==MASTER) delete[] update_objective_eval; //store this info directly into a dchi vec??
+        delete [] update_obj_evalps;
+        if(me==MASTER) delete[] update_obj_eval;
     }
-
-    // Updating chi while respecting constraints on volume fraction and range
-    // double l1 = 0.;
-    // double l2 = 100000.;
-    // double lmid;
-    // //double move = 0.2;
-    // double chi_sum;
-    // while (l2-l1 > 1e-8){
-    //     chi_sum = 0.;
-    //     lmid = 0.5*(l2+l1);
-    //     for (int i=0; i<Npart; i++) {
-    //         chi[i] = ochi[i] * sqrt(-dc[i]/lmid);
-    //         if (chi[i] > ochi[i] + move) chi[i] = ochi[i] + move;
-    //         if (chi[i] > 1.) chi[i] = 1.;
-    //         if (chi[i] < ochi[i] - move) chi[i] = ochi[i] - move;
-    //         if (chi[i] < chi_min) chi[i] = chi_min;
-    //         chi_sum += chi[i];
-    //     }
-    //     if ( ( chi_sum - target_f*(double)Npart) > 0 ) l1 = lmid;
-    //     else l2 = lmid;
-    // }
-
-
-    //  update chi as if it is contious
-
-    // if(me==MASTER) {
-    //     for(int i=0; i<natoms; i++) {
-    //         fprintf(screen,"atom %d dchi: %f\n",i,dchi[i]);
-    //     }
-    //     MPI_Barrier(MPI_COMM_WORLD);
-    // }
-
-    // if(me==MASTER) {
-    //     chi_next.push_back(vector<double>());
-    //     mat_next.push_back(vector<int>());
-    //     for(int i=0; i<natoms; i++) {
-    //         chi_next[0].push_back(chi[i]);
-    //         mat_next[0].push_back(mat[i]);
-    //     }
-    // }
-
-    // for(int i=0; i<pert_sizeps[universe->color]; i++) {
-    //     //lookup chi from optimize->chi_map
-    //     for(int j=0; j<optimize->chi_map.material.size(); j++) {
-    //         if(mat_pop[i][0] == j) {
-    //             //set chi to chi +1
-    //             lammpsIO->lammpsdo("set atom " + std::to_string(i) + "type" );
-    //         }
-    //     }
-    // }
 }
 
 
@@ -330,11 +279,9 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
         //         mat[i] = mat_pop[0][i];
         //     }
         // }
-        // fprintf(screen,"inside your ass\n");
-
         // MPI_Bcast(&chi[0],natoms,MPI_DOUBLE,0,MPI_COMM_WORLD);
         // MPI_Bcast(&mat[0],natoms,MPI_INT,0,MPI_COMM_WORLD);
-        pertibation(opt_obj_eval);
+        perturbation(chi_pop,mat_pop,opt_obj_eval);
         
         // delete[] chi;
         // delete[] mat;

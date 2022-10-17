@@ -8,6 +8,7 @@
 #include "update.h"
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 // #include <memory>
 
 #include <string.h>
@@ -343,72 +344,68 @@ void Optimize::initialize_chipop()
 {
     if(me == MASTER) {
         // To generate inital population mutate a population at a special inital rate
-        for(int i=0; i<pop_size; i++) {
-            chi_pop.push_back(chi);
-            mat_pop.push_back(mat);
-            for(int j=0; j<natoms; j++) {
-                if(mat[j] != -1 && i > 0) {
-                    double mutation_chance = ((double) rand() / (RAND_MAX));
-                    //(mat_index[j] + rand()%(nmat-1))%nmat  // is it typical to select the same material
-                    int mat_mut = (int)(rand() %nmat);
-                    int chi_mut = (int)(rand() %chi_map.nchi[mat_mut]);
-                    mat_pop[i][j] = mat_mut;
-                    chi_pop[i][j] = chi_map.chis[mat_mut][chi_mut];
-                }
-            }
-        }
+        // for(int i=0; i<pop_size; i++) {
+        //     chi_pop.push_back(chi);
+        //     mat_pop.push_back(mat);
+        //     for(int j=0; j<natoms; j++) {
+        //         if(mat[j] != -1 && i > 0) {
+        //             double mutation_chance = ((double) rand() / (RAND_MAX));
+        //             //(mat_index[j] + rand()%(nmat-1))%nmat  // is it typical to select the same material
+        //             int mat_mut = (int)(rand() %nmat);
+        //             int chi_mut = (int)(rand() %chi_map.nchi[mat_mut]);
+        //             mat_pop[i][j] = mat_mut;
+        //             chi_pop[i][j] = chi_map.chis[mat_mut][chi_mut];
+        //         }
+        //     }
+        // }
         // for(int i=0; i<pop_size; i++) {
         //     constrain_avg_chi(i);
         //     constrain_local_avg_chi(chi_pop[i]);
         // }
-
-        //generate a population using a Latin Hypercube
-        //vector of possible chi values
-        // vector<double> values;
-        // for(int i=0; i<chi_map.material.size(); i++) {
-        //     for(int j=0; j<chi_map.chis[i].size(); j++) {
-        //         values.push_back(chi_map.chis[i][j]);
-        //     }
-        // }
-        // vector<vector<double>> sample_space;
-        // int c = 0;
-        // while(chi_pop.size() < pop_size) {
-        //     sample_space.clear();
-        //     for(int i=0; i<natoms; i++) {
-        //         sample_space.push_back(values);
-        //     }
-        //     for(int i=0; i<values.size(); i++) {
-        //         chi_pop.push_back(vector<double>());
-        //         mat_pop.push_back(vector<int>());
-        //         for(int j=0; j<natoms; j++) {
-        //             if(mat[j] == -1) {
-        //                 chi_pop[c].push_back(2);
-        //                 mat_pop[c].push_back(-1);
-        //             }
-        //             else {
-        //                 int sample = (int) rand() % (values.size()-i);
-        //                 chi_pop[c].push_back(sample_space[j][sample]);
-        //                 sample_space[j].erase(sample_space[j].begin()+sample);
-        //                 mat_pop[c].push_back(0);
-        //             }
-        //         }
-        //         c++;
-        //     }
-        // }
-        
-        // while(chi_pop.size() < pop_size) {
-        //     chi_pop.erase(chi_pop.end());
-        //     mat_pop.erase(mat_pop.end());
-        // }
-        
-        // // for(int i=0; i<pop_size; i++) {
-        // //     for(int j=0; j<natoms; j++) {
-        // //         fprintf(screen,"%f ",chi_pop[i][j]);
-        // //     }
-        // //     fprintf(screen,"\n");
-        // // }
-
-
+        if(pop_size > 1) {
+            // generate a population using a Latin Hypercube
+            // vector of possible chi values
+            vector<double> values;
+            for(int i=0; i<chi_map.material.size(); i++) {
+                for(int j=0; j<chi_map.chis[i].size(); j++) {
+                    values.push_back(chi_map.chis[i][j]);
+                }
+            }
+            vector<vector<double>> sample_space;
+            int c = 0;
+            while(chi_pop.size() < pop_size) {
+                sample_space.clear();
+                for(int i=0; i<natoms; i++) {
+                    sample_space.push_back(values);
+                }
+                for(int i=0; i<values.size(); i++) {
+                    chi_pop.push_back(vector<double>());
+                    mat_pop.push_back(vector<int>());
+                    for(int j=0; j<natoms; j++) {
+                        if(mat[j] == -1) {
+                            chi_pop[c].push_back(2);
+                            mat_pop[c].push_back(-1);
+                        }
+                        else {
+                            int sample = (int) rand() % (values.size()-i);
+                            chi_pop[c].push_back(sample_space[j][sample]);
+                            sample_space[j].erase(sample_space[j].begin()+sample);
+                            mat_pop[c].push_back(0);
+                        }
+                    }
+                    c++;
+                }
+            }
+            
+            while(chi_pop.size() > pop_size) {
+                chi_pop.erase(chi_pop.end());
+                mat_pop.erase(mat_pop.end());
+            }
+        }
+        if(pop_size == 1) {
+            chi_pop.push_back(chi);
+            mat_pop.push_back(mat);
+        }
 
         if(me == MASTER) fprintf(screen,"DONE Generating chi population\n\n");
         if(me != MASTER || !dto->wplog) return;
@@ -446,12 +443,12 @@ void Optimize::split_pop()
     pop_sizeps.clear();
     pop_sizeps_cum.clear();
     for(int i=0; i<universe->nsc; i++) pop_sizeps.push_back(int(pop_size/universe->nsc));
-    for(int i=0; i<pop_size%universe->nsc; i++) pop_sizeps[i]++;
+    for(int i=0; i<pop_size%universe->nsc; i++) pop_sizeps[i]++; 
     pop_sizeps_cum.push_back(0);
     for(int i=0; i<universe->nsc-1; i++) pop_sizeps_cum.push_back(pop_sizeps_cum[i]+pop_sizeps[i]);
 
     //code for creating 2d array TODO: make this a function call that I can call anywhere in the code 
-    int n1 = pop_sizeps[universe->color], n2 = natoms;
+    int n1 = std::max(pop_sizeps[universe->color],1), n2 = natoms;
 
     chi_popps = new double*[n1];
     for(int i = 0; i < n1; i++){
@@ -488,6 +485,23 @@ void Optimize::split_pop()
                 }
             }
         }
+        // in case of population less than subcomms copy first chi_pop
+        if(pop_sizeps[i] == 0) {
+            if(me == MASTER) {
+                for(int k=0; k<universe->SCnp[i]; k++) {
+                    if(universe->subMS[i]+k != 0) {
+                        // fprintf(screen,"sending inside subcomm %i to member %i chi %i\n",i,k,j);
+                        MPI_Send(&chi_pop[0][0], natoms, MPI_DOUBLE, universe->subMS[i]+k, 0, MPI_COMM_WORLD);
+                        MPI_Send(&mat_pop[0][0], natoms, MPI_INT, universe->subMS[i]+k, 1, MPI_COMM_WORLD);
+                    }
+                }
+            }
+            if(universe->color == i) {
+                // fprintf(screen,"recieving inside subcomm %i to member %i chi %i\n",i,me-universe->subMS[i],j);
+                MPI_Recv(&chi_popps[0][0], natoms, MPI_DOUBLE, MASTER, 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&mat_popps[0][0], natoms, MPI_INT, MASTER, 1, MPI_COMM_WORLD, &status);
+            }
+        }
     }
     if(!dto->wplog) return;
     output->toplog("\n------------------\nChi sub-population\n-------------------\n\n");
@@ -495,7 +509,7 @@ void Optimize::split_pop()
         string logmsg = "";
         std::ostringstream ss;
         ss << IDuns[i];
-        for(int j=0; j<pop_sizeps[universe->color]; j++) {
+        for(int j=0; j<std::max(pop_sizeps[universe->color],1); j++) {
             if(mat_popps[j][i] != -1) {
                 ss << "\t" << chi_popps[j][i] << " " << chi_map.material[mat_popps[j][i]] << "\t|"; 
                 logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
@@ -661,6 +675,21 @@ void Optimize::communicate_objective(int* fitness)
             }
         }
     }
+    //communicate thermo info
+    if(key == 0) {
+        for(int i=1; i<universe->nsc; i++) {
+            if(universe->color == i) {
+                for(int j=0; j<pop_sizeps[i]; j++) {
+                    MPI_Send(&thermo_val[pop_sizeps_cum[i]+j][0], thermo_string.size(), MPI_DOUBLE, MASTER, j, MPI_COMM_WORLD);
+                }
+            }
+            for(int j=0; j<pop_sizeps[i]; j++) {
+                if(me == MASTER) {
+                    MPI_Recv(&thermo_val[pop_sizeps_cum[i]+j][0], thermo_string.size(), MPI_DOUBLE, universe->subMS[i], j, MPI_COMM_WORLD, &status);
+                }
+            }
+        }
+    }
     if(me == MASTER) {
         vector<double> opt_objective_eval_sorted (opt_objective_eval,opt_objective_eval+pop_size);
         sort(opt_objective_eval_sorted.begin(), opt_objective_eval_sorted.end());
@@ -683,25 +712,26 @@ void Optimize::optrun()
     // initialize chi values from types and set other type-related quantities in the chi_map, then initalize a population of chi's based on sim_type
     initialize_chi(chi,mat);
     initialize_chipop();
-    // split_pop();
 
     // store inital configuration to be reset back to
     if(universe->color == 0) lammpsIO->lammpsdo("write_dump all custom dump.init_config id x y z diameter type vx vy vz");
-
-    // //initalise container to hold individual evaluations of the objective function
-    // if(key == 0) {
-    //     opt_objective_evalps = new double[pop_sizeps[universe->color]];
-    //     if(me == MASTER) {
-    //         opt_objective_eval = new double[pop_size];
-    //     }
-    // }
-
+    for(int i=0; i<potentials.size(); i++) {
+        lammpsIO->lammpsdo(potentials[i].c_str());
+    }
 
     // begin optimization loop
     if(me == MASTER) fprintf(screen,"Starting Optimization\n");
+
+    int n1 = pop_size, n2 = thermo_string.size();
+    thermo_val = new double*[n1];
+    for(int i = 0; i < n1; i++){
+        thermo_val[i] = new double[n2];
+    }
+
     int step = 0;
     while(step < 500) {
         if(me == MASTER) fprintf(screen,"Step %d\n\n",step);
+        auto step_start = high_resolution_clock::now();
         // split population among avilable subcomms
         split_pop();
         //initalise container to hold individual evaluations of the objective function
@@ -721,11 +751,13 @@ void Optimize::optrun()
             load_chi(id);
             //run simulations and extract objectives
             sims->run();
+            //extract thermo
+            for(int i=0; i<thermo_string.size(); i++) {
+                thermo_val[pop_sizeps_cum[universe->color]+id][i] = *(double *)lammpsIO->extract_varaiable(thermo_string[i].c_str());                
+            }
             //evaluate combined objective function
             if(key == 0) {
                 opt_objective_evalps[id] = evaluate_objective();
-                // fprintf(screen,"\x1b[A");
-                // fprintf(screen,"chi_ID: %d Obj: %f\n",pop_sizeps_cum[universe->color]+id,opt_objective_evalps[id]);
                 if(me==universe->nsc) {
                     fprintf(screen,"Completed: %d/%d population members\n",(id+1)*universe->nsc,pop_size);
                     fprintf(screen,"\x1b[A");
@@ -736,13 +768,15 @@ void Optimize::optrun()
         //communicate all objective function evaluations back to the master and rank fitness
         int fitness[pop_size];
         communicate_objective(fitness);
-
+        //update to next chi_pop
+        update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);
         //write dumps
         if(me == MASTER) output->writethermo(step,opt_objective_eval,fitness);
         output->writedump(step,pop_size,fitness);
-        //update to next chi_pop
-        update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);
         step++;
+        auto step_end = high_resolution_clock::now();
+        auto step_duration = duration_cast<std::chrono::milliseconds>(step_end-step_start);      
+        if(me == MASTER) fprintf(screen,"duration: %.3f seconds\n\n", step_duration.count()/1000.0);
     }
 
     //optimisation finished

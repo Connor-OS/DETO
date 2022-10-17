@@ -349,6 +349,28 @@ void Inputdeto::execline(string read_string)
                 error->errsimple(err_msg);
             }
         }
+        else if (strcmp(word.c_str(), "write_restart") == 0) {
+            lss >> read_in;
+            if (strcmp(read_in.c_str(),"yes") == 0) {
+                output->wrestart = true;
+            }
+            else if (strcmp(read_in.c_str(),"no") == 0) {
+                output->wrestart = false;
+            }
+            else {
+                err_msg = "ERROR: Illegal write_restart command (yes or no not \""+read_in+"\")";
+                error->errsimple(err_msg);
+            }
+        }
+        else if (strcmp(word.c_str(), "thermo_style") == 0) {
+            if(!optimize->pop_size) {
+                err_msg = "ERROR: Must set opt_type before using thermo_style command";
+                error->errsimple(err_msg);
+            }
+            while(lss >> read_in) {
+                optimize->thermo_string.push_back(read_in);
+            }
+        }
         /*
         else if (strcmp(word.c_str(), "real_types") == 0) {
             int tt;

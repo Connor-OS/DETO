@@ -39,12 +39,8 @@ namespace DETO_NS {
         void writedump(int,int,int*);
         void writethermo(int,double*,int*);
         void printall();
-        /*
-        
-        void createthermo(std::string);
-        void writethermo(void);
-        void add_thqtt(std::string);
-         */
+
+        bool wrestart;
 
         
     private:

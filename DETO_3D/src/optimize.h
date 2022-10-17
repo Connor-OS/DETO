@@ -5,12 +5,15 @@
 #include "universe.h"
 #include <string>
 #include <vector>
+#include <chrono>
 
 #define MASTER 0
 
 namespace DETO_NS {
     using std::vector;
     using std::string;
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
 	
 	class Optimize : protected Pointers {
 	public:
@@ -71,6 +74,12 @@ namespace DETO_NS {
         int* IDuns; // unsortd IDs of all atoms in LAMMPS
         int* typeuns; //unsorted types of all atoms in LAMMPS
 
+        std::vector<std::string> thermo_string; // space seperated string of themro varaible names
+        double** thermo_val; // Values extracted for thermo of each member at each itteration
+        double ** chi_popps;   // holds chi values per subcomm
+        int ** mat_popps;  //holds material index per subcomm
+
+
 	private:
         vector<bool> flag_avgchi_cstr;   // vector (one per material) of flags, true if user has defined a volume constraint on average chi through the system for that material
 
@@ -92,9 +101,6 @@ namespace DETO_NS {
 
         vector<vector<double>> chi_pop;   // vector of vector of chi values for the whole population
         vector<vector<int>> mat_pop;  // vector of vector of material values for the whole population
-
-        double ** chi_popps;   // holds chi values per subcomm
-        int ** mat_popps;  //holds material index per subcomm
 
         //Optimisation variables
         double* opt_objective_eval;

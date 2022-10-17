@@ -28,7 +28,7 @@ namespace DETO_NS {
 
 		void genetic(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 		void monte_carlo(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
-		void pertibation(const double* opt_obj_eval);
+		void perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
 		void update_chipop(vector<vector<double>>& chi_pop,vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 
         void printall();
@@ -59,8 +59,8 @@ namespace DETO_NS {
 
 		MPI_Status status;
 
-		double* update_objective_evalps;
-		double* update_objective_eval;
+		double* update_obj_evalps;
+		double* update_obj_eval;
 	};
 	
 }

@@ -23,6 +23,7 @@ namespace DETO_NS {
 		~Update();
 
         int me;     // id of the current processor (rank)
+		int key;   // rank of current proc in current subcomm
 		void evaluate_objective(int id);
 		void set_opt_type(string read_string);
 
@@ -37,9 +38,7 @@ namespace DETO_NS {
 	private:
 
 		string err_msg, read_string, word;
-		int key;   // rank of current proc in current subcomm
 		int natoms;
-
 
 		//Optimisation variables
         string opt_type; //the type of optimization to be run. i.e genetic, sensitivity etc..
@@ -58,6 +57,9 @@ namespace DETO_NS {
 		vector<int> mat;
 
 		MPI_Status status;
+
+		double* dchips;
+		double* dchi;
 
 		double* update_obj_evalps;
 		double* update_obj_eval;

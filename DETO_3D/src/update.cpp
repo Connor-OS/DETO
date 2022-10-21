@@ -16,7 +16,6 @@ Update::Update(DETO *deto) : Pointers(deto)
     // The inputcprs class is run by all processors in COMM_WORLD. This reads the id of the processor
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
     key = universe->key;
-
 }
 
 // ---------------------------------------------------------------
@@ -148,11 +147,22 @@ void Update::monte_carlo(const std::vector<std::vector<double>>& chi_pop,const s
     //     optimize->chi = optimize->chi_pop[best];
 }
 
-
 // ---------------------------------------------------------------
 // update using the pertibation method
 void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval)
 {   
+    key = universe->key;
+    double obj_eval;
+    if(key == 0) {
+        for(int i=1; i<universe->nsc; i++) {
+            if(me == MASTER) {
+                MPI_Send(&opt_obj_eval[0], 1, MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD);
+                obj_eval = opt_obj_eval[0];
+            }
+            if(universe->color == i) MPI_Recv(&obj_eval, 1, MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD, &status);
+        }
+    }
+    
     vector<int> pert_sizeps;
     vector<int> pert_sizeps_cum;
     double* chi = optimize->chi_popps[0];
@@ -166,20 +176,22 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
     for(int i=0; i<universe->nsc-1; i++) pert_sizeps_cum.push_back(pert_sizeps_cum[i]+pert_sizeps[i]);
 
     if(key==0) {
-        update_obj_evalps = new double[pert_sizeps[universe->color]];
-        if(me==MASTER) update_obj_eval = new double[natoms];
+        dchips = new double[pert_sizeps[universe->color]];
+        if(me==MASTER) dchi = new double[natoms];
     }
-    //  save config
 
+    // perturbation loop
+    double pert_obj_eval;
     for(int i=0; i<pert_sizeps[universe->color]; i++) {
         int pert_ID = pert_sizeps_cum[universe->color]+i;
         //  load config
-        //load save state at previous equilibrium
-        optimize->load_chi(0);
-
+        optimize->load_chi(0); // we may be able to improve the efficency of this. But is it worth it for the savings we will gain?
         // upate single chi and revaluate objective
         int index = optimize->chi_map.lookup(chi[pert_ID],mat[pert_ID]);
-        if(index < optimize->chi_map.nchi[mat[pert_ID]]-1 && index != -1) {
+        if(index == -1) {
+            if(key == 0)  dchips[i] = 0.0;
+        }
+        else if(index < optimize->chi_map.nchi[mat[pert_ID]]-1) {
             std::string set_type = "set atom " + std::to_string(optimize->IDuns[pert_ID]) + " type " + std::to_string(optimize->chi_map.types[mat[pert_ID]][index+1]);
             lammpsIO->lammpsdo(set_type);
             lammpsIO->lammpsdo("delete_bonds all multi remove");
@@ -187,46 +199,40 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
                 lammpsIO->lammpsdo(optimize->potentials[i].c_str());
             }
             sims->run();
-            if(key == 0) update_obj_evalps[i] = optimize->evaluate_objective();
-        } else if(key == 0) update_obj_evalps[i] = 0;
+            if(key == 0) dchips[i] = -std::max(((obj_eval - optimize->evaluate_objective())/0.05),0.0); //brDchi needs to be repalced with dist to nearest chi
+        } 
+        else {
+            std::string set_type = "set atom " + std::to_string(optimize->IDuns[pert_ID]) + " type " + std::to_string(optimize->chi_map.types[mat[pert_ID]][index-1]);
+            lammpsIO->lammpsdo(set_type);
+            lammpsIO->lammpsdo("delete_bonds all multi remove");
+            for(int i=0; i<optimize->potentials.size(); i++) {
+                lammpsIO->lammpsdo(optimize->potentials[i].c_str());
+            }
+            sims->run();
+            if(key == 0) dchips[i] = -std::max(((optimize->evaluate_objective() - obj_eval)/0.05),0.0); //brDchi needs to be repalced with dist to nearest chi
+        }
 
         if(me==universe->nsc) {
             fprintf(screen,"Completed: %d/%d perturbations\n",(i+1)*universe->nsc,natoms);
             fprintf(screen,"\x1b[A");
         }
     }
-    //move evals on MASTER
+
     if(me == MASTER) {
         for(int i=0; i<pert_sizeps[0]; i++) {
-            update_obj_eval[i] = update_obj_evalps[i];
+            dchi[i] = dchips[i];
         }
     }
     //communicate evals from submasters
     if(key == 0) {
         for(int i=1; i<universe->nsc; i++) {
-            if(universe->color == i) {
-                MPI_Send(&update_obj_evalps[0], pert_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
-            }
-            if(me == MASTER) {
-                MPI_Recv(&update_obj_eval[pert_sizeps_cum[i]], pert_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
-            }
-        }
-    }
-    if(me == MASTER) {
-        for(int i=0; i<natoms; i++) {
-            if(update_obj_eval[i] == 0) {
-                update_obj_eval[i] = opt_obj_eval[0];
-            }
+            if(universe->color == i) MPI_Send(&dchips[0], pert_sizeps[i], MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD);
+            if(me == MASTER) MPI_Recv(&dchi[pert_sizeps_cum[i]], pert_sizeps[i], MPI_DOUBLE, universe->subMS[i], i, MPI_COMM_WORLD, &status);
         }
     }
 
-    //dchi.push_back(-(Utot-Ueq)/brDchi;)
+    //create next chi vector;
     if(me==MASTER) {
-        vector<double> dchi;
-        dchi.clear();
-        for(int i=0; i<natoms; i++) {
-            dchi.push_back(-std::max(((opt_obj_eval[0]-update_obj_eval[i])/0.05),0.0)); //brDchi needs to be repalced with dist to nearest chi
-        }
         if(me==MASTER) {
             chi_next.push_back(vector<double>());
             mat_next.push_back(vector<int>());
@@ -258,8 +264,8 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
     }
 
     if(key==0) {
-        delete [] update_obj_evalps;
-        if(me==MASTER) delete[] update_obj_eval;
+        delete [] dchips;
+        if(me==MASTER) delete[] dchi;
     }
 }
 
@@ -271,20 +277,7 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
     natoms = (int)lammpsIO->lmp->atom->natoms;
     //Direct towards user specified update method (some methods e.g genetic require only master, some require all subcomms)
     if(strcmp(opt_type.c_str(),"pertibation") == 0) {
-        // chi = new double[natoms];
-        // mat = new int[natoms];
-        // if(me==MASTER) {
-        //     for(int i=0; i<natoms; i++) {
-        //         chi[i] = chi_pop[0][i];
-        //         mat[i] = mat_pop[0][i];
-        //     }
-        // }
-        // MPI_Bcast(&chi[0],natoms,MPI_DOUBLE,0,MPI_COMM_WORLD);
-        // MPI_Bcast(&mat[0],natoms,MPI_INT,0,MPI_COMM_WORLD);
         perturbation(chi_pop,mat_pop,opt_obj_eval);
-        
-        // delete[] chi;
-        // delete[] mat;
     }
     if(me == MASTER){
         if(strcmp(opt_type.c_str(),"genetic") == 0) {

@@ -102,9 +102,8 @@ namespace DETO_NS {
         vector<vector<double>> chi_pop;   // vector of vector of chi values for the whole population
         vector<vector<int>> mat_pop;  // vector of vector of material values for the whole population
 
-        //Optimisation variables
-        double* opt_objective_eval;
-        double* opt_objective_evalps;
+        double* opt_objective_eval;  //array to hold values of evaluated objective function
+        double* opt_objective_evalps; //array to hold values of evaluated objective function per subcommunicator
         
         int init_ts; //timestep after initalisation
         double tol; // optimisation tolerance

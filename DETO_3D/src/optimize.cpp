@@ -751,6 +751,7 @@ void Optimize::optrun()
             load_chi(id);
             //run simulations and extract objectives
             sims->run();
+            output->writedump(step);
             //extract thermo
             for(int i=0; i<thermo_string.size(); i++) {
                 thermo_val[pop_sizeps_cum[universe->color]+id][i] = *(double *)lammpsIO->extract_varaiable(thermo_string[i].c_str());                
@@ -772,7 +773,7 @@ void Optimize::optrun()
         update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);
         //write dumps
         if(me == MASTER) output->writethermo(step,opt_objective_eval,fitness);
-        output->writedump(step,pop_size,fitness);
+        // output->writedump(step,pop_size,fitness);
         step++;
         auto step_end = high_resolution_clock::now();
         auto step_duration = duration_cast<std::chrono::milliseconds>(step_end-step_start);      

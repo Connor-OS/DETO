@@ -67,6 +67,28 @@ void Output::add_dump(int devery, string dfile, string dstring, int n_fitest)
     dump_first.push_back(true);
 }
 
+// ---------------------------------------------------------------
+// write new entry in dump file
+void Output::writedump(int step)
+{
+    for(int i=0; i<dump_every.size(); i++) {
+        if(step == 0 && me==MASTER) {
+            std::ofstream dump;
+            dump.open(dump_file[i]);
+            dump.close();
+        }
+         // write what to do when no n_fitest provided
+        if(step%dump_every[i] == 0) {
+            // MPI_Barrier(MPI_COMM_WORLD);
+            lammpsIO->lammpsdo(dump_string[i] + " modify append yes");    
+            // MPI_Barrier(MPI_COMM_WORLD);
+        }
+            
+    }
+    if(universe->color == 0 && wrestart == true) {
+        lammpsIO->lammpsdo("write_data ./dump/data.restart nocoeff");
+    }
+}
 
 // ---------------------------------------------------------------
 // write new entry in dump file

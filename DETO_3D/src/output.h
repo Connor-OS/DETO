@@ -30,6 +30,7 @@ namespace DETO_NS {
         std::vector<std::string> dump_file; // string containing dump_file path
         std::vector<bool> dump_first;  //recognises if dump was called already or this is first call
         std::vector<int> dump_fitest; //dump number of fitest solutions in population
+        std::string restart_file; //file to write restat data into
 
         std::ofstream thermo;
 
@@ -39,6 +40,7 @@ namespace DETO_NS {
         void writedump(int,int,int*);
         void writedump(int);
         void writethermo(int,double*,int*);
+        void writerestart();
         void printall();
 
         bool wrestart;

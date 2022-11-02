@@ -60,7 +60,7 @@ void Output::toplog(string msg)
 void Output::add_dump(int devery, string dfile, string dstring, int n_fitest)
 {
     dump_every.push_back(devery);
-    dstring = "write_dump " + dstring;
+    dstring = dstring;
     dump_string.push_back(dstring);
     dump_file.push_back(dfile);
     dump_fitest.push_back(n_fitest);
@@ -79,14 +79,16 @@ void Output::writedump(int step)
         }
          // write what to do when no n_fitest provided
         if(step%dump_every[i] == 0) {
-            // MPI_Barrier(MPI_COMM_WORLD);
-            lammpsIO->lammpsdo(dump_string[i] + " modify append yes");    
-            // MPI_Barrier(MPI_COMM_WORLD);
-        }
-            
-    }
-    if(universe->color == 0 && wrestart == true) {
-        lammpsIO->lammpsdo("write_data ./dump/data.restart nocoeff");
+            lammpsIO->lammpsdo("dump " + std::to_string(i) + " " +  dump_string[i]);
+            std::string tolmp;
+            tolmp = "dump_modify " + std::to_string(i) + " every 1 first yes append yes";
+            lammpsIO->lammpsdo(tolmp);
+            // write entry
+            lammpsIO->lammpsdo("run 0");
+            // close dump
+            tolmp = "undump " + std::to_string(i);
+            lammpsIO->lammpsdo(tolmp);
+        }       
     }
 }
 
@@ -116,8 +118,15 @@ void Output::writedump(int step, int pop_size, int* fitness)
             }
         }
     }
-    if(universe->color == 0 && wrestart == true) {
-        lammpsIO->lammpsdo("write_data ./dump/data.restart nocoeff");
+}
+
+
+// ---------------------------------------------------------------
+// write new restart file
+void Output::writerestart()
+{
+    if(universe->color == 0) {
+        lammpsIO->lammpsdo("write_data " + restart_file + " nocoeff");
     }
 }
 

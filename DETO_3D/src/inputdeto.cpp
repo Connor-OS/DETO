@@ -269,13 +269,14 @@ void Inputdeto::execline(string read_string)
                 string dump_string,dump_file;
                 int dump_every,n_fitest;
                 n_fitest = 0;
+                lss >> read_in;
                 for(int i=0; i<2; i++) {
                     lss >> read_in;
                     dump_string = dump_string+" "+read_in;
                 }
                 lss >> dump_every;
                 lss >> dump_file;
-                dump_string = dump_string+" "+dump_file;
+                dump_string = dump_string+" 1 "+dump_file;
                 while (lss >> read_in && !comment_found){
                     if(strcmp(read_in.c_str(), "n_fitest") == 0){
                         lss >> n_fitest;
@@ -287,7 +288,6 @@ void Inputdeto::execline(string read_string)
                         comment_found = true;
                         getout=true;
                     }
-                    // lss >> read_string;
                 }
                 output->add_dump(dump_every,dump_file,dump_string,n_fitest);
             }
@@ -351,16 +351,7 @@ void Inputdeto::execline(string read_string)
         }
         else if (strcmp(word.c_str(), "write_restart") == 0) {
             lss >> read_in;
-            if (strcmp(read_in.c_str(),"yes") == 0) {
-                output->wrestart = true;
-            }
-            else if (strcmp(read_in.c_str(),"no") == 0) {
-                output->wrestart = false;
-            }
-            else {
-                err_msg = "ERROR: Illegal write_restart command (yes or no not \""+read_in+"\")";
-                error->errsimple(err_msg);
-            }
+            output->restart_file = read_in;
         }
         else if (strcmp(word.c_str(), "thermo_style") == 0) {
             if(!optimize->pop_size) {

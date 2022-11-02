@@ -19,7 +19,7 @@ Update::Update(DETO *deto) : Pointers(deto)
 }
 
 // ---------------------------------------------------------------
-// Class destructor
+// Class destructorgit
 Update::~Update()
 {
 }
@@ -247,16 +247,22 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
         double lmid;
         double move = opt_par1;
         double chi_sum;
-        while (l2-l1 > 1e-8){
+        while (l2-l1 > 1e-10){
             chi_sum = 0.;
             lmid = 0.5*(l2+l1);
             for (int i=0; i<natoms; i++) {
-                chi_next[0][i] = chi[i] * sqrt(-dchi[i]/lmid);
-                if (chi_next[0][i] > chi[i] + move) chi_next[0][i] = chi[i] + move;
-                if (chi_next[0][i] > 1.) chi_next[0][i] = 1.;
-                if (chi_next[0][i] < chi[i] - move) chi_next[0][i] = chi[i] - move;
-                if (chi_next[0][i] < 0) chi_next[0][i] = 0;
-                chi_sum += chi_next[0][i];
+                if(mat[i] == -1) {
+                    chi_sum += 1;
+                    chi_next[0][i] = 2;
+                }
+                else {
+                    chi_next[0][i] = chi[i] * sqrt(-dchi[i]/lmid);
+                    if (chi_next[0][i] > chi[i] + move) chi_next[0][i] = chi[i] + move;
+                    if (chi_next[0][i] > 1.) chi_next[0][i] = 1.;
+                    if (chi_next[0][i] < chi[i] - move) chi_next[0][i] = chi[i] - move;
+                    if (chi_next[0][i] < 0) chi_next[0][i] = 0;
+                    chi_sum += chi_next[0][i];
+                }
             }
             if ((chi_sum - opt_par2*(double)natoms) > 0) l1 = lmid;
             else l2 = lmid;

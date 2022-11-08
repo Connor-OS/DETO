@@ -123,10 +123,10 @@ void Output::writedump(int step, int pop_size, int* fitness)
 
 // ---------------------------------------------------------------
 // write new restart file
-void Output::writerestart()
+void Output::writerestart(int step)
 {
     if(universe->color == 0) {
-        lammpsIO->lammpsdo("write_data " + restart_file + " nocoeff");
+        lammpsIO->lammpsdo("write_data " + restart_file + std::to_string(step) + " nocoeff");
     }
 }
 

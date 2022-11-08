@@ -247,7 +247,9 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
         double lmid;
         double move = opt_par1;
         double chi_sum;
+        int n_part_opt;
         while (l2-l1 > 1e-10){
+            n_part_opt = 0;
             chi_sum = 0.;
             lmid = 0.5*(l2+l1);
             for (int i=0; i<natoms; i++) {
@@ -262,9 +264,10 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
                     if (chi_next[0][i] < chi[i] - move) chi_next[0][i] = chi[i] - move;
                     if (chi_next[0][i] < 0) chi_next[0][i] = 0;
                     chi_sum += chi_next[0][i];
+                    n_part_opt++;
                 }
             }
-            if ((chi_sum - opt_par2*(double)natoms) > 0) l1 = lmid;
+            if ((chi_sum - opt_par2*(double)n_part_opt) > 0) l1 = lmid;
             else l2 = lmid;
         }
     }

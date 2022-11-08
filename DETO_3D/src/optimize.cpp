@@ -773,7 +773,6 @@ void Optimize::optrun()
         update->update_chipop(chi_pop,mat_pop,opt_objective_eval,fitness);
         //write dumps
         if(me == MASTER) output->writethermo(step,opt_objective_eval,fitness);
-        if(universe->color == 0) output->writerestart();
         // output->writedump(step,pop_size,fitness);
         step++;
         auto step_end = high_resolution_clock::now();

@@ -40,7 +40,7 @@ namespace DETO_NS {
         void writedump(int,int,int*);
         void writedump(int);
         void writethermo(int,double*,int*);
-        void writerestart();
+        void writerestart(int);
         void printall();
 
         bool wrestart;

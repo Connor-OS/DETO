@@ -34,6 +34,7 @@ namespace DETO_NS {
 
         void printall();
 
+		std::ofstream sens_file;
 
 	private:
 

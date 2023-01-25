@@ -125,8 +125,10 @@ void Output::writedump(int step, int pop_size, int* fitness)
 // write new restart file
 void Output::writerestart(int step)
 {
-    if(universe->color == 0) {
-        lammpsIO->lammpsdo("write_data " + restart_file + std::to_string(step) + " nocoeff");
+    if(wrestart == true) {
+        if(universe->color == 0) {
+            lammpsIO->lammpsdo("write_data " + restart_file + std::to_string(step) + " nocoeff");
+        }
     }
 }
 
@@ -139,7 +141,7 @@ void Output::writethermo(int step, double* objective_eval, int* fitness)
     // fprintf(screen,"writing %d %f to thermo file",step,objective_eval);
     if(step == 0) {
         thermo.open("thermo.objective");
-        thermo << "step,best,mean,worst";
+        thermo << "step,obj";
         for(int i=0; i<optimize->thermo_string.size(); i++) {
             thermo << "," << optimize->thermo_string[i];
         }
@@ -153,7 +155,7 @@ void Output::writethermo(int step, double* objective_eval, int* fitness)
     }
     mean = mean/pop_size;
 
-    thermo << step << "," << objective_eval[fitness[0]] << "," << mean << "," << objective_eval[fitness[optimize->pop_size-1]];
+    thermo << step << "," << objective_eval[fitness[0]]; //<< "," << mean << "," << objective_eval[fitness[optimize->pop_size-1]];
     for(int i=0; i<optimize->thermo_string.size(); i++) {
         thermo << "," << optimize->thermo_val[fitness[0]][i];
     }

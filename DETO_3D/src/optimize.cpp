@@ -774,6 +774,7 @@ void Optimize::optrun()
         //write dumps
         if(me == MASTER) output->writethermo(step,opt_objective_eval,fitness);
         // output->writedump(step,pop_size,fitness);
+        output->writerestart(step);
         step++;
         auto step_end = high_resolution_clock::now();
         auto step_duration = duration_cast<std::chrono::milliseconds>(step_end-step_start);      

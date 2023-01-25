@@ -181,10 +181,9 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
     }
 
     // perturbation loop
-    double pert_obj_eval;
     for(int i=0; i<pert_sizeps[universe->color]; i++) {
         int pert_ID = pert_sizeps_cum[universe->color]+i;
-        //  load config
+        //  load inital config
         optimize->load_chi(0); // we may be able to improve the efficency of this. But is it worth it for the savings we will gain?
         // upate single chi and revaluate objective
         int index = optimize->chi_map.lookup(chi[pert_ID],mat[pert_ID]);
@@ -217,6 +216,7 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
             fprintf(screen,"\x1b[A");
         }
     }
+    optimize->load_chi(0); // load inital config after perterbations complete
 
     if(me == MASTER) {
         for(int i=0; i<pert_sizeps[0]; i++) {

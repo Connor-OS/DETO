@@ -5,6 +5,7 @@
 #include "lammpsIO.h"
 #include "universe.h"
 #include "error.h"
+#include "output.h"
 #include <memory>
 
 
@@ -174,21 +175,23 @@ void Update::gradient_descent(const std::vector<std::vector<double>>& chi_pop,co
         }
     }
     //normalise sensitivity between 0-1
-    double min = 0;
+    double min = 100;
     double max = 0;
     for (int i=0; i<natoms; i++) {
         if(mat[i]!=-1) {
-            if(dchi[i] < min) min == dchi[i];
+            if(dchi[i] < min) min = dchi[i];
             if(dchi[i] > max) max = dchi[i];
         }
     }
-    double dchi_max = 0;
+    std::cout << "max " << max << " min " << min << "\n";
+    double dchi_max = 0; double dchi_min = 1;
     for (int i=0; i<natoms; i++) {
         dchi[i] = (dchi[i]-min)/(max-min);
         if(mat[i]!=-1 && dchi[i] > dchi_max) dchi_max = dchi[i];
+        if(mat[i]!=-1 && dchi[i] < dchi_min) dchi_min = dchi[i];
     }
     // for (int i=0; i<natoms; i++) std::cout << dchi[i] << "\n";
-    std::cout << "max_sens " << dchi_max << "\n";
+    std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
     
     sensitivity_update(dchi,chi,mat);
 
@@ -330,6 +333,15 @@ void Update::sensitivity_update(const double* dchi, const double* chi, const int
         if ((chi_sum - vol_frac*(double)n_part_opt) > 0) l1 = lmid;
         else l2 = lmid;
     }
+    output->toplog("\n------------------\nnew dchi , chi, mat\n-------------------\n\n");
+    for (int i=0; i<natoms; i++) {
+        string logmsg = "";
+        std::ostringstream ss;
+        ss << dchi[i] << " " << chi_next[i] << " " << mat[i]; 
+        logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
+        output->toplog(logmsg);
+    }
+
 }
 
 

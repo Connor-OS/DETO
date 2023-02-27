@@ -654,6 +654,21 @@ double Optimize::evaluate_objective()
     return *(double *)lammpsIO->extract_varaiable("obj");
 }
 
+// // ---------------------------------------------------------------
+// // Combine all user defined sensitivities: this function is currently unused because sens combos are likely far to complicated for users to want to program in this way
+// double Optimize::evaluate_sensitivity()
+// {
+//     for(int i=0; i<sims->n_sims; i++) {
+//         for(int j=0; j<sims->n_repeats[i]; j++) {
+//             for(int k=0; k<sims->sim_sens_names[i][j].size(); k++) {
+//                 lammpsIO->lammpsdo("variable " + sims->sim_sens_names[i][j][k] + " equal " + std::to_string(sims->sim_sens_val[i][j][k]));
+//             }
+//         }
+//     }
+//     lammpsIO->lammpsdo("variable obj equal " + obj_function);
+//     return *(double *)lammpsIO->extract_varaiable("obj");
+// }
+
 // ---------------------------------------------------------------
 // communicate the objective function evaluations back to the master and rank fitness 
 void Optimize::communicate_objective(int* fitness)
@@ -761,7 +776,7 @@ void Optimize::optrun()
                 opt_objective_evalps[id] = evaluate_objective();
                 if(me==universe->nsc) {
                     fprintf(screen,"Completed: %d/%d population members\n",(id+1)*universe->nsc,pop_size);
-                    fprintf(screen,"\x1b[A");
+                    // fprintf(screen,"\x1b[A");
                 }
             }
         }

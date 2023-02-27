@@ -31,6 +31,7 @@ namespace DETO_NS {
         std::vector<bool> dump_first;  //recognises if dump was called already or this is first call
         std::vector<int> dump_fitest; //dump number of fitest solutions in population
         std::string restart_file; //file to write restat data into
+        double restart_every;
 
         std::ofstream thermo;
 

@@ -37,23 +37,27 @@ void Update::set_opt_type(std::string read_string)
         lss >> opt_par1 >> opt_par2;
         //opt_par1 = move_limit
     }
-    else if(strcmp(opt_type.c_str(),"genetic") == 0) {
-        gen_elitism = 0;
-        lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
-        // opt_par1 = tournement size cross, opt_par2 = crossover rate, opt_par3 = Mutation rate
-        while(lss >> keyword) {
-            if(std::strcmp(keyword.c_str(),"elitism") == 0) {
-                lss >> gen_elitism;
-            }
-        }
-        if(pop_size%2 == 1 || gen_elitism%2 == 1) {
-            err_msg = "ERROR: please use even numbers only for population size and elitism";
-            error->errsimple(err_msg);
-        }
+    else if(strcmp(opt_type.c_str(),"gradient_descent") == 0) {
+        pop_size = 1;
+        lss >> opt_par1 >> opt_par2;
     }
-    else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
-        lss >> pop_size >> opt_par1 >> opt_par2;
-    }
+    // else if(strcmp(opt_type.c_str(),"genetic") == 0) {
+    //     gen_elitism = 0;
+    //     lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
+    //     // opt_par1 = tournement size cross, opt_par2 = crossover rate, opt_par3 = Mutation rate
+    //     while(lss >> keyword) {
+    //         if(std::strcmp(keyword.c_str(),"elitism") == 0) {
+    //             lss >> gen_elitism;
+    //         }
+    //     }
+    //     if(pop_size%2 == 1 || gen_elitism%2 == 1) {
+    //         err_msg = "ERROR: please use even numbers only for population size and elitism";
+    //         error->errsimple(err_msg);
+    //     }
+    // }
+    // else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
+    //     lss >> pop_size >> opt_par1 >> opt_par2;
+    // }
     else {
         err_msg = "ERROR: opt_type\"" + opt_type + "\" not recognised";
         error->errsimple(err_msg);
@@ -66,69 +70,69 @@ void Update::set_opt_type(std::string read_string)
 }
 
 
-// ---------------------------------------------------------------
-// genetic algorythm for update
-void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
-{
-    fprintf(screen,"\n");
-    chi_next.clear();
-    mat_next.clear();
-    //Selection
-    int selection_size = pop_size-gen_elitism;
-    std::vector<int> selection;
-    selection.clear();
-    int best;   
-    for(int i=0; i<selection_size; i++) {
-        best = rand() % pop_size;
-        for(int j=0; j<opt_par1-1; j++) {
-            int eval = rand() % pop_size;
-            if(opt_obj_eval[eval] < opt_obj_eval[best]) {
-                best = eval;
-            }
-        }
-        chi_next.push_back(chi_pop[best]);
-        mat_next.push_back(mat_pop[best]);
-    }
-    //Crossover
-    for(int i=0; i<selection_size; i+=2) {
-        int j = i+1;
-        double temp = 0;
-        int tempint = 0;
-        // attempt to crossover at each gene individually
-        double cross_chance = ((double) rand() / (RAND_MAX));
-        if(cross_chance < opt_par2) {
-            for(int k=0; k<natoms; k++) {
-                if(rand()%2 == 1) {
-                    temp = chi_next[i][k];
-                    chi_next[i][k] = chi_next[j][k];
-                    chi_next[j][k] = temp;
-                    tempint = mat_next[i][k];
-                    mat_next[i][k] = mat_next[j][k];
-                    mat_next[j][k] = tempint;
-                }
-            }
-        }
-    }
-    //Mutation
-    for(int i=0; i<selection_size; i++) {
-        for(int j=0; j<natoms; j++) {
-            if(mat_pop[i][j] != -1) {
-                double mutation_chance = ((double) rand() / (RAND_MAX));
-                if(mutation_chance < opt_par3) {
-                    int mat_mut = (int)(rand() %optimize->nmat);
-                    int chi_mut = (int)(rand() %optimize->chi_map.nchi[mat_mut]);
-                    mat_next[i][j] = mat_mut;
-                    chi_next[i][j] = optimize->chi_map.chis[mat_mut][chi_mut];
-                }
-            }
-        }
-    }
-    //add the elite solutions back in
-    for(int i=0; i<gen_elitism; i++) {
-        chi_next.push_back(chi_pop[fitness[i]]);
-        mat_next.push_back(mat_pop[fitness[i]]);
-    }
-}
+// // ---------------------------------------------------------------
+// // genetic algorythm for update
+// void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
+// {
+//     fprintf(screen,"\n");
+//     chi_next.clear();
+//     mat_next.clear();
+//     //Selection
+//     int selection_size = pop_size-gen_elitism;
+//     std::vector<int> selection;
+//     selection.clear();
+//     int best;   
+//     for(int i=0; i<selection_size; i++) {
+//         best = rand() % pop_size;
+//         for(int j=0; j<opt_par1-1; j++) {
+//             int eval = rand() % pop_size;
+//             if(opt_obj_eval[eval] < opt_obj_eval[best]) {
+//                 best = eval;
+//             }
+//         }
+//         chi_next.push_back(chi_pop[best]);
+//         mat_next.push_back(mat_pop[best]);
+//     }
+//     //Crossover
+//     for(int i=0; i<selection_size; i+=2) {
+//         int j = i+1;
+//         double temp = 0;
+//         int tempint = 0;
+//         // attempt to crossover at each gene individually
+//         double cross_chance = ((double) rand() / (RAND_MAX));
+//         if(cross_chance < opt_par2) {
+//             for(int k=0; k<natoms; k++) {
+//                 if(rand()%2 == 1) {
+//                     temp = chi_next[i][k];
+//                     chi_next[i][k] = chi_next[j][k];
+//                     chi_next[j][k] = temp;
+//                     tempint = mat_next[i][k];
+//                     mat_next[i][k] = mat_next[j][k];
+//                     mat_next[j][k] = tempint;
+//                 }
+//             }
+//         }
+//     }
+//     //Mutation
+//     for(int i=0; i<selection_size; i++) {
+//         for(int j=0; j<natoms; j++) {
+//             if(mat_pop[i][j] != -1) {
+//                 double mutation_chance = ((double) rand() / (RAND_MAX));
+//                 if(mutation_chance < opt_par3) {
+//                     int mat_mut = (int)(rand() %optimize->nmat);
+//                     int chi_mut = (int)(rand() %optimize->chi_map.nchi[mat_mut]);
+//                     mat_next[i][j] = mat_mut;
+//                     chi_next[i][j] = optimize->chi_map.chis[mat_mut][chi_mut];
+//                 }
+//             }
+//         }
+//     }
+//     //add the elite solutions back in
+//     for(int i=0; i<gen_elitism; i++) {
+//         chi_next.push_back(chi_pop[fitness[i]]);
+//         mat_next.push_back(mat_pop[fitness[i]]);
+//     }
+// }
 
 
 // ---------------------------------------------------------------
@@ -146,6 +150,58 @@ void Update::monte_carlo(const std::vector<std::vector<double>>& chi_pop,const s
     //     fprintf(screen,"\nBest choice is: %d value: %f\n",best, opt_objective_eval[best]);
     //     optimize->chi = optimize->chi_pop[best];
 }
+
+// ---------------------------------------------------------------
+// monte-carlo algorythm for update
+void Update::gradient_descent(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop)
+{
+    //then should update chi_pop based on this sensitivity directly
+    //create next chi vector;
+
+    double* chi = optimize->chi_popps[0];
+    int* mat = optimize->mat_popps[0];
+
+    //should extract the sensitivities directly from a variable assigned in lammps
+    //naively combine all sensitivities linearly we should warn the user about this or ofer them options to use more complex formula
+    dchi = new double[natoms];
+    for(int i=0; i<sims->n_sims; i++) {
+        for(int j=0; j<sims->n_repeats[i]; j++) {
+            for(int k=0; k<sims->sim_sens_names[i][j].size(); k++) {
+                for (int l=0; l<natoms; l++) {
+                    dchi[l] += sims->sim_sens_val[i][j][k][l];
+                }
+            }
+        }
+    }
+    //normalise sensitivity between 0-1
+    double min = 0;
+    double max = 0;
+    for (int i=0; i<natoms; i++) {
+        if(mat[i]!=-1) {
+            if(dchi[i] < min) min == dchi[i];
+            if(dchi[i] > max) max = dchi[i];
+        }
+    }
+    double dchi_max = 0;
+    for (int i=0; i<natoms; i++) {
+        dchi[i] = (dchi[i]-min)/(max-min);
+        if(mat[i]!=-1 && dchi[i] > dchi_max) dchi_max = dchi[i];
+    }
+    // for (int i=0; i<natoms; i++) std::cout << dchi[i] << "\n";
+    std::cout << "max_sens " << dchi_max << "\n";
+    
+    sensitivity_update(dchi,chi,mat);
+
+    delete[] dchi;
+
+    
+
+
+    // this should be easy okay :)
+
+
+}
+
 
 // ---------------------------------------------------------------
 // update using the pertibation method
@@ -231,46 +287,7 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
         }
     }
 
-    //create next chi vector;
-    if(me==MASTER) {
-        if(me==MASTER) {
-            chi_next.push_back(vector<double>());
-            mat_next.push_back(vector<int>());
-            for(int i=0; i<natoms; i++) {
-                chi_next[0].push_back(0);
-                mat_next[0].push_back(mat[i]);
-            }
-        }
-        // Updating chi while respecting constraints on volume fraction and range
-        double l1 = 0.;
-        double l2 = 100000.;
-        double lmid;
-        double move = opt_par1;
-        double chi_sum;
-        int n_part_opt;
-        while (l2-l1 > 1e-10){
-            n_part_opt = 0;
-            chi_sum = 0.;
-            lmid = 0.5*(l2+l1);
-            for (int i=0; i<natoms; i++) {
-                if(mat[i] == -1) {
-                    chi_sum += 1;
-                    chi_next[0][i] = 2;
-                }
-                else {
-                    chi_next[0][i] = chi[i] * sqrt(-dchi[i]/lmid);
-                    if (chi_next[0][i] > chi[i] + move) chi_next[0][i] = chi[i] + move;
-                    if (chi_next[0][i] > 1.) chi_next[0][i] = 1.;
-                    if (chi_next[0][i] < chi[i] - move) chi_next[0][i] = chi[i] - move;
-                    if (chi_next[0][i] < 0) chi_next[0][i] = 0;
-                    chi_sum += chi_next[0][i];
-                    n_part_opt++;
-                }
-            }
-            if ((chi_sum - opt_par2*(double)n_part_opt) > 0) l1 = lmid;
-            else l2 = lmid;
-        }
-    }
+    sensitivity_update(dchi,chi,mat);
 
     if(key==0) {
         delete [] dchips;
@@ -280,24 +297,76 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
 
 
 // ---------------------------------------------------------------
+// return an updated chi vector based on current vector and a sensitivity vector
+void Update::sensitivity_update(const double* dchi, const double* chi, const int* mat)
+{
+    // Updating chi while respecting constraints on volume fraction and range
+    double l1 = 0.;
+    double l2 = 1.;
+    double lmid;
+    double move = opt_par1;
+    double vol_frac = opt_par2;
+    double chi_sum;
+    int n_part_opt;
+    while (l2-l1 > 1e-15){
+        n_part_opt = 0;
+        chi_sum = 0.;
+        lmid = 0.5*(l2+l1);
+        for (int i=0; i<natoms; i++) {
+            if(mat[i] == -1) {
+                // chi_sum += 1;
+                chi_next[i] = 2;
+            }
+            else {
+                chi_next[i] = chi[i] * sqrt(dchi[i]/lmid);
+                if (chi_next[i] > chi[i] + move) chi_next[i] = chi[i] + move;
+                if (chi_next[i] > 1.) chi_next[i] = 1.;
+                if (chi_next[i] < chi[i] - move) chi_next[i] = chi[i] - move;
+                if (chi_next[i] < 0) chi_next[i] = 0;
+                chi_sum += chi_next[i];
+                n_part_opt++;
+            }
+        }        
+        if ((chi_sum - vol_frac*(double)n_part_opt) > 0) l1 = lmid;
+        else l2 = lmid;
+    }
+}
+
+
+// ---------------------------------------------------------------
 // update chi population
 void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
 {
     natoms = (int)lammpsIO->lmp->atom->natoms;
+    chi_next = new double[natoms];
     //Direct towards user specified update method (some methods e.g genetic require only master, some require all subcomms)
     if(strcmp(opt_type.c_str(),"pertibation") == 0) {
         perturbation(chi_pop,mat_pop,opt_obj_eval);
     }
     if(me == MASTER){
-        if(strcmp(opt_type.c_str(),"genetic") == 0) {
-            genetic(chi_pop,mat_pop,opt_obj_eval,fitness);
+        if(strcmp(opt_type.c_str(),"gradient_descent") == 0) {
+            gradient_descent(chi_pop,mat_pop);
         }
-        else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
-            monte_carlo(chi_pop,mat_pop,opt_obj_eval);
+        // if(strcmp(opt_type.c_str(),"genetic") == 0) {
+        //     genetic(chi_pop,mat_pop,opt_obj_eval,fitness);
+        // }
+        // else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
+        //     monte_carlo(chi_pop,mat_pop,opt_obj_eval);
+        // }
+        
+        double chi_sum = 0;
+        int n_part_opt = 0;
+        for (int i=0; i<natoms; i++) {
+            // std::cout << chi_next[i] << "\n";
+            chi_pop[0][i] = chi_next[i];
+            if(mat_pop[0][i] != -1) {
+                chi_sum += chi_pop[0][i];
+                n_part_opt++;
+            }
         }
-        chi_pop = chi_next;
-        mat_pop = mat_next;
+        optimize->vol_frac = chi_sum/n_part_opt;
     }
+    delete [] chi_next;
     MPI_Barrier(MPI_COMM_WORLD);
 }
 

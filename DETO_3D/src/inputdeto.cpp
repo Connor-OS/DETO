@@ -308,6 +308,10 @@ void Inputdeto::execline(string read_string)
             getline(lss, read_in);
             sims->add_objective(read_in);
         }
+        else if (strcmp(word.c_str(), "add_sensitivity") == 0) {
+            getline(lss, read_in);
+            sims->add_sensitivity(read_in);
+        }
         else if (strcmp(word.c_str(), "add_constraint") == 0) {
             getline(lss, read_in);
             optimize->add_constraint(read_in);
@@ -350,8 +354,13 @@ void Inputdeto::execline(string read_string)
             }
         }
         else if (strcmp(word.c_str(), "write_restart") == 0) {
+            output->wrestart = true;
             lss >> read_in;
             output->restart_file = read_in;
+            int r_every;
+            while(lss >> r_every) {
+                output->restart_every = r_every;
+            }
         }
         else if (strcmp(word.c_str(), "thermo_style") == 0) {
             if(!optimize->pop_size) {

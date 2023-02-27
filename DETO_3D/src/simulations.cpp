@@ -157,6 +157,18 @@ void Simulations::add(string read_string)
         sim_obj_val[sim_obj_val.size()-1].push_back(vector<double>());
     }
 
+        // default containers for objectives - will be filled out by seperate add_objective command
+    sim_sens_names.push_back(vector<vector<string>>());
+    sim_sens_LMPnames.push_back(vector<vector<string>>()); // Should these be initialised here or right at the begining of this function?
+    sim_sens_val.push_back(vector<vector<double*>>());
+    for (int i=0;i<n_repeats[n_repeats.size()-1];i++) 
+    {  
+        sim_sens_names[sim_obj_names.size()-1].push_back(vector<string>());
+        sim_sens_LMPnames[sim_obj_LMPnames.size()-1].push_back(vector<string>());
+        sim_sens_val[sim_obj_val.size()-1].push_back(vector<double*>());
+    }
+
+
     //default container for attributes - will be filled out by seperate add_attribute command
     sim_attributes.push_back(vector<string>());
 
@@ -201,6 +213,25 @@ void Simulations::add_objective(string read_string)
                 sim_obj_names[i][j].push_back(obj_name);
                 sim_obj_LMPnames[i][j].push_back(obj_LMPname);
                 sim_obj_val[i][j].push_back(0.);
+            }
+            return;
+        }
+    }
+    err_msg = "ERROR: objective assigned to unspecified simulation";
+    error->errsimple(err_msg);
+}
+
+void Simulations::add_sensitivity(string read_string)
+{
+    string sim_ID, sens_name, sens_LMPname;
+    std::istringstream lss(read_string);
+    lss >> sim_ID >> sens_name >> sens_LMPname;
+    for(int i = 0; i < sim_names.size(); i++){
+        if(strcmp(sim_ID.c_str(),sim_names[i].c_str()) == 0){
+            for (int j=0; j<n_repeats[i]; j++){
+                sim_sens_names[i][j].push_back(sens_name);
+                sim_sens_LMPnames[i][j].push_back(sens_LMPname);
+                sim_sens_val[i][j].push_back(NULL); //this needs to be a array of size natoms but for now NULL
             }
             return;
         }
@@ -296,6 +327,9 @@ void Simulations::run()
             }
             for(int k=0; k<sim_obj_names[i][j].size(); k++) {
                 sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);            
+            }
+            for(int k=0; k<sim_sens_names[i][j].size(); k++) {
+                sim_sens_val[i][j][k] = (double *)lammpsIO->extract_atom_varaiable(sim_sens_LMPnames[i][j][k]);     
             }
         }
     }

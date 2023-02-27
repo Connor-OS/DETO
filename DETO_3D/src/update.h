@@ -30,6 +30,8 @@ namespace DETO_NS {
 		void genetic(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 		void monte_carlo(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
 		void perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
+		void gradient_descent(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop);
+		void sensitivity_update(const double* dchi, const double* chi, const int* mat);
 		void update_chipop(vector<vector<double>>& chi_pop,vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 
         void printall();
@@ -51,7 +53,7 @@ namespace DETO_NS {
         //if "sensitivity" then par1 = move limit
 		const vector<vector<double>> chi_pop;
         // const double* opt_obj_eval;
-		vector<vector<double>> chi_next; // vector containing the next chi_pop
+		double* chi_next; // vector containing the next chi_pop
 		vector<vector<int>> mat_next; // vector containing the next mat_pop
 
 		vector<double> chi;

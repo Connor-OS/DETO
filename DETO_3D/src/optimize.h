@@ -30,6 +30,7 @@ namespace DETO_NS {
         void optrun();
         void printall();
         double evaluate_objective();
+        double evaluate_sensitivity();
 
         vector<string> potentials; // vector containing all information regarding the potentials available for the optimization
         int pop_size; // size of population of solutions
@@ -78,6 +79,7 @@ namespace DETO_NS {
         double** thermo_val; // Values extracted for thermo of each member at each itteration
         double ** chi_popps;   // holds chi values per subcomm
         int ** mat_popps;  //holds material index per subcomm
+        double vol_frac;
 
 
 	private:

@@ -19,6 +19,7 @@ Output::Output(DETO *deto) : Pointers(deto)
     
     // th_every = 0;
     wrestart = false;
+    restart_every = 1;
      
 
 
@@ -127,7 +128,7 @@ void Output::writerestart(int step)
 {
     if(wrestart == true) {
         if(universe->color == 0) {
-            lammpsIO->lammpsdo("write_data " + restart_file + std::to_string(step) + " nocoeff");
+            lammpsIO->lammpsdo("write_data " + restart_file + " nocoeff");
         }
     }
 }
@@ -162,12 +163,12 @@ void Output::writethermo(int step, double* objective_eval, int* fitness)
     thermo << std::endl;
 
 
-    fprintf(screen,"best\tmean\tworst");
+    fprintf(screen,"Obj\tVol_frac");
     for(int i=0; i<optimize->thermo_string.size(); i++) {
         fprintf(screen,"\t%s",optimize->thermo_string[i].c_str());
     }
     fprintf(screen,"\n");
-    fprintf(screen,"%.3f\t%.3f\t%.3f",objective_eval[fitness[0]],mean,objective_eval[fitness[optimize->pop_size-1]]);
+    fprintf(screen,"%.3f %.2f",objective_eval[fitness[0]],optimize->vol_frac);
     for(int i=0; i<optimize->thermo_string.size(); i++) {
         fprintf(screen,"\t%.3f",optimize->thermo_val[fitness[0]][i]);
     }

@@ -62,6 +62,7 @@ namespace DETO_NS {
         void read_repeat(std::string);
 
         void run();
+        void run_one(int sim);
         
 	private:
         std::string err_msg, read_string, word, read_string2;

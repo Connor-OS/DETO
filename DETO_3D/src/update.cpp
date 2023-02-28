@@ -30,18 +30,29 @@ Update::~Update()
 void Update::set_opt_type(std::string read_string)
 {
     /// Warning pop_size growth not supported
+    //reduced functionality to deal with multi sims of differnet styles i.e opt_type vector
+    // lost some flexability in the design here
+    //TODO: redesign how opt_type is handled
     std::istringstream lss(read_string);
-    lss >> opt_type;
-    string keyword;
-    if(strcmp(opt_type.c_str(),"pertibation") == 0) {
-        pop_size = 1;
-        lss >> opt_par1 >> opt_par2;
-        //opt_par1 = move_limit
-    }
-    else if(strcmp(opt_type.c_str(),"gradient_descent") == 0) {
-        pop_size = 1;
-        lss >> opt_par1 >> opt_par2;
-    }
+    lss >> opt_par1 >> opt_par2;
+    string read_in;
+    while(lss >> read_in)
+        opt_type.push_back(read_in);
+    pop_size = 1;
+
+
+
+    // string keyword;
+    // if(strcmp(opt_type.c_str(),"pertibation") == 0) {
+    //     pop_size = 1;
+    //     lss >> opt_par1 >> opt_par2;
+    //     //opt_par1 = move_limit
+    // }
+    // else if(strcmp(opt_type.c_str(),"gradient_descent") == 0) {
+    //     pop_size = 1;
+    //     lss >> opt_par1 >> opt_par2;
+    // }
+    
     // else if(strcmp(opt_type.c_str(),"genetic") == 0) {
     //     gen_elitism = 0;
     //     lss >> pop_size >> opt_par1 >> opt_par2 >> opt_par3;
@@ -59,14 +70,14 @@ void Update::set_opt_type(std::string read_string)
     // else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
     //     lss >> pop_size >> opt_par1 >> opt_par2;
     // }
-    else {
-        err_msg = "ERROR: opt_type\"" + opt_type + "\" not recognised";
-        error->errsimple(err_msg);
-    }
+    // else {
+    //     err_msg = "ERROR: opt_type\"" + opt_type + "\" not recognised";
+    //     error->errsimple(err_msg);
+    // }
     optimize->pop_size = pop_size;
     if(me == MASTER) {
         fprintf(screen,"\noptimization paramaters\n");
-        fprintf(screen,"opt_type: %s\npop_size: %d\n",opt_type.c_str(),pop_size);
+        for(int i=0; i<opt_type.size(); i++) fprintf(screen,"opt_type: %s\npop_size: %d\n",opt_type[i].c_str(),pop_size);
     }
 }
 
@@ -154,26 +165,24 @@ void Update::monte_carlo(const std::vector<std::vector<double>>& chi_pop,const s
 
 // ---------------------------------------------------------------
 // monte-carlo algorythm for update
-void Update::gradient_descent(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop)
+void Update::gradient_descent(const double* chi,const int* mat, vector<double>& dchi, int sim)
 {
     //then should update chi_pop based on this sensitivity directly
     //create next chi vector;
 
-    double* chi = optimize->chi_popps[0];
-    int* mat = optimize->mat_popps[0];
+
 
     //should extract the sensitivities directly from a variable assigned in lammps
     //naively combine all sensitivities linearly we should warn the user about this or ofer them options to use more complex formula
-    dchi = new double[natoms];
-    for(int i=0; i<sims->n_sims; i++) {
-        for(int j=0; j<sims->n_repeats[i]; j++) {
-            for(int k=0; k<sims->sim_sens_names[i][j].size(); k++) {
-                for (int l=0; l<natoms; l++) {
-                    dchi[l] += sims->sim_sens_val[i][j][k][l];
-                }
-            }
-        }
+
+
+    for (int i=0; i<natoms; i++) {
+        dchi[i] = sims->sim_sens_val[sim][0][0][i];
+        // std::cout << dchi[i] << std::endl;
     }
+    
+    
+    
     //normalise sensitivity between 0-1
     double min = 100;
     double max = 0;
@@ -183,19 +192,17 @@ void Update::gradient_descent(const std::vector<std::vector<double>>& chi_pop,co
             if(dchi[i] > max) max = dchi[i];
         }
     }
-    std::cout << "max " << max << " min " << min << "\n";
+    // std::cout << "max " << max << " min " << min << "\n";
     double dchi_max = 0; double dchi_min = 1;
     for (int i=0; i<natoms; i++) {
         dchi[i] = (dchi[i]-min)/(max-min);
         if(mat[i]!=-1 && dchi[i] > dchi_max) dchi_max = dchi[i];
         if(mat[i]!=-1 && dchi[i] < dchi_min) dchi_min = dchi[i];
     }
-    // for (int i=0; i<natoms; i++) std::cout << dchi[i] << "\n";
-    std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
+    // std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
     
-    sensitivity_update(dchi,chi,mat);
+    // sensitivity_update(dchi,chi,mat);
 
-    delete[] dchi;
 
     
 
@@ -208,7 +215,7 @@ void Update::gradient_descent(const std::vector<std::vector<double>>& chi_pop,co
 
 // ---------------------------------------------------------------
 // update using the pertibation method
-void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval)
+void Update::perturbation(const double* chi,const int* mat,const double* opt_obj_eval,vector<double>& dchi, int sim)
 {   
     key = universe->key;
     double obj_eval;
@@ -221,11 +228,8 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
             if(universe->color == i) MPI_Recv(&obj_eval, 1, MPI_DOUBLE, MASTER, i, MPI_COMM_WORLD, &status);
         }
     }
-    
     vector<int> pert_sizeps;
     vector<int> pert_sizeps_cum;
-    double* chi = optimize->chi_popps[0];
-    int* mat = optimize->mat_popps[0];
 
     pert_sizeps.clear();
     pert_sizeps_cum.clear();
@@ -236,8 +240,9 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
 
     if(key==0) {
         dchips = new double[pert_sizeps[universe->color]];
-        if(me==MASTER) dchi = new double[natoms];
+        if(me==MASTER) dchi_ = new double[natoms];
     }
+
 
     // perturbation loop
     for(int i=0; i<pert_sizeps[universe->color]; i++) {
@@ -256,8 +261,9 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
             for(int i=0; i<optimize->potentials.size(); i++) {
                 lammpsIO->lammpsdo(optimize->potentials[i].c_str());
             }
-            sims->run();
-            if(key == 0) dchips[i] = -std::max(((obj_eval - optimize->evaluate_objective())/0.05),0.0); //brDchi needs to be repalced with dist to nearest chi
+            sims->run_one(sim);
+            // if(key == 0) dchips[i] = std::max(((obj_eval - optimize->evaluate_objective())/0.05),0.0); //brDchi needs to be repalced with dist to nearest chi
+            if(key == 0) dchips[i] = (obj_eval - optimize->evaluate_objective())/0.05; //brDchi needs to be repalced with dist to nearest chi
         } 
         else {
             std::string set_type = "set atom " + std::to_string(optimize->IDuns[pert_ID]) + " type " + std::to_string(optimize->chi_map.types[mat[pert_ID]][index-1]);
@@ -266,10 +272,9 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
             for(int i=0; i<optimize->potentials.size(); i++) {
                 lammpsIO->lammpsdo(optimize->potentials[i].c_str());
             }
-            sims->run();
-            if(key == 0) dchips[i] = -std::max(((optimize->evaluate_objective() - obj_eval)/0.05),0.0); //brDchi needs to be repalced with dist to nearest chi
+            sims->run_one(sim);
+            if(key == 0) dchips[i] = (obj_eval - optimize->evaluate_objective())/0.05; //brDchi needs to be repalced with dist to nearest chi        }
         }
-
         if(me==universe->nsc) {
             fprintf(screen,"Completed: %d/%d perturbations\n",(i+1)*universe->nsc,natoms);
             fprintf(screen,"\x1b[A");
@@ -290,18 +295,38 @@ void Update::perturbation(const vector<vector<double>>& chi_pop,const vector<vec
         }
     }
 
-    sensitivity_update(dchi,chi,mat);
+    
+    if(me == MASTER) {
+        double min = 100;
+        double max = -100;
+        for (int i=0; i<natoms; i++) {
+            if(mat[i]!=-1) {
+                if(dchi[i] < min) min = dchi[i];
+                if(dchi[i] > max) max = dchi[i];
+            }
+        }
+        // std::cout << "max " << max << " min " << min << "\n";
+        double dchi_max = 0; double dchi_min = 1;
+        for (int i=0; i<natoms; i++) {
+            dchi[i] = (dchi[i]-min)/(max-min);
+            if(mat[i]!=-1 && dchi[i] > dchi_max) dchi_max = dchi[i];
+            if(mat[i]!=-1 && dchi[i] < dchi_min) dchi_min = dchi[i];
+        }
+        // std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
+    }
+    // sensitivity_update(dchi,chi,mat);
+    // if(me == MASTER) for(int i=0; i<natoms; i++) std::cout << dchi[i] << std::endl;
 
     if(key==0) {
         delete [] dchips;
-        if(me==MASTER) delete[] dchi;
+        if(me==MASTER) delete[] dchi_;
     }
 }
 
 
 // ---------------------------------------------------------------
 // return an updated chi vector based on current vector and a sensitivity vector
-void Update::sensitivity_update(const double* dchi, const double* chi, const int* mat)
+void Update::sensitivity_update(const vector<double> dchi, const double* chi, const int* mat)
 {
     // Updating chi while respecting constraints on volume fraction and range
     double l1 = 0.;
@@ -333,14 +358,6 @@ void Update::sensitivity_update(const double* dchi, const double* chi, const int
         if ((chi_sum - vol_frac*(double)n_part_opt) > 0) l1 = lmid;
         else l2 = lmid;
     }
-    output->toplog("\n------------------\nnew dchi , chi, mat\n-------------------\n\n");
-    for (int i=0; i<natoms; i++) {
-        string logmsg = "";
-        std::ostringstream ss;
-        ss << dchi[i] << " " << chi_next[i] << " " << mat[i]; 
-        logmsg = logmsg+ss.str(); ss.str(""); ss.clear();
-        output->toplog(logmsg);
-    }
 
 }
 
@@ -351,25 +368,51 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
 {
     natoms = (int)lammpsIO->lmp->atom->natoms;
     chi_next = new double[natoms];
-    //Direct towards user specified update method (some methods e.g genetic require only master, some require all subcomms)
-    if(strcmp(opt_type.c_str(),"pertibation") == 0) {
-        perturbation(chi_pop,mat_pop,opt_obj_eval);
-    }
-    if(me == MASTER){
-        if(strcmp(opt_type.c_str(),"gradient_descent") == 0) {
-            gradient_descent(chi_pop,mat_pop);
+    // dchi = new double[natoms];
+
+    double* chi = optimize->chi_popps[0];
+    int* mat = optimize->mat_popps[0];
+
+    //initlaise an sensitivity vector of zeros for each sim
+    vector<vector<double>> dchi = vector<vector<double>>();
+    for(int i=0; i<sims->n_sims; i++) dchi.push_back(vector<double>(natoms, 0.0));
+    // for(int i=0; i<sims->n_sims; i++) {
+    //     for(int j=0; i<natoms; j++) std::cout << dchi[i][j] << std::endl;
+    // }
+
+
+    for(int sim=0; sim<opt_type.size(); sim++) {
+        //Direct towards user specified update method (some methods e.g genetic require only master, some require all subcomms)
+        if(strcmp(opt_type[sim].c_str(),"pertibation") == 0) {
+            perturbation(chi,mat,opt_obj_eval,dchi[sim],sim); //needs to return a sensitivity
         }
-        // if(strcmp(opt_type.c_str(),"genetic") == 0) {
-        //     genetic(chi_pop,mat_pop,opt_obj_eval,fitness);
-        // }
-        // else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
-        //     monte_carlo(chi_pop,mat_pop,opt_obj_eval);
-        // }
-        
+        if(me == MASTER){
+            if(strcmp(opt_type[sim].c_str(),"gradient_descent") == 0) {
+                gradient_descent(chi,mat,dchi[sim],sim); //needs to return a sensitivity
+            }
+            // if(strcmp(opt_type.c_str(),"genetic") == 0) {
+            //     genetic(chi_pop,mat_pop,opt_obj_eval,fitness);
+            // }
+            // else if(strcmp(opt_type.c_str(),"monte-carlo") == 0) {
+            //     monte_carlo(chi_pop,mat_pop,opt_obj_eval);
+            // }
+        }
+    }
+
+    if(me == MASTER) {
+        vector<double> dchi_total = vector<double>(natoms, 0);
+        for(int i=0; i<natoms; i++) {
+            for(int j=0; j<dchi.size(); j++) {
+                dchi_total[i] += dchi[j][i]/dchi.size();
+                // std::cout << dchi[j][i] << " ";
+            }
+            // std::cout << dchi_total[i] << std::endl;
+        } 
+        sensitivity_update(dchi_total,chi,mat);
+
         double chi_sum = 0;
         int n_part_opt = 0;
         for (int i=0; i<natoms; i++) {
-            // std::cout << chi_next[i] << "\n";
             chi_pop[0][i] = chi_next[i];
             if(mat_pop[0][i] != -1) {
                 chi_sum += chi_pop[0][i];
@@ -378,6 +421,8 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
         }
         optimize->vol_frac = chi_sum/n_part_opt;
     }
+
+    // delete [] dchi;
     delete [] chi_next;
     MPI_Barrier(MPI_COMM_WORLD);
 }

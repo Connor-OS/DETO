@@ -29,9 +29,9 @@ namespace DETO_NS {
 
 		void genetic(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 		void monte_carlo(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
-		void perturbation(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop,const double* opt_obj_eval);
-		void gradient_descent(const vector<vector<double>>& chi_pop,const vector<vector<int>>& mat_pop);
-		void sensitivity_update(const double* dchi, const double* chi, const int* mat);
+		void perturbation(const double* chi,const int* mat,const double* opt_obj_eval,vector<double>& dchi,int sim);
+		void gradient_descent(const double* chi,const int* mat,vector<double>& dchi, int sim);
+		void sensitivity_update(const vector<double> dchi, const double* chi, const int* mat);
 		void update_chipop(vector<vector<double>>& chi_pop,vector<vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness);
 
         void printall();
@@ -44,7 +44,7 @@ namespace DETO_NS {
 		int natoms;
 
 		//Optimisation variables
-        string opt_type; //the type of optimization to be run. i.e genetic, sensitivity etc..
+        vector<string> opt_type; //the type of optimization to be run. i.e genetic, sensitivity etc..
         string opt_style; //the style for the optimisation type to be run. i.e genetic style = tornement or roulette 
 		int pop_size; // size of population of solutions
         double opt_par1, opt_par2, opt_par3; //paramaters specifict to optimisation types
@@ -62,7 +62,7 @@ namespace DETO_NS {
 		MPI_Status status;
 
 		double* dchips;
-		double* dchi;
+		double* dchi_;
 
 		double* update_obj_evalps;
 		double* update_obj_eval;

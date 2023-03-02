@@ -99,8 +99,19 @@ double LammpsIO::extract_natoms()
 // Extract per atom variable of atoms in simulation
 void* LammpsIO::extract_atom_varaiable(string toextract)
 {   
-    void* atom_properties = lammps_extract_atom(lmp,toextract.c_str());
-    return atom_properties;
+    // std::cout << "trying sens" << std::endl;
+    // double* atom_properties;// = new double[optimize->natoms];
+
+    // void *atom_properties;
+    // // atom_properties = malloc(natoms*2*tagintsize);
+
+
+
+    // char* c = &toextract[0];
+    // lammps_gather(lmp,c,1,1,atom_properties);
+    // if(me == MASTER) for(int i=0; i <optimize->natoms; i++) std::cout << atom_properties[i] << std::endl;
+    // // lammps_gather_atoms
+    // return atom_properties;
 }
 
 
@@ -155,8 +166,10 @@ void LammpsIO::set_type(int id,int type)
 
 // ---------------------------------------------------------------
 // Extract per atom variable of atoms in simulation
-void* LammpsIO::gather_atom_varaiable(char * toextract)
+void* LammpsIO::gather_atom_varaiable(string toextract)
 {   
+     char* c = &toextract[0];
+
     int64_t natoms;
     int tagintsize = lammps_extract_setting(lmp, "tagint");
     if (tagintsize == 4)
@@ -165,7 +178,7 @@ void* LammpsIO::gather_atom_varaiable(char * toextract)
         natoms = *(int64_t *)lammps_extract_global(lmp, "natoms");
     void *atom_properties;
     atom_properties = malloc(natoms*2*tagintsize);
-    lammps_gather_concat(lmp,toextract,1,1, atom_properties);
+    lammps_gather(lmp,c,1,1, atom_properties);
 
     void * properties = atom_properties;
     // free(atom_properties);

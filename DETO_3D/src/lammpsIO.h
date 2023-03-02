@@ -34,7 +34,7 @@ namespace DETO_NS {
         void* extract_atom_varaiable(string);  // spelling error
         void* extract_varaiable(string);
         int extract_setting(string);
-        void* gather_atom_varaiable(char *);
+        void* gather_atom_varaiable(string);
         void print_bonds();
         void set_type(int,int);
         

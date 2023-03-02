@@ -321,7 +321,6 @@ void Simulations::read_repeat(string repeatfname)
 // Run simulation of given sim_id
 void Simulations::run()
 {
-
     for(int i=0; i<sim_attributes.size(); i++) {
         for(int j=0; j<n_repeats[i]; j++) {
             for(int k=0; k<sim_attributes[i].size(); k++) { //TODO: add while loop for cstgs and for loop for repeat
@@ -331,7 +330,7 @@ void Simulations::run()
                 sim_obj_val[i][j][k] = *(double *)lammpsIO->extract_varaiable(sim_obj_LMPnames[i][j][k]);            
             }
             for(int k=0; k<sim_sens_names[i][j].size(); k++) {
-                sim_sens_val[i][j][k] = (double *)lammpsIO->extract_atom_varaiable(sim_sens_LMPnames[i][j][k]);
+                sim_sens_val[i][j][k] = (double *)lammpsIO->gather_atom_varaiable(sim_sens_LMPnames[i][j][k]);
             }
         }
     }

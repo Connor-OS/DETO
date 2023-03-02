@@ -240,7 +240,6 @@ void Update::perturbation(const double* chi,const int* mat,const double* opt_obj
 
     if(key==0) {
         dchips = new double[pert_sizeps[universe->color]];
-        if(me==MASTER) dchi_ = new double[natoms];
     }
 
 
@@ -277,7 +276,7 @@ void Update::perturbation(const double* chi,const int* mat,const double* opt_obj
         }
         if(me==universe->nsc) {
             fprintf(screen,"Completed: %d/%d perturbations\n",(i+1)*universe->nsc,natoms);
-            fprintf(screen,"\x1b[A");
+            // fprintf(screen,"\x1b[A");
         }
     }
     optimize->load_chi(0); // load inital config after perterbations complete
@@ -319,7 +318,6 @@ void Update::perturbation(const double* chi,const int* mat,const double* opt_obj
 
     if(key==0) {
         delete [] dchips;
-        if(me==MASTER) delete[] dchi_;
     }
 }
 

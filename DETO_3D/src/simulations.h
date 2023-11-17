@@ -67,11 +67,6 @@ namespace DETO_NS {
 	private:
         std::string err_msg, read_string, word, read_string2;
         
-        
-        //void check_name_unique(std::string);
-
-		//std::string fname;              // open inputcprs file
-        //int me;     // id of the current processor (rank)
 		
 	};
 	

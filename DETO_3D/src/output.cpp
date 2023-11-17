@@ -20,11 +20,7 @@ Output::Output(DETO *deto) : Pointers(deto)
     // th_every = 0;
     wrestart = false;
     restart_every = 1;
-     
-
-
 }
-
 
 
 // ---------------------------------------------------------------
@@ -42,7 +38,6 @@ void Output::createplog(string fname)
     plog = fopen (fname.c_str(),"w");
     fclose(plog);
     toplog("BEGINNING OF PROCESSOR SPECIFIC LOG");
-    
 }
 
 

@@ -8,14 +8,6 @@
 #include "simulations.h"
 #include "update.h"
 
-/*
-#ifdef MASKE_WITH_NUFEB
-#include "fix_nufeb.h"
-#endif
-#ifdef MASKE_WITH_SPECIATION
-#include "spec.h"
-#endif
- */
 
 using namespace DETO_NS;
 
@@ -46,18 +38,6 @@ DETO::DETO(int narg, char **arg)
     MPI_Barrier(MPI_COMM_WORLD);
     
     
-    /*
-    step = 0;
-    tempo = 0;
-    doublestep = (double)step;
-    kB = 1.;
-    hpl = 1.;
-    
-    Rtypes.clear();
-    Ttypes.clear();
-	
-	memory = new Memory(this);
-    */
     error = new Error(this);
     inputdeto = new Inputdeto(this,narg,arg);
     universe = new Universe(this);
@@ -66,26 +46,6 @@ DETO::DETO(int narg, char **arg)
     optimize = new Optimize(this);
     sims = new Simulations(this);
     update = new Update(this);
-     /*
-    
-    chem = new Chemistry(this);
-    solution = new Solution(this);
-    fix = new Fix(this);
-    fix_del = new Fix_delete(this);
-#ifdef MASKE_WITH_NUFEB
-    fix_nufeb = new Fix_nufeb(this);
-#endif
-    krun = new Krun(this);
-    randm = new Randm(this);
-    fix_cfoo = new Fix_Cfoo(this);
-    relax = new Relax(this);
-    setconc = new Setconc(this);
-#ifdef MASKE_WITH_SPECIATION
-    spec = new Spec(this);
-#endif
-    fix_nucl = new Fix_nucleate(this);
-    store = new Store(this);
-     */
 }
 
 // ---------------------------------------------------------------

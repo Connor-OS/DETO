@@ -12,8 +12,6 @@ Error::Error(DETO *deto) : Pointers(deto)
 }
 
 
-
-
 // ---------------------------------------------------------------
 // Class destructor
 Error::~Error()
@@ -22,15 +20,10 @@ Error::~Error()
 }
 
 
-
-
 // ---------------------------------------------------------------
 // This produces a simple error taking care of turning off all the parallel processes
 void Error::errsimple(string msg)
 {
-   // fprintf(screen,"\nOK here\n");
-   //     fflush(screen);
-    
     if (me==MASTER) fprintf(screen,"\n---------------------------------------------------------------\n");
     if (me==MASTER) fprintf(screen,"%s",msg.c_str());
     if (me==MASTER) fprintf(screen,"\n---------------------------------------------------------------\n");

@@ -28,9 +28,7 @@ Universe::Universe(DETO *deto) : Pointers(deto)
 // Class destructor
 Universe::~Universe()
 {
-    /*
-     delete [] color_each;
-     */
+
 }
 
 

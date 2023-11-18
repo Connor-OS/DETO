@@ -7,6 +7,10 @@
 #include "error.h"
 #include "output.h"
 #include <memory>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
 
 
 using namespace DETO_NS;
@@ -32,15 +36,12 @@ void Update::set_opt_type(std::string read_string)
     /// Warning pop_size growth not supported
     //reduced functionality to deal with multi sims of differnet styles i.e opt_type vector
     // lost some flexability in the design here
-    //TODO: redesign how opt_type is handled
     std::istringstream lss(read_string);
     lss >> opt_par1 >> opt_par2;
     string read_in;
     while(lss >> read_in)
         opt_type.push_back(read_in);
     pop_size = 1;
-
-
 
     // string keyword;
     // if(strcmp(opt_type.c_str(),"pertibation") == 0) {
@@ -82,107 +83,80 @@ void Update::set_opt_type(std::string read_string)
 }
 
 
-// // ---------------------------------------------------------------
-// // genetic algorythm for update
-// void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
-// {
-//     fprintf(screen,"\n");
-//     chi_next.clear();
-//     mat_next.clear();
-//     //Selection
-//     int selection_size = pop_size-gen_elitism;
-//     std::vector<int> selection;
-//     selection.clear();
-//     int best;   
-//     for(int i=0; i<selection_size; i++) {
-//         best = rand() % pop_size;
-//         for(int j=0; j<opt_par1-1; j++) {
-//             int eval = rand() % pop_size;
-//             if(opt_obj_eval[eval] < opt_obj_eval[best]) {
-//                 best = eval;
-//             }
-//         }
-//         chi_next.push_back(chi_pop[best]);
-//         mat_next.push_back(mat_pop[best]);
-//     }
-//     //Crossover
-//     for(int i=0; i<selection_size; i+=2) {
-//         int j = i+1;
-//         double temp = 0;
-//         int tempint = 0;
-//         // attempt to crossover at each gene individually
-//         double cross_chance = ((double) rand() / (RAND_MAX));
-//         if(cross_chance < opt_par2) {
-//             for(int k=0; k<natoms; k++) {
-//                 if(rand()%2 == 1) {
-//                     temp = chi_next[i][k];
-//                     chi_next[i][k] = chi_next[j][k];
-//                     chi_next[j][k] = temp;
-//                     tempint = mat_next[i][k];
-//                     mat_next[i][k] = mat_next[j][k];
-//                     mat_next[j][k] = tempint;
-//                 }
-//             }
-//         }
-//     }
-//     //Mutation
-//     for(int i=0; i<selection_size; i++) {
-//         for(int j=0; j<natoms; j++) {
-//             if(mat_pop[i][j] != -1) {
-//                 double mutation_chance = ((double) rand() / (RAND_MAX));
-//                 if(mutation_chance < opt_par3) {
-//                     int mat_mut = (int)(rand() %optimize->nmat);
-//                     int chi_mut = (int)(rand() %optimize->chi_map.nchi[mat_mut]);
-//                     mat_next[i][j] = mat_mut;
-//                     chi_next[i][j] = optimize->chi_map.chis[mat_mut][chi_mut];
-//                 }
-//             }
-//         }
-//     }
-//     //add the elite solutions back in
-//     for(int i=0; i<gen_elitism; i++) {
-//         chi_next.push_back(chi_pop[fitness[i]]);
-//         mat_next.push_back(mat_pop[fitness[i]]);
-//     }
-// }
+// ---------------------------------------------------------------
+// genetic algorythm for update
+void Update::genetic(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval, const int* fitness)
+{
+// Not Implemented
+}
 
 
 // ---------------------------------------------------------------
 // monte-carlo algorythm for update
 void Update::monte_carlo(const std::vector<std::vector<double>>& chi_pop,const std::vector<std::vector<int>>& mat_pop,const double* opt_obj_eval)
 {
-    // double best_eval = opt_objective_eval[0];
-    //     int best = 0;
-    //     for(int i=0; i<optimize->pop_sizeps[0]; i++) {
-    //         if(opt_objective_eval[i] < best_eval) {
-    //             best = i;
-    //             best_eval = opt_objective_eval[best];
-    //         }
-    //     }
-    //     fprintf(screen,"\nBest choice is: %d value: %f\n",best, opt_objective_eval[best]);
-    //     optimize->chi = optimize->chi_pop[best];
+// Not Implemented
 }
+
 
 // ---------------------------------------------------------------
 // monte-carlo algorythm for update
-void Update::gradient_descent(const double* chi,const int* mat, vector<double>& dchi, int sim)
+void Update::gradient_descent(const double* chi,const int* mat, vector<double>& dchi)
 {
-    //then should update chi_pop based on this sensitivity directly
-    //create next chi vector;
 
+    LAMMPS_NS::LAMMPS *lmptr;
+    lmptr = lammpsIO->lmp;
+    int natoms = dchi.size();
 
+    int tagintsize;
+    int64_t nbonds;
+    int* bonds;
+    double* atom_pos;
 
-    //should extract the sensitivities directly from a variable assigned in lammps
-    //naively combine all sensitivities linearly we should warn the user about this or ofer them options to use more complex formula
+    atom_pos = new double[3 * natoms];
+    lammps_gather_atoms(lmptr, "x", 1, 3, atom_pos);
 
+    tagintsize = lammps_extract_setting(lmptr, "tagint");
+    
+    if (tagintsize == 4)
+        nbonds = *(int32_t *)lammps_extract_global(lmptr, "nbonds");
+     else
+        nbonds = *(int64_t *)lammps_extract_global(lmptr, "nbonds");
+    bonds = new int[nbonds * 3];
+    lammps_gather_bonds(lmptr, bonds);
+    
+    for (int i=0; i<nbonds*3; i++) std::cout << bonds[i] << std::endl;
 
-    for (int i=0; i<natoms; i++) {
-        dchi[i] = sims->sim_sens_val[sim][0][0][i];
-        // std::cout << dchi[i] << std::endl;
+    // Compute bond length
+    std::vector<double> l(nbonds, 0.0);
+    for (size_t k = 0; k < nbonds; ++k) {
+        if (bonds[3 * k] == 0) {
+            l[k] = 1.0;
+        } else {
+            size_t i = bonds[3 * k + 1]  - 1;
+            size_t j = bonds[3 * k + 2]  - 1;
+            l[k] = std::sqrt(std::pow(atom_pos[3 * i] - atom_pos[3 * j], 2) +
+                             std::pow(atom_pos[3 * i + 1] - atom_pos[3 * j + 1], 2) +
+                             std::pow(atom_pos[3 * i + 2] - atom_pos[3 * j + 2], 2));
+        }
     }
-    
-    
-    
+
+    // Compute sensitivity
+    double k_0 = 100.0;
+    std::fill(dchi.begin(), dchi.end(), 0.0);
+
+    for (size_t k = 0; k < nbonds; ++k) {
+        size_t i = bonds[3 * k + 1] - 1;
+        size_t j = bonds[3 * k + 2] - 1;
+        dchi[i] += 0.5 * chi[i] * std::pow(chi[j], 2) * std::pow((1.0 - l[k]), 2);
+        dchi[j] += 0.5 * chi[j] * std::pow(chi[i], 2) * std::pow((1.0 - l[k]), 2);
+    }
+
+    filter_sensitivities(chi,dchi,bonds,nbonds);
+
+    delete[] bonds;
+    delete[] atom_pos;
+
     //normalise sensitivity between 0-1
     double min = 100;
     double max = 0;
@@ -192,24 +166,15 @@ void Update::gradient_descent(const double* chi,const int* mat, vector<double>& 
             if(dchi[i] > max) max = dchi[i];
         }
     }
-    // std::cout << "max " << max << " min " << min << "\n";
+
     double dchi_max = 0; double dchi_min = 1;
     for (int i=0; i<natoms; i++) {
         dchi[i] = (dchi[i]-min)/(max-min);
         if(mat[i]!=-1 && dchi[i] > dchi_max) dchi_max = dchi[i];
         if(mat[i]!=-1 && dchi[i] < dchi_min) dchi_min = dchi[i];
     }
-    // std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
-    
-    // sensitivity_update(dchi,chi,mat);
 
-
-    
-
-
-    // this should be easy okay :)
-
-
+    // for(int i=0; i< dchi.size(); i++) std::cout << dchi[i] << std::endl;
 }
 
 
@@ -313,11 +278,42 @@ void Update::perturbation(const double* chi,const int* mat,const double* opt_obj
         }
         // std::cout << "max_sens " << dchi_max << " min_sens " << dchi_min << "\n";
     }
-    // sensitivity_update(dchi,chi,mat);
-    // if(me == MASTER) for(int i=0; i<natoms; i++) std::cout << dchi[i] << std::endl;
 
     if(key==0) {
         delete [] dchips;
+    }
+}
+
+
+void Update::filter_sensitivities(const double* chi, vector<double>& dchi, const int* bonds, const int nbonds)
+{
+    // Simple filtering using bondlist as the neighbor list, assuming rmin = 1.5 and l = 1
+    //
+    double rmin = 1.5;
+    double l = 1.0;
+
+    std::vector<double> dchi_filt(dchi.size(), 0.0);
+    std::vector<double> tot(dchi.size(), rmin);
+
+    for (size_t i = 0; i < dchi.size(); ++i) {
+        dchi_filt[i] = dchi[i] * chi[i] * rmin;
+    }
+
+
+    for (size_t k = 0; k < nbonds; ++k) {
+        size_t i = bonds[3 * k + 1] - 1;
+        size_t j = bonds[3 * k + 2] - 1;
+        double fac = rmin - l;
+        tot[i] += fac;
+        tot[j] += fac;
+        dchi_filt[i] += dchi[j] * chi[j] * fac;
+        dchi_filt[j] += dchi[i] * chi[i] * fac;
+    }
+
+    // Calculate and store the final result
+    for (size_t i = 0; i < dchi.size(); ++i) {
+        std::cout << chi[i] << " " << tot[i] << " " << dchi[i] << " " << dchi_filt[i] << std::endl;
+        dchi[i] = dchi_filt[i] / (chi[i] * tot[i] + 0.001);
     }
 }
 
@@ -356,7 +352,6 @@ void Update::sensitivity_update(const vector<double> dchi, const double* chi, co
         if ((chi_sum - vol_frac*(double)n_part_opt) > 0) l1 = lmid;
         else l2 = lmid;
     }
-
 }
 
 
@@ -366,7 +361,6 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
 {
     natoms = (int)lammpsIO->lmp->atom->natoms;
     chi_next = new double[natoms];
-    // dchi = new double[natoms];
 
     double* chi = optimize->chi_popps[0];
     int* mat = optimize->mat_popps[0];
@@ -374,19 +368,16 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
     //initlaise an sensitivity vector of zeros for each sim
     vector<vector<double>> dchi = vector<vector<double>>();
     for(int i=0; i<sims->n_sims; i++) dchi.push_back(vector<double>(natoms, 0.0));
-    // for(int i=0; i<sims->n_sims; i++) {
-    //     for(int j=0; i<natoms; j++) std::cout << dchi[i][j] << std::endl;
-    // }
-
 
     for(int sim=0; sim<opt_type.size(); sim++) {
+        // select method of computing sensitivity
         //Direct towards user specified update method (some methods e.g genetic require only master, some require all subcomms)
         if(strcmp(opt_type[sim].c_str(),"pertibation") == 0) {
-            perturbation(chi,mat,opt_obj_eval,dchi[sim],sim); //needs to return a sensitivity
+            perturbation(chi,mat,opt_obj_eval,dchi[sim],sim);
         }
         if(me == MASTER){
             if(strcmp(opt_type[sim].c_str(),"gradient_descent") == 0) {
-                gradient_descent(chi,mat,dchi[sim],sim); //needs to return a sensitivity
+                gradient_descent(chi,mat,dchi[sim]);
             }
             // if(strcmp(opt_type.c_str(),"genetic") == 0) {
             //     genetic(chi_pop,mat_pop,opt_obj_eval,fitness);
@@ -398,6 +389,7 @@ void Update::update_chipop(vector<vector<double>>& chi_pop, vector<vector<int>>&
     }
 
     if(me == MASTER) {
+        // average all sensitivity vectors
         vector<double> dchi_total = vector<double>(natoms, 0);
         for(int i=0; i<natoms; i++) {
             for(int j=0; j<dchi.size(); j++) {

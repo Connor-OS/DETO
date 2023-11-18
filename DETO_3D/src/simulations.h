@@ -35,17 +35,16 @@ namespace DETO_NS {
         int n_sims; //number of simulations defined in the input script
         std::vector<int> n_repeats; //number of repeats
         std::vector<std::string> sim_repeat_file; //vector holding path to repeat file data
-
         
         std::vector<std::vector<std::string>> sim_attributes; //vector sim attributes
         
         std::vector<std::vector<std::vector<std::string>>> sim_obj_names; // Unique ID of each objective
         std::vector<std::vector<std::vector<std::string>>> sim_obj_LMPnames; // LAMMPS varaible names linked to objective
-        std::vector<std::vector<std::vector<double>>> sim_obj_val; //one list of objectives names and values for each simulation in a repat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of objectives names and value for that simulation)
+        std::vector<std::vector<std::vector<double>>> sim_obj_val; //one list of objectives values for each simulation in a repeat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of objectives names and value for that simulation)
 
         std::vector<std::vector<std::vector<std::string>>> sim_sens_names; // Unique ID of each sensitivity
         std::vector<std::vector<std::vector<std::string>>> sim_sens_LMPnames; // LAMMPS varaible names linked to sensitivity
-        std::vector<std::vector<std::vector<double*>>> sim_sens_val; //one list of sensitivity names and values for each simulation in a repat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of sensitivity names and value for that simulation)
+        std::vector<std::vector<std::vector<double*>>> sim_sens_val; //one list of sensitivity values for each simulation in a repeat for each user-defined simulation in the input file  (NB: if repeat = no, then the second-level vectors will simply have only one entry, which is a vector of sensitivity names and value for that simulation)
 
         std::vector<std::vector<std::string>> sim_rep_vars;      // vector of lammps-like variables in repeat file: one vector for each simulation
         std::vector<std::vector<std::vector<double>>> sim_rep_val;  // vector of values for each variable in repeat file, one for each simulation
@@ -66,8 +65,7 @@ namespace DETO_NS {
         
 	private:
         std::string err_msg, read_string, word, read_string2;
-        
-		
+        	
 	};
 	
 }

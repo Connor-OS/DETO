@@ -37,6 +37,8 @@ namespace DETO_NS {
         void* gather_atom_varaiable(string);
         void print_bonds();
         void set_type(int,int);
+        // std::unique_ptr<int[]> extract_bonds();
+        void extract_bonds(int* & bonds);
         
         string lmpThSt;    // string recording the themo style from input: used to add and evaluate tem computes when needed in source code of lammps
         

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="canonical" href="https://DETO.com/4_examples/4.1.1_Adding_a_LAMMPS_script/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>4.1.1 Adding a LAMMPS script - DETO_3D</title>
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "4.1.1 Adding a LAMMPS script";
+    var mkdocs_page_input_path = "4_examples/4.1.1_Adding_a_LAMMPS_script.md";
+    var mkdocs_page_url = "/4_examples/4.1.1_Adding_a_LAMMPS_script/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> DETO_3D</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">1. Instalation</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.1_cloning/">1.1. Cloning</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.2_submodules/">1.2. Submodules</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.3_building/">1.3. Building</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">2. Input</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.1_input/">2.1. Input</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.2_chimap/">2.2. Chi Map</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.3_potfile/">2.3. Potfile</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">3. commands</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.1_subcomm/">3.1. subcomm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.2_lammps/">3.2. lammps</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.3_simulation/">3.3. simulation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.4_add_attribute/">3.4. add_attribute</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.5_opt_map_chi/">3.5. opt_map_chi</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.6_read_potentials/">3.6. read_potentials</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.7_opt_type/">3.7. opt_type</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.8_objective_function/">3.8. objective_function</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.9_add_objective/">3.9. add_objective</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.10_add_constraint/">3.10. add_constraint</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.11_dump/">3.11. dump</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.12_write_plog/">3.12. write_plog</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.13_write_lmp_log/">3.13. write_lmp_log</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">4. examples</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1_L_Shape/">4.1. L Shaped beam</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">DETO_3D</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>4.1.1 Adding a LAMMPS script</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Connor-OS/DETO/edit/master/docs/4_examples/4.1.1_Adding_a_LAMMPS_script.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>DETO_3D is a superset of LAMMPS, where the integration of LAMMPS commands is central to constructing and executing simulations. In essence, DETO_3D's primary operation involves a user-defined LAMMPS model coupled with a list of interaction properties and a set of boundary conditions to apply in a simulation. The main loop of the DETO_3D program iteratively executes the simulation, updating the interaction properties of the model between each iteration towards an optimal solution.</p>
+<p>The ground conditions for the optimisation should be defined in a LAMMPS script that 
+- Defines initialisation parameters.
+- Creates and defines the initial position of all particles in the simulation.
+- Specifies constraints and the types of any particles that are not included in the optimisation.</p>
+<p>The following script is provided for the L-shaped example.</p>
+<pre><code># ===== SET INITIALISATION PARAMS ========
+dimension   2
+units       si
+boundary    s s p
+atom_style  hybrid sphere bond
+comm_modify     vel yes cutoff 3.2
+newton      off
+special_bonds lj 0 1 1 coul 0 1 1
+timestep        10-4
+
+# ===== SYSTEM DEFINITION ========
+variable        nelx equal 50
+variable        nely equal 50
+variable    radius equal 0.5
+
+region      box block 0 $(v_nelx) 0 $(v_nely) -0.01 0.01
+region      cutout block 20 $(v_nelx) 20 $(v_nely) -0.01 0.01 side out
+region      lshape intersect 2 box cutout
+create_box  12 box bond/types 78 extra/bond/per/atom 12
+
+region      support_reg block INF INF 49 INF INF INF
+region      force_reg block 49 INF 7.2 8.8 INF INF
+
+lattice         hex $(v_radius*2)
+create_atoms    6 region lshape
+fix             1 all nve
+
+neighbor    2.2 bin 
+neigh_modify    delay 0     
+
+group       support_group region support_reg
+group       force_group region force_reg
+fix         support support_group setforce 0 0 0    
+set         group support_group type 12         
+set         group force_group type 12
+
+# ===== DEFINE OUTPUT VARIABLES ========
+compute     stress all stress/atom NULL bond
+variable    shyd atom -(c_stress[1]+c_stress[2]+c_stress[3])/3
+variable    sdev atom sqrt(0.5*((c_stress[1]-c_stress[2])^2+(c_stress[2]-c_stress[3])^2+(c_stress[3]-c_stress[1])^2)+3*(c_stress[4]^2+c_stress[5]^2+c_stress[6]^2))
+
+compute         nbond all nbond/atom
+compute         tbond all reduce sum c_nbond
+</code></pre>
+<p>The commands here are all LAMMPS commands and in fact the script can be run in vanilla LAMMPS. For further deatails of the commands them selves see the official LAMMPS documentation.</p>
+<p>The script begins by initializing parameters that must be defined before particles are added. Following this, the script defines all particles that will be involved in the optimisation. This is done here by filling an L-shaped region with a regular lattice of particles but these particle positions could be just as easily read from a file. All particles are initialised as type 6 at the start of the optimisation, but these types will be subject to change as the optimisation progresses</p>
+<p>Next boundary conditions are partially set. A static constraints is applied to the top of the L-shape and the region where force will be applied is also set. Particles in these regions are set to type 12 which they will retain throughout the optimisation as long as this is specified when we describe the DETO inputs in the next section.</p>
+<p>It's noteworthy that the script refrains from specifying forces or interaction potentials between particles at this point, rendering the system static. The introduction of dynamics is slated is included outside of this script. Only the ground conditions of the optimisation should be included here.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is possible to add dynamics into this section of an optimisation. This could be usefull for example if you want to optimise a system mid process. The commands in this script can be thought of as being used to set the system into the condition it has at the start of the optimisation. Any dynamic behaviour defined here will be run only once and not repeated during each itteration.</p>
+</div>
+<p>The last section of the script, while not imperative for executing an optimisation, defines a set of output variables. These can be included in dump files, serving for subsequent analysis.</p>
+<p>The next section details adding the properties of the simulation that may vary throughout the optimisation. These being the types of particles, and interaction potentials between them.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/Connor-OS/DETO/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

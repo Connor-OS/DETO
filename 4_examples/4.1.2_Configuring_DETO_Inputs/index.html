@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="canonical" href="https://DETO.com/4_examples/4.1.2_Configuring_DETO_Inputs/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>4.1.2 Configuring DETO Inputs - DETO_3D</title>
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "4.1.2 Configuring DETO Inputs";
+    var mkdocs_page_input_path = "4_examples/4.1.2_Configuring_DETO_Inputs.md";
+    var mkdocs_page_url = "/4_examples/4.1.2_Configuring_DETO_Inputs/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> DETO_3D</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">1. Instalation</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.1_cloning/">1.1. Cloning</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.2_submodules/">1.2. Submodules</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../1_instaling/1.3_building/">1.3. Building</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">2. Input</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.1_input/">2.1. Input</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.2_chimap/">2.2. Chi Map</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../2_running/2.3_potfile/">2.3. Potfile</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">3. commands</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.1_subcomm/">3.1. subcomm</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.2_lammps/">3.2. lammps</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.3_simulation/">3.3. simulation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.4_add_attribute/">3.4. add_attribute</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.5_opt_map_chi/">3.5. opt_map_chi</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.6_read_potentials/">3.6. read_potentials</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.7_opt_type/">3.7. opt_type</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.8_objective_function/">3.8. objective_function</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.9_add_objective/">3.9. add_objective</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.10_add_constraint/">3.10. add_constraint</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.11_dump/">3.11. dump</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.12_write_plog/">3.12. write_plog</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../3_commands/3.13_write_lmp_log/">3.13. write_lmp_log</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">4. examples</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1_L_Shape/">4.1. L Shaped beam</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">DETO_3D</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>4.1.2 Configuring DETO Inputs</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Connor-OS/DETO/edit/master/docs/4_examples/4.1.2_Configuring_DETO_Inputs.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>The parameter chi can vary throughout an optimisation in DETO of each particle. Chi represents the proportional intensity of the interactions with a particle and can take a value between zero and one. Zero being non-existent particle that has no interactions with neighbours, an one being a particle with penalised interactions with neighbours, see [1] for a more detailed explanation of this parameter.</p>
+<p>in DETO chi is specified to be selected from a list of discrete possibilities for each particle, this importantly links each value of chi with a specific LAMMPS particle type, that will be linked to the intensity of interaction potentials. This is done in a so called <a href="2_running/2.2_chimap.md">chi map</a>. A chi map must be included in a DETO optimisation and must include at least three columns chi, material, and type. For this example the basic chi map bellow is used featuring 1 material and 11 chi values.</p>
+<p><code>chi_map.dat</code></p>
+<pre><code>#chimap generated with input_gen.py
+
+num_mat 1
+
+PROPERTIES: chi material type
+0.001 homo 1
+0.1 homo 2
+0.2 homo 3
+0.3 homo 4
+0.4 homo 5
+0.5 homo 6
+0.6 homo 7
+0.7 homo 8
+0.8 homo 9
+0.9 homo 10
+1.0 homo 11
+</code></pre>
+<p>Complementary to the Chi map defined above is the <a href="2_running/2.3_potfile.md">potential file</a> which links the defined particle types and therefore chi values to the intensity of particle to particle interactions. This is done by defining individual unique interactions between each potential combination of chi values this means that the number of potentials to be defined needs to be $$\frac{n!}{k!(n−k)!}$$ Where n is the number of chi values specified plus one. If additional atom types are included that are not associate to a chi and therefore static this number increases again. As can be seen this can become a very long file even with a relatively low number of chi values.</p>
+<p>In this example since only 11 chi values where used with one static type the number of unique interactions was 78.</p>
+<p>The structure of this file will vary heavily depending on the types of interaction included in the simulation, but here the file follows the pattern of:
+- defining a group associated with each type
+- defining a bond coefficient for each interaction
+- creating bonds of the correct type between each type and using the defined coefficients
+- deleting the groups so that they can be re-created once the particle types change in the next iteration.</p>
+<p><code>potfile.dat</code></p>
+<pre><code>#potfile generated with input_gen.py
+
+pair_style zero 1.0
+pair_coeff * *
+
+group 1 type 1    #chi equal 0.0
+group 2 type 2    #chi equal 0.1
+group 3 type 3    #chi equal 0.2
+group 4 type 4    #chi equal 0.3
+group 5 type 5    #chi equal 0.4
+group 6 type 6    #chi equal 0.5
+group 7 type 7    #chi equal 0.6
+group 8 type 8    #chi equal 0.7
+group 9 type 9    #chi equal 0.8
+group 10 type 10    #chi equal 0.9
+group 11 type 11    #chi equal 1.0
+group 12 type 12    #non-opt
+
+bond_style harmonic
+bond_coeff 1 0.001 1
+bond_coeff 2 0.001 1
+bond_coeff 3 0.001 1
+bond_coeff 4 0.001 1
+bond_coeff 5 0.001 1
+bond_coeff 6 0.001 1
+bond_coeff 7 0.001 1
+bond_coeff 8 0.001 1
+bond_coeff 9 0.001 1
+bond_coeff 10 0.001 1
+bond_coeff 11 0.001 1
+bond_coeff 12 0.01 1
+bond_coeff 13 0.04 1
+bond_coeff 14 0.09 1
+bond_coeff 15 0.16 1
+bond_coeff 16 0.25 1
+bond_coeff 17 0.36 1
+bond_coeff 18 0.49 1
+bond_coeff 19 0.64 1
+bond_coeff 20 0.81 1
+bond_coeff 21 1 1
+bond_coeff 22 0.16 1
+bond_coeff 23 0.36 1
+bond_coeff 24 0.64 1
+bond_coeff 25 1 1
+bond_coeff 26 1.44 1
+bond_coeff 27 1.96 1
+bond_coeff 28 2.56 1
+bond_coeff 29 3.24 1
+bond_coeff 30 4 1
+bond_coeff 31 0.81 1
+bond_coeff 32 1.44 1
+bond_coeff 33 2.25 1
+bond_coeff 34 3.24 1
+bond_coeff 35 4.41 1
+bond_coeff 36 5.76 1
+bond_coeff 37 7.29 1
+bond_coeff 38 9 1
+bond_coeff 39 2.56 1
+bond_coeff 40 4 1
+bond_coeff 41 5.76 1
+bond_coeff 42 7.84 1
+bond_coeff 43 10.24 1
+bond_coeff 44 12.96 1
+bond_coeff 45 16 1
+bond_coeff 46 6.25 1
+bond_coeff 47 9 1
+bond_coeff 48 12.25 1
+bond_coeff 49 16 1
+bond_coeff 50 20.25 1
+bond_coeff 51 25 1
+bond_coeff 52 12.96 1
+bond_coeff 53 17.64 1
+bond_coeff 54 23.04 1
+bond_coeff 55 29.16 1
+bond_coeff 56 36 1
+bond_coeff 57 24.01 1
+bond_coeff 58 31.36 1
+bond_coeff 59 39.69 1
+bond_coeff 60 49 1
+bond_coeff 61 40.96 1
+bond_coeff 62 51.84 1
+bond_coeff 63 64 1
+bond_coeff 64 65.61 1
+bond_coeff 65 81 1
+bond_coeff 66 100 1
+bond_coeff 67 0.001 1
+bond_coeff 68 1 1
+bond_coeff 69 4 1
+bond_coeff 70 9 1
+bond_coeff 71 16 1
+bond_coeff 72 25 1
+bond_coeff 73 36 1
+bond_coeff 74 49 1
+bond_coeff 75 64 1
+bond_coeff 76 81 1
+bond_coeff 77 100 1
+bond_coeff 78 100 1
+create_bonds many 1 1 1 0.9 1.1
+create_bonds many 1 2 2 0.9 1.1
+create_bonds many 1 3 3 0.9 1.1
+create_bonds many 1 4 4 0.9 1.1
+create_bonds many 1 5 5 0.9 1.1
+create_bonds many 1 6 6 0.9 1.1
+create_bonds many 1 7 7 0.9 1.1
+create_bonds many 1 8 8 0.9 1.1
+create_bonds many 1 9 9 0.9 1.1
+create_bonds many 1 10 10 0.9 1.1
+create_bonds many 1 11 11 0.9 1.1
+create_bonds many 2 2 12 0.9 1.1
+create_bonds many 2 3 13 0.9 1.1
+create_bonds many 2 4 14 0.9 1.1
+create_bonds many 2 5 15 0.9 1.1
+create_bonds many 2 6 16 0.9 1.1
+create_bonds many 2 7 17 0.9 1.1
+create_bonds many 2 8 18 0.9 1.1
+create_bonds many 2 9 19 0.9 1.1
+create_bonds many 2 10 20 0.9 1.1
+create_bonds many 2 11 21 0.9 1.1
+create_bonds many 3 3 22 0.9 1.1
+create_bonds many 3 4 23 0.9 1.1
+create_bonds many 3 5 24 0.9 1.1
+create_bonds many 3 6 25 0.9 1.1
+create_bonds many 3 7 26 0.9 1.1
+create_bonds many 3 8 27 0.9 1.1
+create_bonds many 3 9 28 0.9 1.1
+create_bonds many 3 10 29 0.9 1.1
+create_bonds many 3 11 30 0.9 1.1
+create_bonds many 4 4 31 0.9 1.1
+create_bonds many 4 5 32 0.9 1.1
+create_bonds many 4 6 33 0.9 1.1
+create_bonds many 4 7 34 0.9 1.1
+create_bonds many 4 8 35 0.9 1.1
+create_bonds many 4 9 36 0.9 1.1
+create_bonds many 4 10 37 0.9 1.1
+create_bonds many 4 11 38 0.9 1.1
+create_bonds many 5 5 39 0.9 1.1
+create_bonds many 5 6 40 0.9 1.1
+create_bonds many 5 7 41 0.9 1.1
+create_bonds many 5 8 42 0.9 1.1
+create_bonds many 5 9 43 0.9 1.1
+create_bonds many 5 10 44 0.9 1.1
+create_bonds many 5 11 45 0.9 1.1
+create_bonds many 6 6 46 0.9 1.1
+create_bonds many 6 7 47 0.9 1.1
+create_bonds many 6 8 48 0.9 1.1
+create_bonds many 6 9 49 0.9 1.1
+create_bonds many 6 10 50 0.9 1.1
+create_bonds many 6 11 51 0.9 1.1
+create_bonds many 7 7 52 0.9 1.1
+create_bonds many 7 8 53 0.9 1.1
+create_bonds many 7 9 54 0.9 1.1
+create_bonds many 7 10 55 0.9 1.1
+create_bonds many 7 11 56 0.9 1.1
+create_bonds many 8 8 57 0.9 1.1
+create_bonds many 8 9 58 0.9 1.1
+create_bonds many 8 10 59 0.9 1.1
+create_bonds many 8 11 60 0.9 1.1
+create_bonds many 9 9 61 0.9 1.1
+create_bonds many 9 10 62 0.9 1.1
+create_bonds many 9 11 63 0.9 1.1
+create_bonds many 10 10 64 0.9 1.1
+create_bonds many 10 11 65 0.9 1.1
+create_bonds many 11 11 66 0.9 1.1
+create_bonds many 1 12 67 0.9 1.1
+create_bonds many 2 12 68 0.9 1.1
+create_bonds many 3 12 69 0.9 1.1
+create_bonds many 4 12 70 0.9 1.1
+create_bonds many 5 12 71 0.9 1.1
+create_bonds many 6 12 72 0.9 1.1
+create_bonds many 7 12 73 0.9 1.1
+create_bonds many 8 12 74 0.9 1.1
+create_bonds many 9 12 75 0.9 1.1
+create_bonds many 10 12 76 0.9 1.1
+create_bonds many 11 12 77 0.9 1.1
+create_bonds many 12 12 78 0.9 1.1
+
+group 1 delete
+group 2 delete
+group 3 delete
+group 4 delete
+group 5 delete
+group 6 delete
+group 7 delete
+group 8 delete
+group 9 delete
+group 10 delete
+group 11 delete
+
+#12 particle types
+#78 bonds created
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both the input files on this page were auto generated by a python script called input_gen.py included in the GitHub repo for use.</p>
+</div>
+<hr />
+<p><strong>[1]</strong>  O’Shaughnessy, C., Masoero, E. &amp; Gosling, P.D. Topology optimization using the discrete element method. Part 1: Methodology, validation, and geometric nonlinearity. <em>Meccanica</em></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/Connor-OS/DETO/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

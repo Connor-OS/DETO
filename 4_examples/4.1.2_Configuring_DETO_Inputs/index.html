@@ -168,7 +168,9 @@ PROPERTIES: chi material type
 0.9 homo 10
 1.0 homo 11
 </code></pre>
-<p>Complementary to the Chi map defined above is the <a href="2_running/2.3_potfile.md">potential file</a> which links the defined particle types and therefore chi values to the intensity of particle to particle interactions. This is done by defining individual unique interactions between each potential combination of chi values this means that the number of potentials to be defined needs to be $$\frac{n!}{k!(n−k)!}$$ Where n is the number of chi values specified plus one. If additional atom types are included that are not associate to a chi and therefore static this number increases again. As can be seen this can become a very long file even with a relatively low number of chi values.</p>
+<p>Complementary to the Chi map defined above is the <a href="2_running/2.3_potfile.md">potential file</a> which links the defined particle types and therefore chi values to the intensity of particle to particle interactions. This is done by defining individual unique interactions between each potential combination of chi values this means that the number of potentials to be defined needs to be </p>
+<p>$$\frac{n!}{k!(n−k)!}$$</p>
+<p>Where n is the number of chi values specified plus one. If additional atom types are included that are not associate to a chi and therefore static this number increases again. As can be seen this can become a very long file even with a relatively low number of chi values.</p>
 <p>In this example since only 11 chi values where used with one static type the number of unique interactions was 78.</p>
 <p>The structure of this file will vary heavily depending on the types of interaction included in the simulation, but here the file follows the pattern of:</p>
 <ul>

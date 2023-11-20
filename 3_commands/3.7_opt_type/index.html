@@ -176,15 +176,15 @@ opt_type monte-carlo
 opt_type pertibation
 </code></pre>
 <h3 id="description">Description</h3>
-<p>Define the algorythm to be used for your optimization.  Defining how <em>chi</em> will be updated from between steps as well as whether or not a population of chi is needed. The algorythms available can be split into stocastic and nonstochastic, the stocastic approaches take advantage of parralelisation by generate a <em>chi</em> population (with stocastic variation) which can be evaluated in parrallel across multiple <a href="../3.1_subcomm/">subcommunicators</a>. nonstochastic algorythms use a single <em>chi</em> vector updated with gradient based optimisation methods</p>
-<p>Stocastic:
+<p>Define the algorithm to be used for your optimisation.  Defining how <em>chi</em> will be updated from between steps as well as whether or not a population of chi is needed. The algorithms available can be split into stochastic and non-stochastic, the stochastic approaches take advantage of parallelisation by generate a <em>chi</em> population (with stochastic variation) which can be evaluated in parallel across multiple <a href="../3.1_subcomm/">subcommunicators</a>. non-stochastic algorithms use a single <em>chi</em> vector updated with gradient based optimisation methods</p>
+<p>Stochastic:
 - genetic
 - monte-carlo</p>
-<p>Nonstocastic:
-- pertibation</p>
-<p>Genetic optimization uses a genetic algorythm for optimisation, the technique takes inspiration from the process of natural selection. It involves generating a population of <em>pop_size</em> unique solutions. Selecting a subset of the best or the so called 'fittest' solutions, this can be done with either tournement or roulette selection. Combining elements from pairs of selected fitest results at a rate of <em>crossover_rate</em>. Finally some random mutation is applied to individual elements of the new solutions at a rate of <em>mutation_rate</em> to make up the next generation of solutions.</p>
-<p>Monte-Carlo is an algorythim planned to be added to DETO using a simulated annealing</p>
-<p>Pertibation uses the method as developed in the supplementary material of <a href="https://doi.org/10.1007/s11012-022-01493-w">1</a>. In this method each element is pertibated by a small amount away from its current value and the solution is re-evaluated. The method of finite differences is used to approximate the gradient of the sensitivity here and element <em>chi</em> values are updated accordingly</p>
+<p>Non-stochastic:
+- perturbation</p>
+<p>Genetic optimisation uses a genetic algorithm for optimisation, the technique takes inspiration from the process of natural selection. It involves generating a population of <em>pop_size</em> unique solutions. Selecting a subset of the best or the so called 'fittest' solutions, this can be done with either tournament or roulette selection. Combining elements from pairs of selected fittest results at a rate of <em>crossover_rate</em>. Finally some random mutation is applied to individual elements of the new solutions at a rate of <em>mutation_rate</em> to make up the next generation of solutions.</p>
+<p>Monte-Carlo is an algorithm planned to be added to DETO using a simulated annealing</p>
+<p>Perturbation uses the method as developed in the supplementary material of <a href="https://doi.org/10.1007/s11012-022-01493-w">1</a>. In this method each element is perturbated by a small amount away from its current value and the solution is re-evaluated. The method of finite differences is used to approximate the gradient of the sensitivity here and element <em>chi</em> values are updated accordingly</p>
 <hr />
 <p><strong>[1]</strong>  O’Shaughnessy, C., Masoero, E. &amp; Gosling, P.D. Topology optimization using the discrete element method. Part 1: Methodology, validation, and geometric nonlinearity. <em>Meccanica</em></p>
               

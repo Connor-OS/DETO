@@ -152,16 +152,16 @@
 <p>The commands used in this script are unique to DETO and so will not run natively in LAMMPS.</p>
 <p>To break down the use of the commands in the script below:</p>
 <ul>
-<li>First <a href="3_commands/3.7_opt_type.md"><code>opt_type</code></a> is used to specify a gradient descent optimisation method with a move limit of 0.1 and a total chi fraction of 0.5 meaning that between each step agiven particels chi value cannot fluctuate more than 0.1 and the optimisation is constrained to keep the average chi across the system below 0.5.</li>
-<li>A single objective function is specified with <a href="3_commands/3.8_objective_function.md"><code>objective_function</code></a> this will be linked to a LAMMPS variable with a later command</li>
+<li>First <a href="../../3_commands/3.7_opt_type/"><code>opt_type</code></a> is used to specify a gradient descent optimisation method with a move limit of 0.1 and a total chi fraction of 0.5 meaning that between each step agiven particels chi value cannot fluctuate more than 0.1 and the optimisation is constrained to keep the average chi across the system below 0.5.</li>
+<li>A single objective function is specified with <a href="../../3_commands/3.8_objective_function/"><code>objective_function</code></a> this will be linked to a LAMMPS variable with a later command</li>
 <li>One sub communicator is specified meaning the program will run only a single execution thread.</li>
-<li>The <a href="3_commands/3.2_lammps.md"><code>lammps</code></a> commands specified in in.Lshape_lmp are read into the system and executed on a LAMMPS instance, to generate the initial configuration of the system. The commands could instead have been written into this script each prepended by the keyword <a href="3_commands/3.2_lammps.md"><code>lammps</code></a>. However it can be useful to store them in a separate file as is done here.</li>
-<li>The <a href="3_commands/3.11_dump.md"><code>dump</code></a> command initialises a optimisation wide dump file which takes the same inputs as the <a href="https://docs.lammps.org/dump.html">lammps dump</a> command except dumps an output ever N optimisation steps instead of simulated time steps here N is specified as 1 to capture a dump after each optimisation step.</li>
-<li><a href="3_commands/3.5_opt_map_chi.md.md"><code>opt_map_chi</code></a> reads in the previously defined chi map</li>
-<li><a href="3_commands/3.6_read_potentials.md"><code>read_potentials</code></a> reads in the previously defined potentials file</li>
-<li>The <a href="3_commands/3.3_simulation.md"><code>simulation</code></a> command instantiates a simulation called <code>Sim1</code> to be run as part of this optimisation.</li>
-<li>The <a href="3_commands/3.4_add_attribute.md"><code>add_attribute</code></a> command is used to specify LAMMPS commands that will be run on each iteration for <code>Sim1</code>. These add a downwards force of 0.1 to the <code>force_group</code> defined in in.Lshape_lmp and then initialise an energy minimisation. Finally the bond energy of the system is captured in the variable <code>cost func</code> after the simulation has been run.</li>
-<li>Finally the <a href="3_commands/3.9_add_objective.md"><code>add_objective</code></a> command links the LAMMPS variable <code>cost_func</code> to the DETO specific variable <code>c1</code> to be included in the objective function.</li>
+<li>The <a href="../../3_commands/3.2_lammps/"><code>lammps</code></a> commands specified in in.Lshape_lmp are read into the system and executed on a LAMMPS instance, to generate the initial configuration of the system. The commands could instead have been written into this script each prepended by the keyword <a href="../../3_commands/3.2_lammps/"><code>lammps</code></a>. However it can be useful to store them in a separate file as is done here.</li>
+<li>The <a href="../../3_commands/3.11_dump/"><code>dump</code></a> command initialises a optimisation wide dump file which takes the same inputs as the <a href="https://docs.lammps.org/dump.html">lammps dump</a> command except dumps an output ever N optimisation steps instead of simulated time steps here N is specified as 1 to capture a dump after each optimisation step.</li>
+<li><a href="../../3_commands/3.5_opt_map_chi/"><code>opt_map_chi</code></a> reads in the previously defined chi map</li>
+<li><a href="../../3_commands/3.6_read_potentials/"><code>read_potentials</code></a> reads in the previously defined potentials file</li>
+<li>The <a href="../../3_commands/3.3_simulation/"><code>simulation</code></a> command instantiates a simulation called <code>Sim1</code> to be run as part of this optimisation.</li>
+<li>The <a href="../../3_commands/3.4_add_attribute/"><code>add_attribute</code></a> command is used to specify LAMMPS commands that will be run on each iteration for <code>Sim1</code>. These add a downwards force of 0.1 to the <code>force_group</code> defined in in.Lshape_lmp and then initialise an energy minimisation. Finally the bond energy of the system is captured in the variable <code>cost func</code> after the simulation has been run.</li>
+<li>Finally the <a href="../../3_commands/3.9_add_objective/"><code>add_objective</code></a> command links the LAMMPS variable <code>cost_func</code> to the DETO specific variable <code>c1</code> to be included in the objective function.</li>
 </ul>
 <pre><code># ===== SET OPTIMIZATION STYLE AND PARAMS ========
 opt_type 0.1 0.5 gradient_descent
@@ -193,6 +193,7 @@ add_attribute Sim1  variable    cost_func equal ebond
 add_objective Sim1 c1 cost_func
 </code></pre>
 <p>This simple script illustrates a complete DETO optimisation. However it can be straightforwardly expanded to include multiple simulations and more complex composite objective functions.</p>
+<p>In the next section we will run the script shown above and analyse the outputs of the optimisation process.</p>
               
             </div>
           </div>

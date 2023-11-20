@@ -183,7 +183,7 @@ simulation    sim3 cstgs var_force binary 1 10 100000 0.01 repeat no
 <p>Initialize a simulation and define its type and properties. In DETO a Simulation is the set of operations you interned to optimize for, objectives are associated with individual simulations and tracked across optimization steps. Once defined each simulation will be repeated for each sample solution in the process of optimization.</p>
 <p>The operations are stored as a set of attributes, these take the form of an ordered list of LAMMPS commands that can be executed for each sample, starting from the same inital conditions.</p>
 <p>You must define one or more simulations to run an optimization, these can be of type <em>run</em> in which the attributes are run a single time for each evaluation of a solution or type <em>cstgs</em>(change something to get something) in this case each simulation is repeated at each evaluation incrementing the value of one or more variables in the simulation untill a predefined criteria is met (WARNING: this method is not implemented in the code yet)</p>
-<p>Once a simulation is defined you can add attributes, and objectives to it with the  <a href="../3.4_add_attribute/">add_attribute</a> and <a href="3.9_add_objective">add_objective</a> commands respectively.</p>
+<p>Once a simulation is defined you can add attributes, and objectives to it with the  <a href="../3.4_add_attribute/">add_attribute</a> and <a href="../3.9_add_objective/">add_objective</a> commands respectively.</p>
 <h3 id="requirements">Requirements</h3>
 <p>You must define at least one simulation to run an optimization.</p>
 <p>Each simulation must contain at least one run or minimize command as a means of evaluating some timesteps of the simulation.</p>

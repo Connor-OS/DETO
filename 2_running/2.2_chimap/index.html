@@ -195,7 +195,7 @@ PROPERTIES: chi material type
 </code></pre>
 <h3 id="description">Description</h3>
 <p>The chimap file is used to prescribe the mapping of chi values onto particle types, materials, and any other per particle propertiesyou wish to associate with the optimisation.</p>
-<p>a chimap file is a necessary component of a DETO run and is called from the main input scriot via the <a href="3.5_opt_map_chi.md">opt_map_chi</a> command.</p>
+<p>a chimap file is a necessary component of a DETO run and is called from the main input scriot via the <a href="../../3_commands/3.5_opt_map_chi/">opt_map_chi</a> command.</p>
 <p>the range of chi values given in the chi map will be the range available to the optimization. For calssical topology optimisation you will chose values between 0 and 1 but you may want chi to represent some physical quantity so it can be prescribed above one or even negative.  A chi value of zero is permisable, however this is not recomended if a sensitivity type optimisation is choosen due to it's negative effects on material migration.</p>
 <p>the number of materials defined at the top of the file sets the avialable materials for the optimization. You must then specify that exact number of materials as strings below in the materials column.</p>
               

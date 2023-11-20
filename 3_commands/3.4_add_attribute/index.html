@@ -159,7 +159,7 @@
             <div class="section">
               
                 <h1 id="add_attribute-command">add_attribute command</h1>
-<p>add an attribute to a previously specified simulation writen in LAMMPS syntax</p>
+<p>add an attribute to a previously specified simulation written in LAMMPS syntax</p>
 <h3 id="syntax">Syntax</h3>
 <pre><code>add_attribute sim_ID command
 </code></pre>
@@ -177,7 +177,7 @@ add_attribute Sim1      unfix force
 <h3 id="description">Description</h3>
 <p>add an attribute to a previously defined simulation. In DETO attributes are LAMMPS commands associated with a particular <a href="../3.3_simulation/">simulation</a>. These commands define the operations that take place during the simulation.</p>
 <p>the add_attribute command takes as an argument the unique identifier of the simulation to add the attribute to followed by any string that is a syntactically correct <a href="https://docs.lammps.org/Manual.html#">LAMMPS</a> command. </p>
-<p>You should think of these commands as defining the process you intend to optimize. The boundry conditions as well as either quasi-static or dynamic performance of the structure. Therefore it is necessary specify at least one <em>run</em> or <em>minimize</em> command as an attribute per simulation.</p>
+<p>You should think of these commands as defining the process you intend to optimise. The boundary conditions as well as either quasi-static or dynamic performance of the structure. Therefore it is necessary specify at least one <em>run</em> or <em>minimize</em> command as an attribute per simulation.</p>
 <p>Since each simulation must track at least one <a href="../3.9_add_objective/">objective</a> which must be a scalar value variable or compute it is often necessary to create attributes defining these values at the end of the simulation run.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

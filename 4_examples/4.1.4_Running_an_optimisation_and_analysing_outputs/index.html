@@ -9,14 +9,14 @@
   
   <link rel="canonical" href="https://DETO.com/4_examples/4.1.4_Running_an_optimisation_and_analysing_outputs/">
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>4.1.4 Running an optimisation and analysing outputs - DETO_3D</title>
+  <title>4.1.4 Running an optimisation and analysis - DETO_3D</title>
   <link rel="stylesheet" href="../../css/theme.css" />
   <link rel="stylesheet" href="../../css/theme_extra.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
   
   <script>
     // Current page data
-    var mkdocs_page_name = "4.1.4 Running an optimisation and analysing outputs";
+    var mkdocs_page_name = "4.1.4 Running an optimisation and analysis";
     var mkdocs_page_input_path = "4_examples/4.1.4_Running_an_optimisation_and_analysing_outputs.md";
     var mkdocs_page_url = "/4_examples/4.1.4_Running_an_optimisation_and_analysing_outputs/";
   </script>
@@ -97,8 +97,16 @@
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">4. examples</span></p>
-                <ul>
+                <ul class="current">
                     <li class="toctree-l1"><a class="reference internal" href="../4.1_L_Shape/">4.1. L Shaped beam</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.1_Adding_a_LAMMPS_script/">4.1.1 Adding a LAMMPS script</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.2_Configuring_DETO_Inputs/">4.1.2 Configuring DETO inputs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.3_Constructing_a_DETO_script/">4.1.3 Constructing a DETO script</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">4.1.4 Running an optimisation and analysis</a>
                     </li>
                 </ul>
       </div>
@@ -121,8 +129,12 @@
     <li><a href="../..">Docs</a> &raquo;</li>
     
       
+        
+          <li>4. examples &raquo;</li>
+        
+      
     
-    <li>4.1.4 Running an optimisation and analysing outputs</li>
+    <li>4.1.4 Running an optimisation and analysis</li>
     <li class="wy-breadcrumbs-aside">
       
         <a href="https://github.com/Connor-OS/DETO/edit/master/docs/4_examples/4.1.4_Running_an_optimisation_and_analysing_outputs.md"
@@ -139,10 +151,10 @@
                 <p>The script in.Lshape should be run from the command line using</p>
 <p><code>./deto in.Lshape</code></p>
 <p>Whilst running DETO will output some useful information to the terminal at each optimisation step such as the objective function and volume fraction.</p>
-<p>The output of the optimisation is largely analysed through dump files that can record much more extensive information on the system between each optimisation step. These outputs can be configured in much the same way that slandered LAMMPS dumps can be to track per particle values.</p>
-<p>In the example here the line:
-<code>dump     1 all custom 1 ./dump/dump.Lshape id type x y v_shyd v_sdev c_nbond</code>
-is included in the script meaning for all particles at each optimisation step the ID, type, x and y coordinates, hydrostatic and deviatoric stress,and number of intact bonds are recorded.</p>
+<p>The output of the optimisation is largely analysed through dump files that can record much more extensive information on the system between each optimisation step. These outputs can be configured in much the same way that standard LAMMPS dumps can be to track per particle values.</p>
+<p>In the example here the line:</p>
+<p><code>dump     1 all custom 1 ./dump/dump.Lshape id type x y v_shyd v_sdev c_nbond</code></p>
+<p>is included in the script meaning for all particles at each optimisation step the ID, type, x and y coordinates, hydrostatic and deviatoric stress,and number of intact bonds are recorded.</p>
 <p>A typical way to view this dumped information is via the open source visualisation software <a href="https://www.ovito.org/about/">Ovito</a> where particles can be visualised and even colour coded with respect to their properties</p>
 <p>By displaying the particle type it is possible to get a straightforward visual representation of the distribution of chi at any stage of the optimisation and on the layout of the optimised structure. For example here the conventional "boot" optimal structure can be seen at step 150 of the optimisation.</p>
 <p><img alt="Stress" src="https://connor-os.github.io/DETO/img/Lshape_type.png" /></p>
@@ -155,6 +167,13 @@ is included in the script meaning for all particles at each optimisation step th
             </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../4.1.3_Constructing_a_DETO_script/" class="btn btn-neutral" title="4.1.3 Constructing a DETO script"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -179,6 +198,8 @@ is included in the script meaning for all particles at each optimisation step th
       
           <a href="https://github.com/Connor-OS/DETO/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
+      
+        <span><a href="../4.1.3_Constructing_a_DETO_script/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
     </span>

@@ -9,14 +9,14 @@
   
   <link rel="canonical" href="https://DETO.com/4_examples/4.1.2_Configuring_DETO_Inputs/">
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>4.1.2 Configuring DETO Inputs - DETO_3D</title>
+  <title>4.1.2 Configuring DETO inputs - DETO_3D</title>
   <link rel="stylesheet" href="../../css/theme.css" />
   <link rel="stylesheet" href="../../css/theme_extra.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
   
   <script>
     // Current page data
-    var mkdocs_page_name = "4.1.2 Configuring DETO Inputs";
+    var mkdocs_page_name = "4.1.2 Configuring DETO inputs";
     var mkdocs_page_input_path = "4_examples/4.1.2_Configuring_DETO_Inputs.md";
     var mkdocs_page_url = "/4_examples/4.1.2_Configuring_DETO_Inputs/";
   </script>
@@ -97,8 +97,16 @@
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">4. examples</span></p>
-                <ul>
+                <ul class="current">
                     <li class="toctree-l1"><a class="reference internal" href="../4.1_L_Shape/">4.1. L Shaped beam</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.1_Adding_a_LAMMPS_script/">4.1.1 Adding a LAMMPS script</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">4.1.2 Configuring DETO inputs</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.3_Constructing_a_DETO_script/">4.1.3 Constructing a DETO script</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../4.1.4_Running_an_optimisation_and_analysing_outputs/">4.1.4 Running an optimisation and analysis</a>
                     </li>
                 </ul>
       </div>
@@ -121,8 +129,12 @@
     <li><a href="../..">Docs</a> &raquo;</li>
     
       
+        
+          <li>4. examples &raquo;</li>
+        
+      
     
-    <li>4.1.2 Configuring DETO Inputs</li>
+    <li>4.1.2 Configuring DETO inputs</li>
     <li class="wy-breadcrumbs-aside">
       
         <a href="https://github.com/Connor-OS/DETO/edit/master/docs/4_examples/4.1.2_Configuring_DETO_Inputs.md"
@@ -158,11 +170,13 @@ PROPERTIES: chi material type
 </code></pre>
 <p>Complementary to the Chi map defined above is the <a href="2_running/2.3_potfile.md">potential file</a> which links the defined particle types and therefore chi values to the intensity of particle to particle interactions. This is done by defining individual unique interactions between each potential combination of chi values this means that the number of potentials to be defined needs to be $$\frac{n!}{k!(n−k)!}$$ Where n is the number of chi values specified plus one. If additional atom types are included that are not associate to a chi and therefore static this number increases again. As can be seen this can become a very long file even with a relatively low number of chi values.</p>
 <p>In this example since only 11 chi values where used with one static type the number of unique interactions was 78.</p>
-<p>The structure of this file will vary heavily depending on the types of interaction included in the simulation, but here the file follows the pattern of:
-- defining a group associated with each type
-- defining a bond coefficient for each interaction
-- creating bonds of the correct type between each type and using the defined coefficients
-- deleting the groups so that they can be re-created once the particle types change in the next iteration.</p>
+<p>The structure of this file will vary heavily depending on the types of interaction included in the simulation, but here the file follows the pattern of:</p>
+<ul>
+<li>defining a group associated with each type</li>
+<li>defining a bond coefficient for each interaction</li>
+<li>creating bonds of the correct type between each type and using the defined coefficients</li>
+<li>deleting the groups so that they can be re-created once the particle types change in the next iteration.</li>
+</ul>
 <p><code>potfile.dat</code></p>
 <pre><code>#potfile generated with input_gen.py
 
@@ -366,6 +380,15 @@ group 11 delete
           </div>
           <footer>
   
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../4.1.3_Constructing_a_DETO_script/" class="btn btn-neutral float-right" title="4.1.3 Constructing a DETO script">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../4.1.1_Adding_a_LAMMPS_script/" class="btn btn-neutral" title="4.1.1 Adding a LAMMPS script"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
 
   <hr/>
 
@@ -390,6 +413,10 @@ group 11 delete
           <a href="https://github.com/Connor-OS/DETO/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
+        <span><a href="../4.1.1_Adding_a_LAMMPS_script/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../4.1.3_Constructing_a_DETO_script/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
